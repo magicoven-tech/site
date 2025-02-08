@@ -61,22 +61,45 @@
 
         @keyframes piscar {
             0% {
-                color: #4CAF50; /* Verde */
+                color: #4CAF50; 
             }
             50% {
-                color: #9C27B0; /* Roxo */
+                color: #9C27B0;
             }
             100% {
-                color: #4CAF50; /* Verde */
+                color: #4CAF50; 
             }
         }
         
-        img {
+        /* img {
             max-width: 80%; 
             max-height: 60vh; 
             height: auto;
             margin-top: 20px;
             object-fit: contain; 
+        } */
+
+        img {
+            max-width: 80%; 
+            max-height: 60vh; 
+            height: auto;
+            margin-top: 20px;
+            object-fit: contain;
+            filter: contrast(150%) hue-rotate(90deg) saturate(200%);
+            mix-blend-mode: hard-light;
+            animation: colorShift 4s infinite alternate;
+        }
+
+        @keyframes colorShift {
+            0% {
+                filter: contrast(150%) hue-rotate(90deg) saturate(200%);
+            }
+            50% {
+                filter: contrast(150%) hue-rotate(180deg) saturate(200%);
+            }
+            100% {
+                filter: contrast(150%) hue-rotate(270deg) saturate(200%);
+            }
         }
     </style>
 </head>
