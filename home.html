@@ -56,6 +56,19 @@
         h1 {
             color: #333;
             margin-bottom: 30px;
+            animation: piscar 2s infinite;
+        }
+
+        @keyframes piscar {
+            0% {
+                color: #4CAF50; /* Verde */
+            }
+            50% {
+                color: #9C27B0; /* Roxo */
+            }
+            100% {
+                color: #4CAF50; /* Verde */
+            }
         }
         
         img {
