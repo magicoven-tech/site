@@ -4,22 +4,53 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Site em Construção</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
-       body {
-            font-family: Arial, sans-serif;
+        body {
+            font-family: Roboto, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh; /* Alterado de min-height para height */
+            height: 100vh;
             margin: 0;
             background-color: #f5f5f5;
-            overflow: hidden; /* Impede a rolagem */
+            overflow: hidden;
+            background-image: url('./assets/pudim-pattern.jpg');
+            background-repeat: repeat;
+            background-size: 100px auto; 
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(245, 245, 245, 0.9);
+            z-index: 0;
         }
         
         .container {
             text-align: center;
             padding: 20px;
+            position: relative;
+            z-index: 1; 
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+        
+        img {
+            max-width: 80%; 
+            max-height: 60vh; 
+            height: auto;
+            margin-top: 20px;
+            object-fit: contain; 
         }
         
         h1 {
