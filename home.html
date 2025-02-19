@@ -1,112 +1,31 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Site em Construção</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: Roboto, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f5f5f5;
-            overflow: hidden;
-            background-image: url('./assets/pudim-pattern.jpg');
-            background-repeat: repeat;
-            background-size: 100px auto; 
-            position: relative;
-        }
-
-        body::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(245, 245, 245, 0.5);
-            z-index: 0;
-        }
-        
-        .container {
-            text-align: center;
-            padding: 20px;
-            position: relative;
-            z-index: 1; 
-        }
-        
-        h1 {
-            color: #333;
-            margin-bottom: 30px;
-        }
-        
-        img {
-            max-width: 80%; 
-            max-height: 60vh; 
-            height: auto;
-            margin-top: 20px;
-            object-fit: contain; 
-        }
-        
-        h1 {
-            color: #333;
-            margin-bottom: 30px;
-            animation: piscar 2s infinite;
-        }
-
-        @keyframes piscar {
-            0% {
-                color: #4CAF50; 
-            }
-            50% {
-                color: #9C27B0;
-            }
-            100% {
-                color: #4CAF50; 
-            }
-        }
-        
-        /* img {
-            max-width: 80%; 
-            max-height: 60vh; 
-            height: auto;
-            margin-top: 20px;
-            object-fit: contain; 
-        } */
-
-        img {
-            max-width: 80%; 
-            max-height: 60vh; 
-            height: auto;
-            margin-top: 20px;
-            object-fit: contain;
-            filter: contrast(150%) hue-rotate(90deg) saturate(200%);
-            mix-blend-mode: hard-light;
-            animation: colorShift 4s infinite alternate;
-        }
-
-        @keyframes colorShift {
-            0% {
-                filter: contrast(150%) hue-rotate(90deg) saturate(200%);
-            }
-            50% {
-                filter: contrast(150%) hue-rotate(180deg) saturate(200%);
-            }
-            100% {
-                filter: contrast(150%) hue-rotate(270deg) saturate(200%);
-            }
-        }
-    </style>
+    <title>Site em Construção - Magic Oven</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
-        <h1>Site em Construção</h1>
-        <img src="/assets/magicoven.jpg" alt="Em construção">
+        <h1>🧙🏽‍♂️ Magic Oven 🧙🏼</h1>
+        <p>Nosso site está em construção, mas algo incrível está chegando!</p>
+        <div class="countdown">
+            <p>Volte em:</p>
+            <div class="timer">
+                <span id="days">00</span>d
+                <span id="hours">00</span>h
+                <span id="minutes">00</span>m
+                <span id="seconds">00</span>s
+            </div>
+        </div>
+        <p class="contact">Enquanto isso, nos siga nas redes sociais ou entre em contato:</p>
+        <div class="social-links">
+            <a href="https://www.instagram.com/magicoven.tech/" target="_blank">Instagram</a>
+            <a href="https://www.linkedin.com/company/magicoven" target="_blank">LinkedIn</a>
+            <a href="mailto:contato@magicoven.tech">E-mail</a>
+        </div>
     </div>
+    <script src="script.js"></script>
 </body>
 </html>
