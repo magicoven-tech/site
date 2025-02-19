@@ -16,13 +16,20 @@ body, html {
 /* Pseudo-elemento para o gradiente fixo */
 body::before {
     content: '';
-    position: fixed; /* Fixa o gradiente no lugar */
-    top: 0;
+    position: fixed;
+    top: -50px; /* Ajuste para cobrir a área do topo */
     left: 0;
     width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, #1a1a1a, #333); /* Gradiente horizontal */
-    z-index: -1; /* Coloca o gradiente atrás do conteúdo */
+    height: calc(100% + 50px); /* Ajuste para cobrir a área do topo */
+    background: linear-gradient(90deg, #1a1a1a, #333);
+    z-index: -1;
+}
+
+/* Ignora a safe area do iPhone (notch e barra de status) */
+@supports (padding: max(0px)) {
+    body {
+        padding-top: env(safe-area-inset-top); /* Adiciona padding para a safe area */
+    }
 }
 
 .container {
