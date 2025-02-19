@@ -1,24 +1,40 @@
 /* styles.css */
-body {
+body, html {
     margin: 0;
     padding: 0;
     font-family: 'Arial', sans-serif;
-    background: linear-gradient(90deg, #1a1a1a, #333);
     color: #fff;
+    min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
     text-align: center;
+    position: relative; /* Necessário para o pseudo-elemento */
+    overflow: hidden; /* Evita barras de rolagem indesejadas */
+}
+
+/* Pseudo-elemento para o gradiente fixo */
+body::before {
+    content: '';
+    position: fixed; /* Fixa o gradiente no lugar */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, #1a1a1a, #333); /* Gradiente horizontal */
+    z-index: -1; /* Coloca o gradiente atrás do conteúdo */
 }
 
 .container {
-    max-width: 90%; /* Ajuste para telas menores */
+    max-width: 90%;
     padding: 20px;
+    width: 100%;
+    position: relative; /* Garante que o conteúdo fique acima do gradiente */
+    z-index: 1; /* Coloca o conteúdo na frente do gradiente */
 }
 
 h1 {
-    font-size: 2.5rem; /* Tamanho menor para celulares */
+    font-size: 2.5rem;
     margin-bottom: 20px;
     animation: glow 2s infinite alternate;
 }
@@ -33,7 +49,7 @@ h1 {
 }
 
 p {
-    font-size: 1rem; /* Tamanho menor para celulares */
+    font-size: 1rem;
     margin-bottom: 20px;
 }
 
@@ -44,20 +60,21 @@ p {
 .timer {
     display: flex;
     justify-content: center;
-    gap: 10px; /* Espaçamento menor para celulares */
-    font-size: 1.5rem; /* Tamanho menor para celulares */
+    align-items: center;
+    gap: 10px;
+    font-size: 1.5rem;
     font-weight: bold;
-    flex-wrap: wrap; /* Quebra de linha em telas pequenas */
+    flex-wrap: wrap;
 }
 
 .timer span {
-    padding: 8px; /* Padding menor para celulares */
+    padding: 8px;
     background: rgba(255, 255, 255, 0.1);
     border-radius: 5px;
 }
 
 .contact {
-    font-size: 0.9rem; /* Tamanho menor para celulares */
+    font-size: 0.9rem;
     margin-top: 20px;
 }
 
@@ -68,8 +85,8 @@ p {
 .social-links a {
     color: #ff6f61;
     text-decoration: none;
-    margin: 0 8px; /* Margem menor para celulares */
-    font-size: 1rem; /* Tamanho menor para celulares */
+    margin: 0 8px;
+    font-size: 1rem;
     transition: color 0.3s;
 }
 
@@ -80,14 +97,14 @@ p {
 /* Media Queries para Telas Menores */
 @media (max-width: 600px) {
     h1 {
-        font-size: 2rem; /* Ajuste para telas muito pequenas */
+        font-size: 2rem;
     }
 
     .timer {
-        font-size: 1.2rem; /* Ajuste para telas muito pequenas */
+        font-size: 1.2rem;
     }
 
     .social-links a {
-        font-size: 0.9rem; /* Ajuste para telas muito pequenas */
+        font-size: 0.9rem;
     }
 }
