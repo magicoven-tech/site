@@ -7,17 +7,17 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    min-height: 100vh;
     text-align: center;
 }
 
 .container {
-    max-width: 600px;
+    max-width: 90%; /* Ajuste para telas menores */
     padding: 20px;
 }
 
 h1 {
-    font-size: 3rem;
+    font-size: 2.5rem; /* Tamanho menor para celulares */
     margin-bottom: 20px;
     animation: glow 2s infinite alternate;
 }
@@ -32,7 +32,7 @@ h1 {
 }
 
 p {
-    font-size: 1.2rem;
+    font-size: 1rem; /* Tamanho menor para celulares */
     margin-bottom: 20px;
 }
 
@@ -43,34 +43,50 @@ p {
 .timer {
     display: flex;
     justify-content: center;
-    gap: 15px;
-    font-size: 2rem;
+    gap: 10px; /* Espaçamento menor para celulares */
+    font-size: 1.5rem; /* Tamanho menor para celulares */
     font-weight: bold;
+    flex-wrap: wrap; /* Quebra de linha em telas pequenas */
 }
 
 .timer span {
-    padding: 10px;
+    padding: 8px; /* Padding menor para celulares */
     background: rgba(255, 255, 255, 0.1);
     border-radius: 5px;
 }
 
 .contact {
-    font-size: 1rem;
-    margin-top: 30px;
+    font-size: 0.9rem; /* Tamanho menor para celulares */
+    margin-top: 20px;
 }
 
 .social-links {
-    margin-top: 20px;
+    margin-top: 15px;
 }
 
 .social-links a {
     color: #ff6f61;
     text-decoration: none;
-    margin: 0 10px;
-    font-size: 1.1rem;
+    margin: 0 8px; /* Margem menor para celulares */
+    font-size: 1rem; /* Tamanho menor para celulares */
     transition: color 0.3s;
 }
 
 .social-links a:hover {
     color: #fff;
+}
+
+/* Media Queries para Telas Menores */
+@media (max-width: 600px) {
+    h1 {
+        font-size: 2rem; /* Ajuste para telas muito pequenas */
+    }
+
+    .timer {
+        font-size: 1.2rem; /* Ajuste para telas muito pequenas */
+    }
+
+    .social-links a {
+        font-size: 0.9rem; /* Ajuste para telas muito pequenas */
+    }
 }
