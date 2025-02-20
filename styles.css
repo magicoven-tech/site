@@ -46,19 +46,30 @@ h1 {
     animation: glow 2s infinite alternate;
 }
 
-.memoji {
-    width: 50px; /* Ajuste o tamanho conforme necessário */
-    height: 50px; /* Ajuste o tamanho conforme necessário */
-    vertical-align: middle; /* Alinha os Memojis com o texto */
-    /* margin: 0 5px;  Espaçamento entre os Memojis e o texto */
-}
-
 @keyframes glow {
     from {
         text-shadow: 0 0 10px #ff6f61, 0 0 20px #ff6f61;
     }
     to {
         text-shadow: 0 0 20px #ff6f61, 0 0 40px #ff6f61;
+    }
+}
+
+/* Efeito de glow para os Memojis */
+.memoji {
+    width: 40px; /* Ajuste o tamanho conforme necessário */
+    height: 40px; /* Ajuste o tamanho conforme necessário */
+    vertical-align: middle; /* Alinha os Memojis com o texto */
+    margin: 0 5px; /* Espaçamento entre os Memojis e o texto */
+    animation: glow-image 2s infinite alternate; /* Aplica a animação de glow */
+}
+
+@keyframes glow-image {
+    from {
+        filter: drop-shadow(0 0 10px #ff6f61) drop-shadow(0 0 20px #ff6f61);
+    }
+    to {
+        filter: drop-shadow(0 0 20px #ff6f61) drop-shadow(0 0 40px #ff6f61);
     }
 }
 
