@@ -57,10 +57,9 @@ h1 {
 
 /* Efeito de glow para os Memojis */
 .memoji {
-    width: 40px; /* Ajuste o tamanho conforme necessário */
-    height: 40px; /* Ajuste o tamanho conforme necessário */
-    vertical-align: middle; /* Alinha os Memojis com o texto */
-    margin: 0 5px; /* Espaçamento entre os Memojis e o texto */
+    width: 60px;
+    height: 60px;
+    vertical-align: middle;
     animation: glow-image 2s infinite alternate; /* Aplica a animação de glow */
 }
 
