@@ -1,0 +1,99 @@
+backend:
+  name: git-gateway
+  branch: main # Altere para a branch principal do seu site no Netlify, se não for 'main'
+
+media_folder: "assets" # Onde as imagens serão salvas no seu repositório (relativo à raiz do projeto)
+public_folder: "/assets" # O caminho público para acessar as imagens no seu site
+
+collections:
+  - name: "slides"
+    label: "Slides da Apresentação"
+    file: "pitch/slides.json" # O caminho para o seu arquivo slides.json
+    format: "json"
+    fields:
+      - name: "slides"
+        label: "Slides"
+        widget: "list"
+        summary: "{{type}} - {{title}}" # Exibição amigável na lista do CMS
+        types:
+          - label: "Slide de Título"
+            name: "title"
+            widget: "object"
+            fields:
+              - {label: "Tipo", name: "type", widget: "hidden", default: "title"}
+              - {label: "Título", name: "title", widget: "string"}
+              - {label: "Subtítulo", name: "subtitle", widget: "string", required: false}
+              - {label: "Descrição", name: "description", widget: "text", required: false}
+          - label: "Slide de Problema/Solução/Oportunidade"
+            name: "problem_solution_market"
+            widget: "object"
+            fields:
+              - {label: "Tipo", name: "type", widget: "select", options: ["problem", "solution", "market-opportunity"], default: "problem"}
+              - {label: "Título", name: "title", widget: "string"}
+              - label: "Itens"
+                name: "items"
+                widget: "list"
+                fields:
+                  - {label: "Título do Item", name: "heading", widget: "string"}
+                  - {label: "Descrição do Item", name: "description", widget: "text"}
+                  - {label: "Fonte (Opcional)", name: "source", widget: "string", required: false}
+          - label: "Slide de Modelo de Receita"
+            name: "revenue_model"
+            widget: "object"
+            fields:
+              - {label: "Tipo", name: "type", widget: "hidden", default: "revenue-model"}
+              - {label: "Título", name: "title", widget: "string"}
+              - label: "Itens de Receita"
+                name: "items"
+                widget: "list"
+                fields:
+                  - {label: "Percentual", name: "heading", widget: "string"}
+                  - {label: "Descrição", name: "description", widget: "text"}
+          - label: "Slide de Conteúdo Longo (Canvas)"
+            name: "long_content"
+            widget: "object"
+            fields:
+              - {label: "Tipo", name: "type", widget: "hidden", default: "long-content"}
+              - {label: "Título", name: "title", widget: "string"}
+              - label: "Itens de Conteúdo"
+                name: "items"
+                widget: "list"
+                fields:
+                  - {label: "Título do Item", name: "heading", widget: "string"}
+                  - {label: "Descrição do Item", name: "description", widget: "text"}
+          - label: "Slide de Fundadores"
+            name: "founders"
+            widget: "object"
+            fields:
+              - {label: "Tipo", name: "type", widget: "hidden", default: "founders"}
+              - {label: "Título", name: "title", widget: "string"}
+              - label: "Fundadores"
+                name: "founders"
+                widget: "list"
+                fields:
+                  - {label: "Nome", name: "name", widget: "string"}
+                  - {label: "Função", name: "role", widget: "string"}
+                  - {label: "Descrição", name: "description", widget: "text"}
+              - {label: "Fechamento", name: "closing", widget: "text"}
+          - label: "Slide de Próximos Passos"
+            name: "next_steps"
+            widget: "object"
+            fields:
+              - {label: "Tipo", name: "type", widget: "hidden", default: "next-steps"}
+              - {label: "Título", name: "title", widget: "string"}
+              - label: "Itens de Próximos Passos"
+                name: "items"
+                widget: "list"
+                fields:
+                  - {label: "Título do Item", name: "heading", widget: "string"}
+                  - {label: "Descrição do Item", name: "description", widget: "text"}
+              - {label: "Chamada para Ação", name: "callToAction", widget: "string"}
+          - label: "Slide de Agradecimento"
+            name: "thank_you"
+            widget: "object"
+            fields:
+              - {label: "Tipo", name: "type", widget: "hidden", default: "thank-you"}
+              - {label: "Título", name: "title", widget: "string"}
+              - {label: "Chamada para Ação", name: "callToAction", widget: "string"}
+              - {label: "Email de Contato", name: "contactEmail", widget: "string"}
+              - {label: "QR Code (Opcional)", name: "qrCode", widget: "image", required: false} 
