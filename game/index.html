@@ -819,6 +819,68 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
 
+        // --- Mobile Controls (Virtual Joystick) ---
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let isDragging = false;
+
+        document.addEventListener('touchstart', (e) => {
+            if (e.touches.length > 1) return; // Single touch only
+
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+            isDragging = false;
+        }, { passive: false });
+
+        document.addEventListener('touchmove', (e) => {
+            e.preventDefault(); // Prevent scroll
+            if (e.touches.length > 1) return;
+
+            const touchX = e.touches[0].clientX;
+            const touchY = e.touches[0].clientY;
+
+            const deltaX = touchX - touchStartX;
+            const deltaY = touchY - touchStartY;
+
+            // Threshold to consider it a drag
+            if (Math.abs(deltaX) > 10 || Math.abs(deltaY) > 10) {
+                isDragging = true;
+            }
+
+            // Virtual Joystick Logic
+            const threshold = 30; // Sensitivity
+
+            // Reset keys
+            keys.up = false;
+            keys.down = false;
+            keys.left = false;
+            keys.right = false;
+
+            if (deltaY < -threshold) keys.up = true;
+            if (deltaY > threshold) keys.down = true;
+            if (deltaX < -threshold) keys.left = true;
+            if (deltaX > threshold) keys.right = true;
+
+        }, { passive: false });
+
+        document.addEventListener('touchend', (e) => {
+            // If it wasn't a drag, treat as Tap (Space)
+            if (!isDragging) {
+                if (gameState !== STATE.PLAYING) {
+                    startGame();
+                } else if (gameState === STATE.GAME_OVER) {
+                    startGame(); // Restart
+                }
+            }
+
+            // Reset keys on release
+            keys.up = false;
+            keys.down = false;
+            keys.left = false;
+            keys.right = false;
+            isDragging = false;
+        });
+
         animate();
     </script>
 </body>
