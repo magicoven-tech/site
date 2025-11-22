@@ -409,14 +409,13 @@
 
         // --- Game Objects ---
         class Cat {
-            constructor(color, startX, startZ) {
+            constructor(color, startX, startZ, hasSpots = false) {
                 this.mesh = new THREE.Group();
                 this.color = color;
 
                 // Materials
                 const bodyMat = new THREE.MeshStandardMaterial({ color: color });
-                const whiteMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
-                const blackMat = new THREE.MeshStandardMaterial({ color: 0x333333 });
+                const spotMat = new THREE.MeshStandardMaterial({ color: 0x333333 }); // Dark spots
 
                 // Body
                 const bodyGeo = new THREE.BoxGeometry(1.5, 1.5, 3);
@@ -424,6 +423,19 @@
                 this.body.position.y = 1.5;
                 this.body.castShadow = true;
                 this.mesh.add(this.body);
+
+                // Spots (Simple cubes added to body if hasSpots)
+                if (hasSpots) {
+                    const spotGeo = new THREE.BoxGeometry(0.5, 0.1, 0.5);
+                    const spots = [
+                        [0, 2.25, 0], [0.4, 2.25, 0.8], [-0.4, 2.25, -0.8]
+                    ];
+                    spots.forEach(pos => {
+                        const spot = new THREE.Mesh(spotGeo, spotMat);
+                        spot.position.set(...pos);
+                        this.mesh.add(spot);
+                    });
+                }
 
                 // Head
                 const headGeo = new THREE.BoxGeometry(1.4, 1.4, 1.2);
@@ -522,7 +534,7 @@
         }
 
         // Initialize Player
-        const player = new Cat(0xffaa00, 25, 0); // Orange Tabby
+        const player = new Cat(0x111111, 25, 0); // Black Cat
 
         // --- Input Handling ---
         const keys = { up: false, down: false, left: false, right: false };
@@ -594,8 +606,8 @@
 
         // --- AI Opponent ---
         class AIController extends Cat {
-            constructor(color, startX, startZ) {
-                super(color, startX, startZ);
+            constructor(color, startX, startZ, hasSpots) {
+                super(color, startX, startZ, hasSpots);
                 this.target = null;
                 this.maxSpeed = 0.55; // Slightly slower than player
             }
@@ -660,7 +672,7 @@
                 }
             }
         }
-        const enemy = new AIController(0x888888, -25, 0); // Grey Cat
+        const enemy = new AIController(0xffffff, -25, 0, true); // White Cat with Spots
 
         // --- Coins ---
         const coins = [];
