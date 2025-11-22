@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Savanna Drift: 3D Car Simulator</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        #game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* HUD Elements */
+        .hud-top {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px;
+        }
+
+        .score-box {
+            background: rgba(0, 0, 0, 0.6);
+            color: #fff;
+            padding: 15px 25px;
+            border-radius: 15px;
+            text-align: center;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .score-title {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+
+        .score-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #ffd700;
+        }
+
+        .hud-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding: 20px;
+        }
+
+        .speedometer {
+            width: 200px;
+            height: 100px;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 100px 100px 0 0;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-bottom: none;
+        }
+
+        .speed-value {
+            font-size: 40px;
+            color: #fff;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .speed-unit {
+            font-size: 14px;
+            color: #aaa;
+            margin-bottom: 20px;
+            margin-left: 5px;
+        }
+
+        .energy-bars {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 15px;
+            border-radius: 15px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .bar-container {
+            width: 200px;
+        }
+
+        .bar-label {
+            color: #fff;
+            font-size: 12px;
+            margin-bottom: 4px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .bar-bg {
+            width: 100%;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+
+        .player-fill {
+            background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+            width: 0%;
+        }
+
+        .enemy-fill {
+            background: linear-gradient(90deg, #ff0844 0%, #ffb199 100%);
+            width: 0%;
+        }
+
+        /* Notifications */
+        #notification-area {
+            position: absolute;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+        }
+
+        .notification {
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 20px;
+            margin-bottom: 10px;
+            animation: fadeOut 3s forwards;
+            font-weight: bold;
+            border: 1px solid #ffd700;
+        }
+
+        /* Start/End Screen */
+        #overlay-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            pointer-events: auto;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            font-size: 60px;
+            margin: 0 0 20px 0;
+            background: linear-gradient(45deg, #ffd700, #ffaa00);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+        }
+
+        p {
+            font-size: 20px;
+            color: #ccc;
+            margin-bottom: 40px;
+        }
+
+        .key-hint {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            color: #ffd700;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @keyframes fadeOut {
+            0% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            80% {
+                opacity: 1;
+                transform: translateY(-10px);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="game-container">
+        <div id="ui-layer">
+            <div class="hud-top">
+                <div class="score-box">
+                    <div class="score-title">Player</div>
+                    <div class="score-value" id="player-score">0</div>
+                </div>
+                <div class="score-box">
+                    <div class="score-title">Opponent</div>
+                    <div class="score-value" id="enemy-score">0</div>
+                </div>
+            </div>
+
+            <div id="notification-area"></div>
+
+            <div class="hud-bottom">
+                <div class="energy-bars">
+                    <div class="bar-container">
+                        <div class="bar-label"><span>Player Progress</span><span id="p-prog">0/10</span></div>
+                        <div class="bar-bg">
+                            <div class="bar-fill player-fill" id="player-bar"></div>
+                        </div>
+                    </div>
+                    <div class="bar-container">
+                        <div class="bar-label"><span>Enemy Progress</span><span id="e-prog">0/10</span></div>
+                        <div class="bar-bg">
+                            <div class="bar-fill enemy-fill" id="enemy-bar"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="speedometer">
+                    <div class="speed-value" id="speed-display">0</div>
+                    <div class="speed-unit">km/h</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="overlay-screen">
+            <h1>SAVANNA CATS</h1>
+            <p>Collect 10 coins before the AI Cat does!</p>
+            <p>Use <span class="key-hint">WASD</span> or <span class="key-hint">ARROWS</span> to run.</p>
+            <p>Avoid the <span style="color: #ff4444">TRAIN</span> and obstacles.</p>
+            <p>Press <span class="key-hint">SPACE</span> to Start</p>
+        </div>
+    </div>
+
+    <!-- Import Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Simplex Noise for Terrain -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.4.0/simplex-noise.min.js"></script>
+
+    <script>
+        // --- Game Constants & State ---
+        const STATE = {
+            START: 0,
+            PLAYING: 1,
+            GAME_OVER: 2
+        };
+        let gameState = STATE.START;
+        const WIN_SCORE = 10;
+
+        // --- Three.js Setup ---
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x87CEEB); // Sky blue
+        scene.fog = new THREE.Fog(0x87CEEB, 20, 100);
+
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        document.getElementById('game-container').appendChild(renderer.domElement);
+
+        // --- Lighting ---
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        dirLight.position.set(50, 100, 50);
+        dirLight.castShadow = true;
+        dirLight.shadow.camera.left = -50;
+        dirLight.shadow.camera.right = 50;
+        dirLight.shadow.camera.top = 50;
+        dirLight.shadow.camera.bottom = -50;
+        dirLight.shadow.mapSize.width = 2048;
+        dirLight.shadow.mapSize.height = 2048;
+        scene.add(dirLight);
+
+        // --- Environment Generation ---
+        const simplex = new SimplexNoise();
+
+        // Ground
+        const groundGeometry = new THREE.PlaneGeometry(200, 200, 64, 64);
+        const groundMaterial = new THREE.MeshStandardMaterial({
+            color: 0xe0c9a6, // Savanna sand/dry grass
+            flatShading: true,
+            roughness: 1
+        });
+
+        // Deform ground for mountains/hills
+        const posAttribute = groundGeometry.attributes.position;
+        for (let i = 0; i < posAttribute.count; i++) {
+            const x = posAttribute.getX(i);
+            const y = posAttribute.getY(i);
+            // Safe zone in center for road
+            const dist = Math.sqrt(x * x + y * y);
+            let height = 0;
+
+            if (dist > 35) {
+                // Mountains on outside
+                height = Math.pow((dist - 35) / 10, 2) * (Math.abs(simplex.noise2D(x * 0.02, y * 0.02)) + 0.5);
+            } else {
+                // Gentle bumps inside
+                height = simplex.noise2D(x * 0.1, y * 0.1) * 0.5;
+            }
+
+            posAttribute.setZ(i, height);
+        }
+        groundGeometry.computeVertexNormals();
+
+        const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+        ground.rotation.x = -Math.PI / 2;
+        ground.receiveShadow = true;
+        scene.add(ground);
+
+        // Road (Circular)
+        const roadRadius = 25;
+        const roadWidth = 8;
+        const roadGeometry = new THREE.RingGeometry(roadRadius - roadWidth / 2, roadRadius + roadWidth / 2, 64);
+        const roadMaterial = new THREE.MeshStandardMaterial({
+            color: 0x333333,
+            roughness: 0.8
+        });
+        const road = new THREE.Mesh(roadGeometry, roadMaterial);
+        road.rotation.x = -Math.PI / 2;
+        road.position.y = 0.1; // Slightly above ground
+        road.receiveShadow = true;
+        scene.add(road);
+
+        // Train Track (Inner Circle)
+        const trackRadius = 15;
+        const trackGeometry = new THREE.TorusGeometry(trackRadius, 0.5, 16, 100);
+        const trackMaterial = new THREE.MeshStandardMaterial({ color: 0x555555 });
+        const track = new THREE.Mesh(trackGeometry, trackMaterial);
+        track.rotation.x = -Math.PI / 2;
+        track.position.y = 0.2;
+        scene.add(track);
+
+        // Trees
+        const treeGeo = new THREE.ConeGeometry(1, 4, 8);
+        const treeMat = new THREE.MeshStandardMaterial({ color: 0x228b22 });
+        const trunkGeo = new THREE.CylinderGeometry(0.3, 0.3, 1.5, 8);
+        const trunkMat = new THREE.MeshStandardMaterial({ color: 0x8b4513 });
+
+        function createTree(x, z) {
+            const group = new THREE.Group();
+            const leaves = new THREE.Mesh(treeGeo, treeMat);
+            leaves.position.y = 2.5;
+            leaves.castShadow = true;
+            const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+            trunk.position.y = 0.75;
+            trunk.castShadow = true;
+            group.add(leaves);
+            group.add(trunk);
+            group.position.set(x, 0, z);
+
+            // Adjust height to terrain
+            // Simple approximation or raycast could be used, here we just assume flat-ish or manual placement
+            // For now, let's just place them and let them clip into mountains
+            return group;
+        }
+
+        for (let i = 0; i < 50; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const radius = 40 + Math.random() * 40; // Outside road
+            const x = Math.cos(angle) * radius;
+            const z = Math.sin(angle) * radius;
+            scene.add(createTree(x, z));
+        }
+
+        // --- Game Objects ---
+        class Cat {
+            constructor(color, startX, startZ) {
+                this.mesh = new THREE.Group();
+                this.color = color;
+
+                // Materials
+                const bodyMat = new THREE.MeshStandardMaterial({ color: color });
+                const whiteMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
+                const blackMat = new THREE.MeshStandardMaterial({ color: 0x333333 });
+
+                // Body
+                const bodyGeo = new THREE.BoxGeometry(1.5, 1.5, 3);
+                this.body = new THREE.Mesh(bodyGeo, bodyMat);
+                this.body.position.y = 1.5;
+                this.body.castShadow = true;
+                this.mesh.add(this.body);
+
+                // Head
+                const headGeo = new THREE.BoxGeometry(1.4, 1.4, 1.2);
+                this.head = new THREE.Mesh(headGeo, bodyMat);
+                this.head.position.set(0, 2.5, 1.8);
+                this.head.castShadow = true;
+                this.mesh.add(this.head);
+
+                // Ears
+                const earGeo = new THREE.ConeGeometry(0.3, 0.6, 4);
+                const earL = new THREE.Mesh(earGeo, bodyMat);
+                earL.position.set(-0.4, 3.3, 1.8);
+                earL.rotation.y = -Math.PI / 4;
+                this.mesh.add(earL);
+
+                const earR = new THREE.Mesh(earGeo, bodyMat);
+                earR.position.set(0.4, 3.3, 1.8);
+                earR.rotation.y = Math.PI / 4;
+                this.mesh.add(earR);
+
+                // Tail
+                const tailGeo = new THREE.CylinderGeometry(0.15, 0.15, 2, 8);
+                this.tail = new THREE.Mesh(tailGeo, bodyMat);
+                this.tail.position.set(0, 2, -1.8);
+                this.tail.rotation.x = -Math.PI / 4;
+                this.mesh.add(this.tail);
+
+                // Legs
+                this.legs = [];
+                const legGeo = new THREE.BoxGeometry(0.4, 1.2, 0.4);
+                const legPositions = [
+                    [-0.5, 0.6, 1], [0.5, 0.6, 1],   // Front
+                    [-0.5, 0.6, -1], [0.5, 0.6, -1]  // Back
+                ];
+
+                legPositions.forEach(pos => {
+                    const leg = new THREE.Mesh(legGeo, bodyMat);
+                    leg.position.set(...pos);
+                    leg.castShadow = true;
+                    this.mesh.add(leg);
+                    this.legs.push(leg);
+                });
+
+                this.mesh.position.set(startX, 0, startZ);
+                scene.add(this.mesh);
+
+                // Physics/Movement State
+                this.speed = 0;
+                this.maxSpeed = 0.6; // Cats are agile but maybe not super fast cars
+                this.acceleration = 0.02;
+                this.friction = 0.95; // More friction for paws
+                this.turnSpeed = 0.08;
+                this.angle = 0;
+                this.velocity = new THREE.Vector3();
+                this.legCycle = 0;
+            }
+
+            update(input) {
+                if (input) {
+                    if (input.up) this.speed += this.acceleration;
+                    if (input.down) this.speed -= this.acceleration;
+                    if (input.left && Math.abs(this.speed) > 0.01) this.angle += this.turnSpeed * Math.sign(this.speed);
+                    if (input.right && Math.abs(this.speed) > 0.01) this.angle -= this.turnSpeed * Math.sign(this.speed);
+                }
+
+                // Physics
+                this.speed *= this.friction;
+                this.mesh.rotation.y = this.angle;
+
+                this.velocity.x = Math.sin(this.angle) * this.speed;
+                this.velocity.z = Math.cos(this.angle) * this.speed;
+
+                this.mesh.position.add(this.velocity);
+
+                // Animation
+                if (Math.abs(this.speed) > 0.01) {
+                    this.legCycle += this.speed * 20;
+                    this.legs[0].rotation.x = Math.sin(this.legCycle) * 0.5; // Front L
+                    this.legs[1].rotation.x = Math.cos(this.legCycle) * 0.5; // Front R
+                    this.legs[2].rotation.x = Math.cos(this.legCycle) * 0.5; // Back L
+                    this.legs[3].rotation.x = Math.sin(this.legCycle) * 0.5; // Back R
+
+                    this.tail.rotation.z = Math.sin(this.legCycle * 0.5) * 0.2; // Tail wag
+                } else {
+                    // Reset pose
+                    this.legs.forEach(l => l.rotation.x = 0);
+                }
+
+                // Simple Boundary/Collision (Keep on map roughly)
+                const dist = Math.sqrt(this.mesh.position.x ** 2 + this.mesh.position.z ** 2);
+                if (dist > 95) { // World boundary
+                    this.speed *= -0.5;
+                    this.mesh.position.add(this.velocity.clone().negate());
+                }
+            }
+        }
+
+        // Initialize Player
+        const player = new Cat(0xffaa00, 25, 0); // Orange Tabby
+
+        // --- Input Handling ---
+        const keys = { up: false, down: false, left: false, right: false };
+
+        window.addEventListener('keydown', (e) => {
+            if (gameState !== STATE.PLAYING && e.code === 'Space') {
+                startGame();
+                return;
+            }
+            if (gameState !== STATE.PLAYING) return;
+
+            switch (e.code) {
+                case 'ArrowUp': case 'KeyW': keys.up = true; break;
+                case 'ArrowDown': case 'KeyS': keys.down = true; break;
+                case 'ArrowLeft': case 'KeyA': keys.left = true; break;
+                case 'ArrowRight': case 'KeyD': keys.right = true; break;
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            switch (e.code) {
+                case 'ArrowUp': case 'KeyW': keys.up = false; break;
+                case 'ArrowDown': case 'KeyS': keys.down = false; break;
+                case 'ArrowLeft': case 'KeyA': keys.left = false; break;
+                case 'ArrowRight': case 'KeyD': keys.right = false; break;
+            }
+        });
+
+        function startGame() {
+            gameState = STATE.PLAYING;
+            document.getElementById('overlay-screen').classList.add('hidden');
+            // Reset logic can go here
+        }
+
+        // --- Train ---
+        class Train {
+            constructor() {
+                this.mesh = new THREE.Group();
+
+                // Engine
+                const engineGeo = new THREE.BoxGeometry(3, 4, 6);
+                const engineMat = new THREE.MeshStandardMaterial({ color: 0xcc0000 });
+                const engine = new THREE.Mesh(engineGeo, engineMat);
+                engine.position.y = 2;
+                engine.castShadow = true;
+                this.mesh.add(engine);
+
+                // Chimney
+                const chimGeo = new THREE.CylinderGeometry(0.5, 0.5, 2);
+                const chimMat = new THREE.MeshStandardMaterial({ color: 0x111111 });
+                const chimney = new THREE.Mesh(chimGeo, chimMat);
+                chimney.position.set(0, 5, 2);
+                this.mesh.add(chimney);
+
+                scene.add(this.mesh);
+                this.angle = 0;
+                this.speed = 0.03;
+                this.radius = 15; // Track radius
+            }
+
+            update() {
+                this.angle += this.speed;
+                this.mesh.position.x = Math.cos(this.angle) * this.radius;
+                this.mesh.position.z = Math.sin(this.angle) * this.radius;
+                this.mesh.rotation.y = -this.angle;
+            }
+        }
+        const train = new Train();
+
+        // --- AI Opponent ---
+        class AIController extends Cat {
+            constructor(color, startX, startZ) {
+                super(color, startX, startZ);
+                this.target = null;
+                this.maxSpeed = 0.55; // Slightly slower than player
+            }
+
+            updateAI(coins) {
+                // Find nearest coin
+                if (!this.target || !this.target.active) {
+                    let minDist = Infinity;
+                    this.target = null;
+                    coins.forEach(coin => {
+                        if (coin.active) {
+                            const dist = this.mesh.position.distanceTo(coin.mesh.position);
+                            if (dist < minDist) {
+                                minDist = dist;
+                                this.target = coin;
+                            }
+                        }
+                    });
+                }
+
+                // Move towards target
+                if (this.target) {
+                    const targetPos = this.target.mesh.position;
+                    const direction = new THREE.Vector3().subVectors(targetPos, this.mesh.position).normalize();
+
+                    // Calculate angle to target
+                    const targetAngle = Math.atan2(direction.x, direction.z);
+
+                    // Smooth rotation
+                    let angleDiff = targetAngle - this.angle;
+                    // Normalize angle to -PI to PI
+                    while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
+                    while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
+
+                    if (Math.abs(angleDiff) > 0.1) {
+                        this.angle += Math.sign(angleDiff) * this.turnSpeed;
+                    }
+
+                    // Accelerate if facing roughly right way
+                    if (Math.abs(angleDiff) < 1) {
+                        if (this.speed < this.maxSpeed) this.speed += this.acceleration;
+                    } else {
+                        this.speed *= 0.95; // Slow down to turn
+                    }
+                } else {
+                    // Idle / Wander
+                    this.speed *= 0.95;
+                }
+
+                // Apply physics from parent class
+                this.speed *= this.friction;
+                this.mesh.rotation.y = this.angle;
+                this.velocity.x = Math.sin(this.angle) * this.speed;
+                this.velocity.z = Math.cos(this.angle) * this.speed;
+                this.mesh.position.add(this.velocity);
+
+                // Boundary check
+                const dist = Math.sqrt(this.mesh.position.x ** 2 + this.mesh.position.z ** 2);
+                if (dist > 95) {
+                    this.speed *= -0.5;
+                    this.mesh.position.add(this.velocity.clone().negate());
+                }
+            }
+        }
+        const enemy = new AIController(0x888888, -25, 0); // Grey Cat
+
+        // --- Coins ---
+        const coins = [];
+        const coinGeo = new THREE.CylinderGeometry(1, 1, 0.2, 16);
+        const coinMat = new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 1, roughness: 0.3 });
+
+        class Coin {
+            constructor() {
+                this.mesh = new THREE.Mesh(coinGeo, coinMat);
+                this.mesh.rotation.x = Math.PI / 2;
+                this.mesh.castShadow = true;
+                scene.add(this.mesh);
+                this.active = false;
+                this.respawn();
+            }
+
+            respawn() {
+                this.active = true;
+                this.mesh.visible = true;
+                // Random position on road/map, avoid center track
+                let valid = false;
+                while (!valid) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const r = 20 + Math.random() * 20; // 20-40 radius
+                    this.mesh.position.set(Math.cos(angle) * r, 1, Math.sin(angle) * r);
+                    valid = true; // Add more checks if needed
+                }
+            }
+
+            update() {
+                if (this.active) {
+                    this.mesh.rotation.z += 0.05;
+                }
+            }
+        }
+
+        // Create initial coins
+        for (let i = 0; i < 5; i++) {
+            coins.push(new Coin());
+        }
+
+        // --- Game Logic ---
+        let playerScore = 0;
+        let enemyScore = 0;
+
+        function checkCollisions() {
+            // Coins
+            coins.forEach(coin => {
+                if (coin.active) {
+                    if (player.mesh.position.distanceTo(coin.mesh.position) < 3) {
+                        coin.respawn();
+                        playerScore++;
+                        updateScore();
+                    }
+                    if (enemy.mesh.position.distanceTo(coin.mesh.position) < 3) {
+                        coin.respawn();
+                        enemyScore++;
+                        updateScore();
+                        showNotification("AI collected a coin!");
+                    }
+                }
+            });
+
+            // Train Collision (Simple distance check)
+            if (player.mesh.position.distanceTo(train.mesh.position) < 5) {
+                resetPlayer();
+            }
+        }
+
+        function updateScore() {
+            document.getElementById('player-score').innerText = playerScore;
+            document.getElementById('enemy-score').innerText = enemyScore;
+
+            const pProg = Math.min(100, (playerScore / WIN_SCORE) * 100);
+            const eProg = Math.min(100, (enemyScore / WIN_SCORE) * 100);
+
+            document.getElementById('player-bar').style.width = pProg + '%';
+            document.getElementById('enemy-bar').style.width = eProg + '%';
+            document.getElementById('p-prog').innerText = playerScore + '/10';
+            document.getElementById('e-prog').innerText = enemyScore + '/10';
+
+            if (playerScore >= WIN_SCORE) endGame("You Win!");
+            else if (enemyScore >= WIN_SCORE) endGame("AI Wins!");
+        }
+
+        function showNotification(msg) {
+            const area = document.getElementById('notification-area');
+            const notif = document.createElement('div');
+            notif.className = 'notification';
+            notif.innerText = msg;
+            area.appendChild(notif);
+            setTimeout(() => notif.remove(), 3000);
+        }
+
+        function resetPlayer() {
+            // Explosion effect could go here
+            player.mesh.position.set(25, 0, 0);
+            player.speed = 0;
+            player.angle = 0;
+            showNotification("CRASH! Resetting...");
+        }
+
+        function endGame(msg) {
+            gameState = STATE.GAME_OVER;
+            const overlay = document.getElementById('overlay-screen');
+            overlay.classList.remove('hidden');
+            overlay.innerHTML = `<h1>${msg}</h1><p>Press SPACE to Restart</p>`;
+
+            // Reset scores for next game
+            playerScore = 0;
+            enemyScore = 0;
+        }
+
+        // --- Game Loop ---
+        function animate() {
+            requestAnimationFrame(animate);
+
+            if (gameState === STATE.PLAYING) {
+                player.update(keys);
+                enemy.updateAI(coins);
+                train.update();
+                coins.forEach(c => c.update());
+                checkCollisions();
+
+                // Camera Follow
+                const relativeCameraOffset = new THREE.Vector3(0, 10, -20);
+                const cameraOffset = relativeCameraOffset.applyMatrix4(player.mesh.matrixWorld);
+
+                camera.position.lerp(cameraOffset, 0.1);
+                camera.lookAt(player.mesh.position);
+
+                // Update Speedometer
+                const speedKmh = Math.abs(Math.round(player.speed * 200)); // Fake scale
+                document.getElementById('speed-display').innerText = speedKmh;
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        // Handle Resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        animate();
+    </script>
+</body>
+
+</html>
