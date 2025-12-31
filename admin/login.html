@@ -211,8 +211,11 @@
 
                 const data = await response.json();
 
-                if (response.ok && data.success) {
-                    // Login bem-sucedido
+                if (response.ok && data.success && data.token) {
+                    // Salva token JWT
+                    setAuthToken(data.token);
+
+                    // Login bem-sucedido - redireciona
                     window.location.href = '/admin/';
                 } else {
                     // Erro no login

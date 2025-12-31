@@ -21,17 +21,52 @@ const API_CONFIG = {
     }
 };
 
-// Função helper para fazer requests
+// ============================================
+// HELPERS JWT
+// ============================================
+
+// Salvar token
+window.setAuthToken = function (token) {
+    localStorage.setItem('magicoven_token', token);
+};
+
+// Obter token
+window.getAuthToken = function () {
+    return localStorage.getItem('magicoven_token');
+};
+
+// Remover token
+window.clearAuthToken = function () {
+    localStorage.removeItem('magicoven_token');
+};
+
+// Verificar se está autenticado
+window.isAuthenticated = function () {
+    return !!window.getAuthToken();
+};
+
+// Função helper para fazer requests COM autenticação
 window.apiRequest = async function (endpoint, options = {}) {
     const url = `${API_CONFIG.baseURL}${endpoint}`;
+    const token = window.getAuthToken();
+
     const defaultOptions = {
-        credentials: 'include',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
         }
     };
 
-    const response = await fetch(url, { ...defaultOptions, ...options });
+    const finalOptions = {
+        ...defaultOptions,
+        ...options,
+        headers: {
+            ...defaultOptions.headers,
+            ...(options.headers || {})
+        }
+    };
+
+    const response = await fetch(url, finalOptions);
     return response;
 };
 

@@ -1,6 +1,6 @@
 /**
  * Magic Oven CMS - Backend Server
- * Servidor Express com autenticação e API REST
+ * Servidor Express com autenticação JWT e API REST
  */
 
 const express = require('express');
@@ -8,11 +8,14 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const session = require('express-session');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const fs = require('fs').promises;
 const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const JWT_SECRET = process.env.JWT_SECRET || 'magic-oven-jwt-secret-change-in-production';
+
 
 // Middleware de CORS
 app.use(cors({
@@ -92,16 +95,49 @@ async function writeJSON(filepath, data) {
 }
 
 // ============================================
+// MIDDLEWARE JWT
+// ============================================
+
+// Middleware para verificar token JWT
+function verifyToken(req, res, next) {
+    // Busca token no header Authorization
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1]; // Format: "Bearer TOKEN"
+
+    if (!token) {
+        return res.status(401).json({ error: 'Token não fornecido' });
+    }
+
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        req.user = decoded;
+        next();
+    } catch (error) {
+        return res.status(403).json({ error: 'Token inválido ou expirado' });
+    }
+}
+
+// Função para gerar token
+function generateToken(user) {
+    return jwt.sign(
+        {
+            id: user.id,
+            username: user.username,
+            name: user.name
+        },
+        JWT_SECRET,
+        { expiresIn: '24h' }
+    );
+}
+
+
+// ============================================
 // MIDDLEWARE - Autenticação
 // ============================================
 
-function requireAuth(req, res, next) {
-    if (req.session && req.session.userId) {
-        next();
-    } else {
-        res.status(401).json({ error: 'Não autenticado' });
-    }
-}
+// Middleware requireAuth agora usa JWT (alias para verifyToken)
+const requireAuth = verifyToken;
+
 
 // ============================================
 // ROTAS - Autenticação
@@ -131,12 +167,12 @@ app.post('/api/auth/login', async (req, res) => {
         return res.status(401).json({ error: 'Credenciais inválidas' });
     }
 
-    // Cria sessão
-    req.session.userId = user.id;
-    req.session.username = user.username;
+    // Gera token JWT
+    const token = generateToken(user);
 
     res.json({
         success: true,
+        token: token,
         user: {
             id: user.id,
             username: user.username,
@@ -144,6 +180,7 @@ app.post('/api/auth/login', async (req, res) => {
         }
     });
 });
+
 
 // Logout
 app.post('/api/auth/logout', (req, res) => {
@@ -157,18 +194,28 @@ app.post('/api/auth/logout', (req, res) => {
 
 // Verificar autenticação
 app.get('/api/auth/check', (req, res) => {
-    if (req.session && req.session.userId) {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+
+    if (!token) {
+        return res.json({ authenticated: false });
+    }
+
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
         res.json({
             authenticated: true,
             user: {
-                id: req.session.userId,
-                username: req.session.username
+                id: decoded.id,
+                username: decoded.username,
+                name: decoded.name
             }
         });
-    } else {
+    } catch (error) {
         res.json({ authenticated: false });
     }
 });
+
 
 // ============================================
 // ROTAS - Blog Posts
