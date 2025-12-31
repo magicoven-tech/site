@@ -3,6 +3,7 @@
  * Servidor Express com autenticação JWT e API REST
  */
 
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
