@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Magic Oven CMS</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="../css/main.css">
+    <style>
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--spacing-lg);
+        }
+
+        .login-box {
+            background: var(--color-surface-elevated);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-3xl);
+            max-width: 450px;
+            width: 100%;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: var(--spacing-2xl);
+        }
+
+        .login-logo {
+            font-size: var(--font-size-3xl);
+            font-weight: var(--font-weight-bold);
+            font-style: italic;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .login-subtitle {
+            color: var(--color-text-secondary);
+            font-size: var(--font-size-sm);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .form-group {
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: var(--spacing-xs);
+            font-weight: var(--font-weight-semibold);
+            font-size: var(--font-size-sm);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--color-text-secondary);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: var(--spacing-md);
+            background: var(--color-surface);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-sm);
+            color: var(--color-text-primary);
+            font-family: var(--font-primary);
+            font-size: var(--font-size-base);
+            transition: all var(--transition-base);
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--color-accent-primary);
+            box-shadow: 0 0 0 3px rgba(39, 255, 43, 0.1);
+        }
+
+        .form-actions {
+            margin-top: var(--spacing-xl);
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: var(--spacing-md);
+            font-size: var(--font-size-base);
+        }
+
+        .error-message {
+            background: rgba(255, 59, 48, 0.1);
+            border: 1px solid rgba(255, 59, 48, 0.3);
+            color: #ff3b30;
+            padding: var(--spacing-md);
+            border-radius: var(--radius-sm);
+            margin-bottom: var(--spacing-lg);
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .default-credentials {
+            margin-top: var(--spacing-lg);
+            padding: var(--spacing-md);
+            background: rgba(39, 255, 43, 0.05);
+            border: 1px solid rgba(39, 255, 43, 0.2);
+            border-radius: var(--radius-sm);
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+        }
+
+        .default-credentials strong {
+            color: var(--color-accent-primary);
+            font-family: var(--font-mono);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="vignette-frame"></div>
+
+    <div class="login-container">
+        <div class="login-box">
+            <div class="login-header">
+                <h1 class="login-logo">MAGIC OVEN</h1>
+                <p class="login-subtitle">CMS Admin</p>
+            </div>
+
+            <div id="errorMessage" class="error-message"></div>
+
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">Usuário</label>
+                    <input type="text" id="username" name="username" required autocomplete="username" autofocus>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Senha</label>
+                    <input type="password" id="password" name="password" required autocomplete="current-password">
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary btn-login">Entrar</button>
+                </div>
+            </form>
+
+            <div class="default-credentials">
+                <strong>Credenciais padrão:</strong><br>
+                Usuário: <strong>admin</strong><br>
+                Senha: <strong>admin123</strong><br>
+                <br>
+                <small>⚠️ Altere a senha em produção!</small>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const loginForm = document.getElementById('loginForm');
+        const errorMessage = document.getElementById('errorMessage');
+
+        // Verifica se já está autenticado
+        checkAuth();
+
+        async function checkAuth() {
+            try {
+                const response = await fetch('/api/auth/check', {
+                    credentials: 'include'
+                });
+                const data = await response.json();
+
+                if (data.authenticated) {
+                    // Já está logado, redireciona para o admin
+                    window.location.href = '/admin/';
+                }
+            } catch (error) {
+                console.error('Erro ao verificar autenticação:', error);
+            }
+        }
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            // Mostra loading
+            loginForm.classList.add('loading');
+            errorMessage.classList.remove('show');
+
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    // Login bem-sucedido
+                    window.location.href = '/admin/';
+                } else {
+                    // Erro no login
+                    showError(data.error || 'Credenciais inválidas');
+                    loginForm.classList.remove('loading');
+                }
+            } catch (error) {
+                console.error('Erro no login:', error);
+                showError('Erro ao conectar ao servidor. Certifique-se de que o backend está rodando.');
+                loginForm.classList.remove('loading');
+            }
+        });
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.classList.add('show');
+        }
+    </script>
+</body>
+
+</html>

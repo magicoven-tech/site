@@ -1,0 +1,11 @@
+{
+  "users": [
+    {
+      "id": "1",
+      "username": "admin",
+      "password": "$2a$10$ctaT94.EoEg1RZv7TJ/Ohu4K7cLjcmQk33r8.JIZmOqUF8WcPNupy",
+      "name": "Administrador",
+      "email": "admin@magicoven.tech"
+    }
+  ]
+}

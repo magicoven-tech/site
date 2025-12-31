@@ -1,0 +1,136 @@
+{
+  "posts": [
+    {
+      "id": "1767177667929",
+      "title": "teste-2",
+      "slug": "teste-2",
+      "category": "TECH",
+      "excerpt": "teste",
+      "content": "teste",
+      "author": "Magic Oven",
+      "tags": [
+        "teste"
+      ],
+      "featured": false,
+      "published": true,
+      "date": "2025-12-31"
+    },
+    {
+      "id": "1767177638942",
+      "title": "teste",
+      "slug": "teste",
+      "category": "TECH",
+      "excerpt": "teste",
+      "content": "teste",
+      "author": "Magic Oven",
+      "tags": [
+        "teste"
+      ],
+      "featured": false,
+      "published": true,
+      "date": "2025-12-31"
+    },
+    {
+      "id": "1",
+      "title": "O Futuro do Design Digital em 2027",
+      "slug": "o-futuro-do-design-digital-em-2027",
+      "category": "DESIGN",
+      "date": "2025-12-30",
+      "excerpt": "Explorando as tendências emergentes que vão moldar o design de interfaces nos próximos anos. De minimalismo brutal a experiências imersivas em 3D.",
+      "content": "<p>O design digital está em constante evolução...</p>",
+      "author": "Magic Oven",
+      "tags": [
+        "design",
+        "tendências",
+        "2027"
+      ],
+      "featured": true,
+      "published": true
+    },
+    {
+      "id": "2",
+      "title": "Construindo Experiências Web Performáticas",
+      "slug": "experiencias-web-performaticas",
+      "category": "CÓDIGO",
+      "date": "2025-12-28",
+      "excerpt": "Dicas práticas para otimizar performance sem sacrificar a qualidade visual. Como fazer seu site carregar em menos de 2 segundos.",
+      "content": "<p>Performance é crucial para a experiência do usuário...</p>",
+      "author": "Magic Oven",
+      "tags": [
+        "performance",
+        "web",
+        "otimização"
+      ],
+      "featured": true,
+      "published": true
+    },
+    {
+      "id": "3",
+      "title": "Arte Generativa com JavaScript",
+      "slug": "arte-generativa-javascript",
+      "category": "ARTE",
+      "date": "2025-12-25",
+      "excerpt": "Como criar arte procedural fascinante usando apenas código e criatividade. Explorando Canvas API e algoritmos de geração.",
+      "content": "<p>A arte generativa combina criatividade com código...</p>",
+      "author": "Magic Oven",
+      "tags": [
+        "arte",
+        "javascript",
+        "canvas"
+      ],
+      "featured": true,
+      "published": true
+    },
+    {
+      "id": "4",
+      "title": "Microinterações que Encantam",
+      "slug": "microinteracoes-encantam",
+      "category": "UX",
+      "date": "2025-12-22",
+      "excerpt": "O poder dos pequenos detalhes: como microinterações podem transformar uma interface comum em uma experiência memorável.",
+      "content": "<p>Microinterações são os pequenos momentos de interação...</p>",
+      "author": "Magic Oven",
+      "tags": [
+        "ux",
+        "microinterações",
+        "design"
+      ],
+      "featured": false,
+      "published": true
+    },
+    {
+      "id": "5",
+      "title": "Nosso Setup Criativo",
+      "slug": "setup-criativo",
+      "category": "WORKFLOW",
+      "date": "2025-12-20",
+      "excerpt": "As ferramentas, processos e rituais que usamos no Magic Oven para criar projetos incríveis todos os dias.",
+      "content": "<p>Nosso workflow é resultado de anos de experimentação...</p>",
+      "author": "Magic Oven",
+      "tags": [
+        "workflow",
+        "ferramentas",
+        "produtividade"
+      ],
+      "featured": false,
+      "published": true
+    },
+    {
+      "id": "6",
+      "title": "Designers que Nos Inspiram",
+      "slug": "designers-inspiram",
+      "category": "INSPIRAÇÃO",
+      "date": "2025-12-18",
+      "excerpt": "Uma curadoria de artistas e designers digitais que estão empurrando os limites da criatividade e inovação.",
+      "content": "<p>A inspiração vem de muitas fontes...</p>",
+      "author": "Magic Oven",
+      "tags": [
+        "inspiração",
+        "designers",
+        "arte"
+      ],
+      "featured": false,
+      "published": true
+    }
+  ]
+}

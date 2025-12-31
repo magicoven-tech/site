@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Contato - Magic Oven</title>
+    <meta name="description" content="Entre em contato conosco para discutir seu próximo projeto.">
+
+    <link rel="icon" type="image/png" href="assets/favicon/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="assets/favicon/favicon.svg" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="css/main.css">
+    <style>
+        .contact-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--spacing-3xl);
+            align-items: start;
+        }
+
+        .contact-info {
+            position: sticky;
+            top: 120px;
+        }
+
+        .contact-info h2 {
+            font-size: var(--font-size-3xl);
+            font-weight: var(--font-weight-bold);
+            font-style: italic;
+            margin-bottom: var(--spacing-lg);
+            line-height: 1.2;
+        }
+
+        .contact-info p {
+            color: var(--color-text-secondary);
+            font-size: var(--font-size-lg);
+            margin-bottom: var(--spacing-2xl);
+            line-height: 1.7;
+        }
+
+        .contact-methods {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-lg);
+        }
+
+        .contact-method {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            padding: var(--spacing-md);
+            background: var(--color-surface-elevated);
+            border-radius: var(--radius-md);
+            transition: transform var(--transition-base);
+        }
+
+        .contact-method:hover {
+            transform: translateX(8px);
+        }
+
+        .contact-method-icon {
+            font-size: var(--font-size-3xl);
+            flex-shrink: 0;
+        }
+
+        .contact-method-info h4 {
+            font-size: var(--font-size-sm);
+            color: var(--color-text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .contact-method-info a {
+            color: var(--color-text-primary);
+            text-decoration: none;
+            font-size: var(--font-size-base);
+            transition: color var(--transition-base);
+        }
+
+        .contact-method-info a:hover {
+            color: var(--color-accent-secondary);
+        }
+
+        .contact-form {
+            background: var(--color-surface-elevated);
+            padding: var(--spacing-2xl);
+            border-radius: var(--radius-lg);
+        }
+
+        .form-group {
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .form-label {
+            display: block;
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-semibold);
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: var(--color-text-secondary);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .form-input,
+        .form-textarea {
+            width: 100%;
+            padding: var(--spacing-sm) var(--spacing-md);
+            font-family: var(--font-primary);
+            font-size: var(--font-size-base);
+            color: var(--color-text-primary);
+            background: var(--color-surface);
+            border: 2px solid transparent;
+            border-radius: var(--radius-md);
+            transition: all var(--transition-base);
+        }
+
+        .form-input:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--color-accent-secondary);
+            background: var(--color-background);
+        }
+
+        .form-input.error,
+        .form-textarea.error {
+            border-color: var(--color-accent-primary);
+        }
+
+        .form-textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .form-submit {
+            width: 100%;
+            margin-top: var(--spacing-md);
+        }
+
+        .social-links-section {
+            margin-top: var(--spacing-3xl);
+            padding-top: var(--spacing-3xl);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .social-links-grid {
+            display: flex;
+            gap: var(--spacing-md);
+            flex-wrap: wrap;
+        }
+
+        .social-link-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            padding: var(--spacing-sm) var(--spacing-lg);
+            background: var(--color-surface-elevated);
+            border: 2px solid transparent;
+            border-radius: var(--radius-md);
+            color: var(--color-text-primary);
+            text-decoration: none;
+            font-weight: var(--font-weight-semibold);
+            transition: all var(--transition-base);
+        }
+
+        .social-link-btn:hover {
+            border-color: var(--color-accent-secondary);
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 968px) {
+            .contact-container {
+                grid-template-columns: 1fr;
+                gap: var(--spacing-2xl);
+            }
+
+            .contact-info {
+                position: static;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="vignette-frame"></div>
+
+    <nav class="main-nav" id="mainNav">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <img src="assets/bruno.png" alt="Bruno" class="logo-memoji">
+                <span class="logo-text">MAGIC OVEN</span>
+                <img src="assets/julia.png" alt="Julia" class="logo-memoji">
+            </a>
+
+            <div class="nav-menu" id="navMenu">
+                <a href="index.html" class="nav-link">INÍCIO</a>
+                <a href="portfolio.html" class="nav-link">TRABALHOS</a>
+                <a href="blog.html" class="nav-link">BLOG</a>
+                <a href="sobre.html" class="nav-link">SOBRE</a>
+                <a href="contato.html" class="nav-link active">CONTATO</a>
+            </div>
+
+            <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <section class="page-header">
+        <div class="section-container">
+            <h1 class="page-title">
+                <span class="page-title-small">VAMOS CONVERSAR</span>
+                <span class="page-title-large">CONTATO</span>
+            </h1>
+        </div>
+    </section>
+
+    <section style="padding: var(--spacing-4xl) var(--spacing-lg);">
+        <div class="contact-container">
+            <div class="contact-info" data-aos="fade-up">
+                <h2>Tem um projeto em mente?</h2>
+                <p>
+                    Adoraríamos ouvir sobre sua ideia! Seja um projeto completo
+                    ou apenas uma conversa sobre possibilidades, estamos aqui para ajudar.
+                </p>
+
+                <div class="contact-methods">
+                    <div class="contact-method">
+                        <div class="contact-method-icon">📧</div>
+                        <div class="contact-method-info">
+                            <h4>Email</h4>
+                            <a href="mailto:contato@magicoven.tech">contato@magicoven.tech</a>
+                        </div>
+                    </div>
+
+                    <div class="contact-method">
+                        <div class="contact-method-icon">📱</div>
+                        <div class="contact-method-info">
+                            <h4>Instagram</h4>
+                            <a href="https://www.instagram.com/magicoven.tech/" target="_blank"
+                                rel="noopener">@magicoven.tech</a>
+                        </div>
+                    </div>
+
+                    <div class="contact-method">
+                        <div class="contact-method-icon">💼</div>
+                        <div class="contact-method-info">
+                            <h4>LinkedIn</h4>
+                            <a href="https://www.linkedin.com/company/magicoven" target="_blank" rel="noopener">Magic
+                                Oven</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="social-links-section">
+                    <h4 class="footer-title">SIGA-NOS</h4>
+                    <div class="social-links-grid">
+                        <a href="https://www.instagram.com/magicoven.tech/" target="_blank" rel="noopener"
+                            class="social-link-btn">
+                            Instagram
+                        </a>
+                        <a href="https://www.linkedin.com/company/magicoven" target="_blank" rel="noopener"
+                            class="social-link-btn">
+                            LinkedIn
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="contact-form" data-aos="fade-up" data-aos-delay="200">
+                <form id="contactForm">
+                    <div class="form-group">
+                        <label for="name" class="form-label">Nome</label>
+                        <input type="text" id="name" name="name" class="form-input" required
+                            placeholder="Seu nome completo">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" id="email" name="email" class="form-input" required
+                            placeholder="seu@email.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="project" class="form-label">Tipo de Projeto</label>
+                        <input type="text" id="project" name="project" class="form-input"
+                            placeholder="Web Design, App, Consultoria, etc.">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="message" class="form-label">Mensagem</label>
+                        <textarea id="message" name="message" class="form-textarea" required
+                            placeholder="Conte-nos sobre seu projeto..."></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary form-submit">
+                        ENVIAR MENSAGEM
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <footer class="main-footer">
+        <div class="footer-container">
+            <div class="footer-grid">
+                <div class="footer-section">
+                    <div class="footer-logo">
+                        <img src="assets/bruno.png" alt="Bruno" class="footer-memoji">
+                        <span class="footer-logo-text">MAGIC OVEN</span>
+                        <img src="assets/julia.png" alt="Julia" class="footer-memoji">
+                    </div>
+                    <p class="footer-tagline">
+                        Transformando ideias em experiências digitais inesquecíveis
+                    </p>
+                </div>
+
+                <div class="footer-section">
+                    <h4 class="footer-title">NAVEGAÇÃO</h4>
+                    <nav class="footer-nav">
+                        <a href="index.html">Início</a>
+                        <a href="portfolio.html">Trabalhos</a>
+                        <a href="blog.html">Blog</a>
+                        <a href="sobre.html">Sobre</a>
+                        <a href="contato.html">Contato</a>
+                    </nav>
+                </div>
+
+                <div class="footer-section">
+                    <h4 class="footer-title">SOCIAL</h4>
+                    <nav class="footer-social">
+                        <a href="https://www.instagram.com/magicoven.tech/" target="_blank" rel="noopener">Instagram</a>
+                        <a href="https://www.linkedin.com/company/magicoven" target="_blank" rel="noopener">LinkedIn</a>
+                        <a href="mailto:contato@magicoven.tech">Email</a>
+                    </nav>
+                </div>
+
+                <div class="footer-section">
+                    <h4 class="footer-title">CONTATO</h4>
+                    <div class="footer-contact">
+                        <a href="mailto:contato@magicoven.tech">contato@magicoven.tech</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p class="footer-copyright">
+                    © 2025 Magic Oven. Feito com magia e código.
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+</body>
+
+</html>

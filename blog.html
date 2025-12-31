@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Blog - Magic Oven</title>
+    <meta name="description" content="Artigos sobre design, tecnologia e criatividade.">
+
+    <link rel="icon" type="image/png" href="assets/favicon/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="assets/favicon/favicon.svg" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="css/main.css">
+</head>
+
+<body>
+    <div class="vignette-frame"></div>
+
+    <nav class="main-nav" id="mainNav">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <img src="assets/bruno.png" alt="Bruno" class="logo-memoji">
+                <span class="logo-text">MAGIC OVEN</span>
+                <img src="assets/julia.png" alt="Julia" class="logo-memoji">
+            </a>
+
+            <div class="nav-menu" id="navMenu">
+                <a href="index.html" class="nav-link">INÍCIO</a>
+                <a href="portfolio.html" class="nav-link">TRABALHOS</a>
+                <a href="blog.html" class="nav-link active">BLOG</a>
+                <a href="sobre.html" class="nav-link">SOBRE</a>
+                <a href="contato.html" class="nav-link">CONTATO</a>
+            </div>
+
+            <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <section class="page-header">
+        <div class="section-container">
+            <h1 class="page-title">
+                <span class="page-title-small">PENSAMENTOS E IDEIAS</span>
+                <span class="page-title-large">BLOG</span>
+            </h1>
+            <p class="page-subtitle">
+                Compartilhando conhecimento sobre design, código, arte e criatividade
+            </p>
+        </div>
+    </section>
+
+    <section class="blog-section">
+        <div class="section-container">
+            <!-- Posts do blog carregados dinamicamente do CMS -->
+            <div id="blog-list" class="blog-grid">
+                <!-- Conteúdo carregado via CMS -->
+            </div>
+        </div>
+    </section>
+
+    <footer class="main-footer">
+        <div class="footer-container">
+            <div class="footer-grid">
+                <div class="footer-section">
+                    <div class="footer-logo">
+                        <img src="assets/bruno.png" alt="Bruno" class="footer-memoji">
+                        <span class="footer-logo-text">MAGIC OVEN</span>
+                        <img src="assets/julia.png" alt="Julia" class="footer-memoji">
+                    </div>
+                    <p class="footer-tagline">
+                        Transformando ideias em experiências digitais inesquecíveis
+                    </p>
+                </div>
+
+                <div class="footer-section">
+                    <h4 class="footer-title">NAVEGAÇÃO</h4>
+                    <nav class="footer-nav">
+                        <a href="index.html">Início</a>
+                        <a href="portfolio.html">Trabalhos</a>
+                        <a href="blog.html">Blog</a>
+                        <a href="sobre.html">Sobre</a>
+                        <a href="contato.html">Contato</a>
+                    </nav>
+                </div>
+
+                <div class="footer-section">
+                    <h4 class="footer-title">SOCIAL</h4>
+                    <nav class="footer-social">
+                        <a href="https://www.instagram.com/magicoven.tech/" target="_blank" rel="noopener">Instagram</a>
+                        <a href="https://www.linkedin.com/company/magicoven" target="_blank" rel="noopener">LinkedIn</a>
+                        <a href="mailto:contato@magicoven.tech">Email</a>
+                    </nav>
+                </div>
+
+                <div class="footer-section">
+                    <h4 class="footer-title">CONTATO</h4>
+                    <div class="footer-contact">
+                        <a href="mailto:contato@magicoven.tech">contato@magicoven.tech</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p class="footer-copyright">
+                    © 2025 Magic Oven. Feito com magia e código.
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/cms.js"></script>
+    <script src="js/main.js"></script>
+</body>
+
+</html>
