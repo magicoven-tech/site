@@ -66,8 +66,7 @@ const AdminCMS = {
      */
     async loadBlogPosts() {
         try {
-            const response = await fetch('/api/blog', {
-                credentials: 'include'
+            const response = await apiRequest('/api/blog', {
             });
             const data = await response.json();
             this.currentData.blog = data.posts;
@@ -83,8 +82,7 @@ const AdminCMS = {
      */
     async loadProjects() {
         try {
-            const response = await fetch('/api/projects', {
-                credentials: 'include'
+            const response = await apiRequest('/api/projects', {
             });
             const data = await response.json();
             this.currentData.projects = data.projects;
@@ -268,12 +266,11 @@ const AdminCMS = {
 
             console.log(`📡 Request: ${method} ${url}`);
 
-            const response = await fetch(url, {
+            const response = await apiRequest(url, {
                 method,
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                credentials: 'include',
                 body: JSON.stringify(postData)
             });
 
@@ -352,12 +349,11 @@ const AdminCMS = {
             const apiUrl = this.editingId ? `/api/projects/${this.editingId}` : '/api/projects';
             const method = this.editingId ? 'PUT' : 'POST';
 
-            const response = await fetch(apiUrl, {
+            const response = await apiRequest(apiUrl, {
                 method,
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                credentials: 'include',
                 body: JSON.stringify(projectData)
             });
 
@@ -406,12 +402,11 @@ const AdminCMS = {
         };
 
         try {
-            const response = await fetch(`/api/${type}/${id}`, {
+            const response = await apiRequest(`/api/${type}/${id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                credentials: 'include',
                 body: JSON.stringify(updatedItem)
             });
 
@@ -486,9 +481,8 @@ const AdminCMS = {
         }
 
         try {
-            const response = await fetch(`/api/${type}/${id}`, {
+            const response = await apiRequest(`/api/${type}/${id}`, {
                 method: 'DELETE',
-                credentials: 'include'
             });
 
             const data = await response.json();
