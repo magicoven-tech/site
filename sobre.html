@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Sobre - Magic Oven</title>
+    <meta name="description" content="Conheça a história por trás do Magic Oven.">
+
+    <link rel="icon" type="image/png" href="assets/favicon/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="assets/favicon/favicon.svg" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="css/main.css">
+    <style>
+        .about-story {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .about-story p {
+            font-size: var(--font-size-lg);
+            color: var(--color-text-secondary);
+            margin-bottom: var(--spacing-lg);
+            line-height: 1.8;
+        }
+
+        .team-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--spacing-2xl);
+            margin-top: var(--spacing-3xl);
+        }
+
+        .team-member {
+            text-align: center;
+            padding: var(--spacing-xl);
+            background: var(--color-surface-elevated);
+            border-radius: var(--radius-lg);
+            transition: transform var(--transition-base);
+        }
+
+        .team-member:hover {
+            transform: translateY(-8px);
+        }
+
+        .team-member-photo {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto var(--spacing-md);
+            border-radius: 50%;
+            overflow: hidden;
+            filter: drop-shadow(0 0 20px var(--color-glow-blue));
+        }
+
+        .team-member-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .team-member-name {
+            font-size: var(--font-size-2xl);
+            font-weight: var(--font-weight-bold);
+            font-style: italic;
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .team-member-role {
+            font-size: var(--font-size-sm);
+            color: var(--color-accent-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .team-member-bio {
+            color: var(--color-text-secondary);
+            line-height: 1.7;
+        }
+
+        .values-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--spacing-xl);
+            margin-top: var(--spacing-2xl);
+        }
+
+        .value-item {
+            text-align: center;
+            padding: var(--spacing-lg);
+        }
+
+        .value-icon {
+            font-size: var(--font-size-4xl);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .value-title {
+            font-size: var(--font-size-lg);
+            font-weight: var(--font-weight-bold);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .value-description {
+            color: var(--color-text-secondary);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="vignette-frame"></div>
+
+    <nav class="main-nav" id="mainNav">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <img src="assets/bruno.png" alt="Bruno" class="logo-memoji">
+                <span class="logo-text">MAGIC OVEN</span>
+                <img src="assets/julia.png" alt="Julia" class="logo-memoji">
+            </a>
+
+            <div class="nav-menu" id="navMenu">
+                <a href="index.html" class="nav-link">INÍCIO</a>
+                <a href="portfolio.html" class="nav-link">TRABALHOS</a>
+                <a href="blog.html" class="nav-link">BLOG</a>
+                <a href="sobre.html" class="nav-link active">SOBRE</a>
+                <a href="contato.html" class="nav-link">CONTATO</a>
+            </div>
+
+            <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <section class="page-header">
+        <div class="section-container">
+            <h1 class="page-title">
+                <span class="page-title-small">NOSSA HISTÓRIA</span>
+                <span class="page-title-large">SOBRE NÓS</span>
+            </h1>
+        </div>
+    </section>
+
+    <section class="about-story-section">
+        <div class="section-container">
+            <div class="about-story" data-aos="fade-up">
+                <p>
+                    O <strong>Magic Oven</strong> nasceu da união de duas mentes criativas apaixonadas
+                    por transformar ideias em experiências digitais inesquecíveis.
+                </p>
+                <p>
+                    Somos um estúdio digital experimental que acredita no poder da colaboração,
+                    da experimentação e da mágica que acontece quando design e tecnologia se encontram.
+                </p>
+                <p>
+                    Cada projeto é uma oportunidade de explorar novos territórios, empurrar limites
+                    e criar algo que não apenas funcione bem, mas que também inspire e encante.
+                </p>
+            </div>
+
+            <div class="team-section">
+                <div class="team-member" data-aos="fade-up">
+                    <div class="team-member-photo">
+                        <img src="assets/bruno.png" alt="Bruno">
+                    </div>
+                    <h3 class="team-member-name">Bruno</h3>
+                    <p class="team-member-role">Desenvolvedor & Designer</p>
+                    <p class="team-member-bio">
+                        Apaixonado por código limpo e interfaces que contam histórias.
+                        Acredita que tecnologia deve ser tanto funcional quanto bela.
+                    </p>
+                </div>
+
+                <div class="team-member" data-aos="fade-up" data-aos-delay="100">
+                    <div class="team-member-photo">
+                        <img src="assets/julia.png" alt="Julia">
+                    </div>
+                    <h3 class="team-member-name">Julia</h3>
+                    <p class="team-member-role">Designer & Artista</p>
+                    <p class="team-member-bio">
+                        Especialista em transformar conceitos abstratos em experiências visuais
+                        impactantes. Sempre em busca da próxima grande ideia criativa.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="values-section" style="background: var(--color-surface);">
+        <div class="section-container">
+            <h2 class="section-title">
+                <span class="section-title-small">O QUE NOS MOVE</span>
+                <span class="section-title-large">NOSSOS VALORES</span>
+            </h2>
+
+            <div class="values-grid">
+                <div class="value-item" data-aos="fade-up">
+                    <div class="value-icon">🎨</div>
+                    <h3 class="value-title">Criatividade</h3>
+                    <p class="value-description">
+                        Pensamos fora da caixa em cada projeto, buscando soluções únicas e memoráveis.
+                    </p>
+                </div>
+
+                <div class="value-item" data-aos="fade-up" data-aos-delay="100">
+                    <div class="value-icon">⚡</div>
+                    <h3 class="value-title">Excelência</h3>
+                    <p class="value-description">
+                        Não nos contentamos com o mediano. Cada detalhe importa na busca pela perfeição.
+                    </p>
+                </div>
+
+                <div class="value-item" data-aos="fade-up" data-aos-delay="200">
+                    <div class="value-icon">🔬</div>
+                    <h3 class="value-title">Experimentação</h3>
+                    <p class="value-description">
+                        Adoramos explorar novas tecnologias e técnicas para criar experiências inovadoras.
+                    </p>
+                </div>
+
+                <div class="value-item" data-aos="fade-up" data-aos-delay="300">
+                    <div class="value-icon">🤝</div>
+                    <h3 class="value-title">Colaboração</h3>
+                    <p class="value-description">
+                        Acreditamos que as melhores ideias surgem quando trabalhamos juntos.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta-section">
+        <div class="cta-content">
+            <h2 class="cta-title">
+                <span class="cta-title-line">VAMOS CRIAR</span>
+                <span class="cta-title-line cta-title-italic">ALGO MÁGICO</span>
+                <span class="cta-title-line">JUNTOS?</span>
+            </h2>
+            <p class="cta-subtitle">
+                Estamos sempre abertos a novos projetos e colaborações
+            </p>
+            <a href="contato.html" class="btn btn-primary btn-large">INICIAR UM PROJETO</a>
+        </div>
+    </section>
+
+    <footer class="main-footer">
+        <div class="footer-container">
+            <div class="footer-grid">
+                <div class="footer-section">
+                    <div class="footer-logo">
+                        <img src="assets/bruno.png" alt="Bruno" class="footer-memoji">
+                        <span class="footer-logo-text">MAGIC OVEN</span>
+                        <img src="assets/julia.png" alt="Julia" class="footer-memoji">
+                    </div>
+                    <p class="footer-tagline">
+                        Transformando ideias em experiências digitais inesquecíveis
+                    </p>
+                </div>
+
+                <div class="footer-section">
+                    <h4 class="footer-title">NAVEGAÇÃO</h4>
+                    <nav class="footer-nav">
+                        <a href="index.html">Início</a>
+                        <a href="portfolio.html">Trabalhos</a>
+                        <a href="blog.html">Blog</a>
+                        <a href="sobre.html">Sobre</a>
+                        <a href="contato.html">Contato</a>
+                    </nav>
+                </div>
+
+                <div class="footer-section">
+                    <h4 class="footer-title">SOCIAL</h4>
+                    <nav class="footer-social">
+                        <a href="https://www.instagram.com/magicoven.tech/" target="_blank" rel="noopener">Instagram</a>
+                        <a href="https://www.linkedin.com/company/magicoven" target="_blank" rel="noopener">LinkedIn</a>
+                        <a href="mailto:contato@magicoven.tech">Email</a>
+                    </nav>
+                </div>
+
+                <div class="footer-section">
+                    <h4 class="footer-title">CONTATO</h4>
+                    <div class="footer-contact">
+                        <a href="mailto:contato@magicoven.tech">contato@magicoven.tech</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p class="footer-copyright">
+                    © 2025 Magic Oven. Feito com magia e código.
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+</body>
+
+</html>
