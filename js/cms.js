@@ -17,7 +17,8 @@ const CMS = {
         if (this.cache.blog) return this.cache.blog;
 
         try {
-            const response = await fetch('/api/blog');
+            const apiBase = window.API_CONFIG ? window.API_CONFIG.baseURL : '';
+            const response = await fetch(`${apiBase}/api/blog`);
             const data = await response.json();
             this.cache.blog = data.posts;
             return data.posts;
@@ -34,7 +35,8 @@ const CMS = {
         if (this.cache.projects) return this.cache.projects;
 
         try {
-            const response = await fetch('/api/projects');
+            const apiBase = window.API_CONFIG ? window.API_CONFIG.baseURL : '';
+            const response = await fetch(`${apiBase}/api/projects`);
             const data = await response.json();
             this.cache.projects = data.projects;
             return data.projects;
