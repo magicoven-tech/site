@@ -34,7 +34,8 @@ const AdminCMS = {
      */
     async checkAuth() {
         try {
-            const response = await fetch('/api/auth/check', {
+            const apiBase = window.API_CONFIG ? window.API_CONFIG.baseURL : '';
+            const response = await fetch(`${apiBase}/api/auth/check`, {
                 credentials: 'include'
             });
             const data = await response.json();
