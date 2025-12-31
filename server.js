@@ -418,6 +418,64 @@ async function initializeUsers() {
     }
 }
 
+// ============================================
+// ROTAS - Contato
+// ============================================
+
+const MESSAGES_FILE = path.join(__dirname, 'data', 'messages.json');
+
+// Receber nova mensagem de contato
+app.post('/api/contact', async (req, res) => {
+    const { name, email, project, message } = req.body;
+
+    // Validação básica
+    if (!name || !email || !message) {
+        return res.status(400).json({ error: 'Campos obrigatórios faltando' });
+    }
+
+    let data = await readJSON(MESSAGES_FILE);
+    if (!data) {
+        // Se o arquivo não existir ou estiver vazio, inicializa
+        data = { messages: [] };
+    }
+
+    const newMessage = {
+        id: String(Date.now()),
+        name,
+        email,
+        project: project || '',
+        message,
+        date: new Date().toISOString(),
+        read: false
+    };
+
+    data.messages.unshift(newMessage);
+
+    // Tenta criar o diretório se não existir (embora já deva existir)
+    try {
+        await fs.mkdir(path.dirname(MESSAGES_FILE), { recursive: true });
+    } catch (err) {
+        // Ignora erro se diretório já existe
+    }
+
+    const success = await writeJSON(MESSAGES_FILE, data);
+
+    if (!success) {
+        return res.status(500).json({ error: 'Erro ao salvar mensagem' });
+    }
+
+    // Em um cenário real, aqui seria enviado o email via Nodemailer/SendGrid
+    console.log(`📨 Nova mensagem recebida de ${name} (${email})`);
+
+    res.json({ success: true, message: 'Mensagem recebida com sucesso' });
+});
+
+// Listar mensagens (protegido - para o admin ler)
+app.get('/api/contact', requireAuth, async (req, res) => {
+    const data = await readJSON(MESSAGES_FILE);
+    res.json(data || { messages: [] });
+});
+
 // Iniciar servidor
 app.listen(PORT, async () => {
     await initializeUsers();

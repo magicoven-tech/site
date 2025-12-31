@@ -14,53 +14,53 @@ class Navigation {
         this.lastScroll = 0;
         this.init();
     }
-    
+
     init() {
         // Mobile menu toggle
         if (this.menuToggle && this.navMenu) {
             this.menuToggle.addEventListener('click', () => this.toggleMenu());
         }
-        
+
         // Hide nav on scroll down, show on scroll up
         window.addEventListener('scroll', () => this.handleScroll(), { passive: true });
-        
+
         // Close mobile menu on link click
         const navLinks = document.querySelectorAll('.nav-link');
         navLinks.forEach(link => {
             link.addEventListener('click', () => this.closeMenu());
         });
-        
+
         // Close menu on outside click
         document.addEventListener('click', (e) => {
             if (!this.nav.contains(e.target) && this.navMenu.classList.contains('active')) {
                 this.closeMenu();
             }
         });
-        
+
         // Set active link based on current page
         this.setActiveLink();
     }
-    
+
     toggleMenu() {
         this.menuToggle.classList.toggle('active');
         this.navMenu.classList.toggle('active');
         document.body.style.overflow = this.navMenu.classList.contains('active') ? 'hidden' : '';
     }
-    
+
     closeMenu() {
         this.menuToggle.classList.remove('active');
         this.navMenu.classList.remove('active');
         document.body.style.overflow = '';
     }
-    
+
     handleScroll() {
         const currentScroll = window.pageYOffset;
-        
+
         if (currentScroll <= 100) {
             this.nav.classList.remove('nav-hidden');
             return;
         }
-        
+
         if (currentScroll > this.lastScroll && currentScroll > 200) {
             // Scrolling down
             this.nav.classList.add('nav-hidden');
@@ -69,14 +69,14 @@ class Navigation {
             // Scrolling up
             this.nav.classList.remove('nav-hidden');
         }
-        
+
         this.lastScroll = currentScroll;
     }
-    
+
     setActiveLink() {
         const currentPage = window.location.pathname.split('/').pop() || 'index.html';
         const navLinks = document.querySelectorAll('.nav-link');
-        
+
         navLinks.forEach(link => {
             const linkPage = link.getAttribute('href');
             if (linkPage === currentPage) {
@@ -96,10 +96,10 @@ class ScrollAnimations {
         this.elements = document.querySelectorAll('[data-aos]');
         this.init();
     }
-    
+
     init() {
         if (this.elements.length === 0) return;
-        
+
         // Create observer
         this.observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
@@ -111,7 +111,7 @@ class ScrollAnimations {
             threshold: 0.1,
             rootMargin: '0px 0px -50px 0px'
         });
-        
+
         // Observe all elements
         this.elements.forEach(el => {
             this.observer.observe(el);
@@ -126,20 +126,20 @@ class SmoothScroll {
     constructor() {
         this.init();
     }
-    
+
     init() {
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', (e) => {
                 const href = anchor.getAttribute('href');
                 if (href === '#') return;
-                
+
                 e.preventDefault();
                 const target = document.querySelector(href);
-                
+
                 if (target) {
                     const offset = 80; // Nav height
                     const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - offset;
-                    
+
                     window.scrollTo({
                         top: targetPosition,
                         behavior: 'smooth'
@@ -158,11 +158,11 @@ class CursorGlow {
         this.cursor = null;
         this.init();
     }
-    
+
     init() {
         // Only on desktop
         if (window.innerWidth < 1024) return;
-        
+
         // Create cursor element
         this.cursor = document.createElement('div');
         this.cursor.className = 'cursor-glow';
@@ -179,14 +179,14 @@ class CursorGlow {
             opacity: 0;
         `;
         document.body.appendChild(this.cursor);
-        
+
         // Track mouse movement
         document.addEventListener('mousemove', (e) => {
             this.cursor.style.left = e.clientX + 'px';
             this.cursor.style.top = e.clientY + 'px';
             this.cursor.style.opacity = '1';
         });
-        
+
         // Hide when mouse leaves
         document.addEventListener('mouseleave', () => {
             this.cursor.style.opacity = '0';
@@ -201,7 +201,7 @@ class PageTransitions {
     constructor() {
         this.init();
     }
-    
+
     init() {
         // Fade in on page load
         document.body.style.opacity = '0';
@@ -211,7 +211,7 @@ class PageTransitions {
                 document.body.style.opacity = '1';
             }, 100);
         });
-        
+
         // Optional: Add page transition on link clicks
         // This would require additional setup with your routing
     }
@@ -233,11 +233,11 @@ const Utils = {
             timeout = setTimeout(later, wait);
         };
     },
-    
+
     // Throttle function for scroll events
     throttle(func, limit) {
         let inThrottle;
-        return function(...args) {
+        return function (...args) {
             if (!inThrottle) {
                 func.apply(this, args);
                 inThrottle = true;
@@ -245,7 +245,7 @@ const Utils = {
             }
         };
     },
-    
+
     // Check if element is in viewport
     isInViewport(element) {
         const rect = element.getBoundingClientRect();
@@ -268,54 +268,82 @@ class FormHandler {
             this.init();
         }
     }
-    
+
     init() {
         this.form.addEventListener('submit', (e) => this.handleSubmit(e));
-        
+
         // Add validation feedback
         const inputs = this.form.querySelectorAll('input, textarea');
         inputs.forEach(input => {
             input.addEventListener('blur', () => this.validateField(input));
         });
     }
-    
-    handleSubmit(e) {
+
+    async handleSubmit(e) {
         e.preventDefault();
-        
+
         // Validate all fields
         const inputs = this.form.querySelectorAll('input, textarea');
         let isValid = true;
-        
+
         inputs.forEach(input => {
             if (!this.validateField(input)) {
                 isValid = false;
             }
         });
-        
+
         if (!isValid) return;
-        
+
         // Get form data
         const formData = new FormData(this.form);
         const data = Object.fromEntries(formData);
-        
-        console.log('Form submitted:', data);
-        
-        // Here you would send the data to your backend
-        // For now, just show a success message
-        this.showMessage('Mensagem enviada com sucesso! Entraremos em contato em breve.', 'success');
-        this.form.reset();
+
+        const submitBtn = this.form.querySelector('button[type="submit"]');
+        const originalText = submitBtn ? submitBtn.innerText : 'ENVIAR';
+
+        try {
+            if (submitBtn) {
+                submitBtn.innerText = 'ENVIANDO...';
+                submitBtn.disabled = true;
+            }
+
+            const response = await fetch('/api/contact', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                this.showMessage('Mensagem enviada com sucesso! Entraremos em contato em breve.', 'success');
+                this.form.reset();
+            } else {
+                throw new Error(result.error || 'Erro ao enviar mensagem');
+            }
+        } catch (error) {
+            console.error('Erro no envio:', error);
+            this.showMessage('Ocorreu um erro ao enviar sua mensagem. Tente novamente.', 'error');
+        } finally {
+            if (submitBtn) {
+                submitBtn.innerText = originalText;
+                submitBtn.disabled = false;
+            }
+        }
     }
-    
+
     validateField(field) {
         const value = field.value.trim();
         let isValid = true;
-        
+
         // Required field check
         if (field.hasAttribute('required') && !value) {
             isValid = false;
             this.showFieldError(field, 'Este campo é obrigatório');
         }
-        
+
         // Email validation
         if (field.type === 'email' && value) {
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -324,17 +352,17 @@ class FormHandler {
                 this.showFieldError(field, 'Por favor, insira um email válido');
             }
         }
-        
+
         if (isValid) {
             this.clearFieldError(field);
         }
-        
+
         return isValid;
     }
-    
+
     showFieldError(field, message) {
         this.clearFieldError(field);
-        
+
         field.classList.add('error');
         const errorDiv = document.createElement('div');
         errorDiv.className = 'field-error';
@@ -342,7 +370,7 @@ class FormHandler {
         errorDiv.style.cssText = 'color: #ff6b6b; font-size: 0.875rem; margin-top: 0.25rem;';
         field.parentNode.appendChild(errorDiv);
     }
-    
+
     clearFieldError(field) {
         field.classList.remove('error');
         const error = field.parentNode.querySelector('.field-error');
@@ -350,7 +378,7 @@ class FormHandler {
             error.remove();
         }
     }
-    
+
     showMessage(message, type = 'success') {
         const messageDiv = document.createElement('div');
         messageDiv.className = `form-message ${type}`;
@@ -363,9 +391,9 @@ class FormHandler {
             color: ${type === 'success' ? '#4ecdc4' : '#ff6b6b'};
             text-align: center;
         `;
-        
+
         this.form.appendChild(messageDiv);
-        
+
         setTimeout(() => {
             messageDiv.remove();
         }, 5000);
@@ -382,16 +410,16 @@ class ParallaxEffect {
             this.init();
         }
     }
-    
+
     init() {
         window.addEventListener('scroll', Utils.throttle(() => {
             this.update();
         }, 10), { passive: true });
     }
-    
+
     update() {
         const scrolled = window.pageYOffset;
-        
+
         this.elements.forEach(el => {
             const speed = el.dataset.parallax || 0.5;
             const yPos = -(scrolled * speed);
@@ -409,14 +437,14 @@ document.addEventListener('DOMContentLoaded', () => {
     new ScrollAnimations();
     new SmoothScroll();
     new PageTransitions();
-    
+
     // Optional features (uncomment if needed)
     // new CursorGlow();
     // new ParallaxEffect();
-    
+
     // Initialize contact form if it exists
     new FormHandler('contactForm');
-    
+
     console.log('🧙‍♂️ Magic Oven initialized ✨');
 });
 
