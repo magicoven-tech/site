@@ -38,11 +38,24 @@ app.use(cors({
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+// Logging Middleware
+app.use((req, res, next) => {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+    next();
+});
+
+// ============================================
+// ROTAS - Health Check
+// ============================================
+app.get('/api/health', (req, res) => {
+    res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
 // Servir arquivos estáticos
 
 
-// Servir arquivos estáticos
-app.use(express.static(path.join(__dirname)));
+// Servir arquivos estáticos - MOVIDO PARA O FINAL DO ARQUIVO PARA NÃO BLOQUEAR API
+// app.use(express.static(path.join(__dirname)));
 
 // Caminhos dos arquivos de dados
 const BLOG_FILE = path.join(__dirname, 'data', 'blog.json');
@@ -475,6 +488,10 @@ async function initializeUsers() {
         console.log('⚠️  ALTERE A SENHA EM PRODUÇÃO!');
     }
 }
+
+// Servir arquivos estáticos (Fallback para SPA/Arquivos)
+// Colocado após as APIs para garantir que rotas da API tenham prioridade
+app.use(express.static(path.join(__dirname)));
 
 // Iniciar servidor
 app.listen(PORT, async () => {
