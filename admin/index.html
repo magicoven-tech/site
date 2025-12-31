@@ -1,11 +1,414 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="pt-BR">
+
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CMS Magic Oven</title>
-  <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CMS Admin - Magic Oven</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+    rel="stylesheet">
+
+  <link rel="stylesheet" href="../css/main.css">
+  <style>
+    /* Admin-specific styles */
+    .admin-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: var(--spacing-2xl) var(--spacing-lg);
+      margin-top: 80px;
+    }
+
+    .admin-header {
+      margin-bottom: var(--spacing-2xl);
+    }
+
+    .admin-tabs {
+      display: flex;
+      gap: var(--spacing-sm);
+      border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+      margin-bottom: var(--spacing-2xl);
+    }
+
+    .tab-button {
+      padding: var(--spacing-sm) var(--spacing-lg);
+      background: transparent;
+      border: none;
+      color: var(--color-text-secondary);
+      font-family: var(--font-primary);
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-semibold);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all var(--transition-base);
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+    }
+
+    .tab-button:hover {
+      color: var(--color-text-primary);
+    }
+
+    .tab-button.active {
+      color: var(--color-accent-primary);
+      border-bottom-color: var(--color-accent-primary);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .items-grid {
+      display: grid;
+      gap: var(--spacing-md);
+      margin-bottom: var(--spacing-2xl);
+    }
+
+    .item-card {
+      background: var(--color-surface-elevated);
+      border-radius: var(--radius-md);
+      padding: var(--spacing-lg);
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: var(--spacing-md);
+      align-items: center;
+    }
+
+    .item-info h3 {
+      margin-bottom: var(--spacing-xs);
+      color: var(--color-text-primary);
+    }
+
+    .item-meta {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-secondary);
+    }
+
+    .item-actions {
+      display: flex;
+      gap: var(--spacing-xs);
+    }
+
+    .btn-icon {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-sm);
+      border: none;
+      cursor: pointer;
+      transition: all var(--transition-base);
+      font-size: var(--font-size-lg);
+    }
+
+    .btn-edit {
+      background: rgba(39, 255, 43, 0.1);
+      color: var(--color-accent-primary);
+    }
+
+    .btn-edit:hover {
+      background: var(--color-accent-primary);
+      color: var(--color-background);
+    }
+
+    .btn-delete {
+      background: rgba(255, 59, 48, 0.1);
+      color: #ff3b30;
+    }
+
+    .btn-delete:hover {
+      background: #ff3b30;
+      color: white;
+    }
+
+    .btn-toggle {
+      background: rgba(255, 204, 0, 0.1);
+      color: #ffcc00;
+    }
+
+    .btn-toggle:hover {
+      background: #ffcc00;
+      color: var(--color-background);
+    }
+
+    .form-container {
+      background: var(--color-surface-elevated);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-2xl);
+      margin-bottom: var(--spacing-2xl);
+    }
+
+    .form-group {
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: var(--spacing-xs);
+      font-weight: var(--font-weight-semibold);
+      font-size: var(--font-size-sm);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--color-text-secondary);
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: var(--spacing-sm) var(--spacing-md);
+      background: var(--color-surface);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: var(--radius-sm);
+      color: var(--color-text-primary);
+      font-family: var(--font-primary);
+      font-size: var(--font-size-base);
+      transition: all var(--transition-base);
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: var(--color-accent-primary);
+      box-shadow: 0 0 0 3px rgba(39, 255, 43, 0.1);
+    }
+
+    .form-group textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .form-checkbox {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+    }
+
+    .form-checkbox input {
+      width: auto;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: var(--spacing-md);
+      justify-content: flex-end;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: var(--radius-sm);
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-semibold);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .badge-published {
+      background: rgba(39, 255, 43, 0.2);
+      color: var(--color-accent-primary);
+    }
+
+    .badge-draft {
+      background: rgba(255, 204, 0, 0.2);
+      color: #ffcc00;
+    }
+
+    .badge-featured {
+      background: rgba(94, 92, 230, 0.2);
+      color: #5e5ce6;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: var(--spacing-4xl) var(--spacing-lg);
+      color: var(--color-text-secondary);
+    }
+
+    .empty-state-icon {
+      font-size: 4rem;
+      margin-bottom: var(--spacing-lg);
+      opacity: 0.3;
+    }
+
+    .status-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: var(--spacing-xs);
+    }
+
+    .status-published {
+      background: var(--color-accent-primary);
+    }
+
+    .status-draft {
+      background: #ffcc00;
+    }
+  </style>
 </head>
+
 <body>
+  <div class="vignette-frame"></div>
+
+  <nav class="main-nav">
+    <div class="nav-container">
+      <a href="../index.html" class="logo">
+        <span class="logo-text">MAGIC OVEN CMS</span>
+      </a>
+
+      <div style="display: flex; gap: var(--spacing-md); align-items: center;">
+        <button class="btn btn-primary" onclick="showCreateForm()">+ NOVO ITEM</button>
+        <button class="btn btn-outline" id="logoutBtn">Sair</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="admin-container">
+    <div class="admin-header">
+      <h1 class="page-title">
+        <span class="page-title-small">ADMINISTRAÇÃO</span>
+        <span class="page-title-large">Gerenciar Conteúdo</span>
+      </h1>
+    </div>
+
+    <div class="admin-tabs">
+      <button class="tab-button active" onclick="switchTab('blog')">📝 Blog Posts</button>
+      <button class="tab-button" onclick="switchTab('projects')">🎨 Projetos</button>
+    </div>
+
+    <!-- Blog Tab -->
+    <div id="blog-tab" class="tab-content active">
+      <div class="form-container" id="blog-form" style="display: none;">
+        <h2>Novo Post do Blog</h2>
+        <form id="blogPostForm">
+          <div class="form-group">
+            <label for="blog-title">Título *</label>
+            <input type="text" id="blog-title" required>
+          </div>
+
+          <div class="form-group">
+            <label for="blog-category">Categoria *</label>
+            <input type="text" id="blog-category" placeholder="DESIGN, CÓDIGO, ARTE, etc" required>
+          </div>
+
+          <div class="form-group">
+            <label for="blog-excerpt">Resumo *</label>
+            <textarea id="blog-excerpt" required></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="blog-content">Conteúdo (HTML)</label>
+            <textarea id="blog-content" style="min-height: 200px;"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="blog-tags">Tags (separadas por vírgula)</label>
+            <input type="text" id="blog-tags" placeholder="design, código, arte">
+          </div>
+
+          <div class="form-group form-checkbox">
+            <input type="checkbox" id="blog-featured">
+            <label for="blog-featured">Post em destaque</label>
+          </div>
+
+          <div class="form-group form-checkbox">
+            <input type="checkbox" id="blog-published" checked>
+            <label for="blog-published">Publicar imediatamente</label>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-outline" onclick="cancelForm()">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Salvar Post</button>
+          </div>
+        </form>
+      </div>
+
+      <div id="blog-list" class="items-grid">
+        <!-- Posts serão carregados aqui -->
+      </div>
+    </div>
+
+    <!-- Projects Tab -->
+    <div id="projects-tab" class="tab-content">
+      <div class="form-container" id="project-form" style="display: none;">
+        <h2>Novo Projeto</h2>
+        <form id="projectForm">
+          <div class="form-group">
+            <label for="project-title">Título *</label>
+            <input type="text" id="project-title" required>
+          </div>
+
+          <div class="form-group">
+            <label for="project-category">Categoria *</label>
+            <input type="text" id="project-category" placeholder="Web Design • Desenvolvimento" required>
+          </div>
+
+          <div class="form-group">
+            <label for="project-description">Descrição Breve *</label>
+            <textarea id="project-description" required></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="project-full-description">Descrição Completa (HTML)</label>
+            <textarea id="project-full-description" style="min-height: 200px;"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="project-client">Cliente</label>
+            <input type="text" id="project-client">
+          </div>
+
+          <div class="form-group">
+            <label for="project-year">Ano</label>
+            <input type="text" id="project-year" placeholder="2025">
+          </div>
+
+          <div class="form-group">
+            <label for="project-gradient">Gradiente CSS</label>
+            <input type="text" id="project-gradient" placeholder="linear-gradient(135deg, #667eea 0%, #764ba2 100%)">
+          </div>
+
+          <div class="form-group">
+            <label for="project-url">URL do Projeto</label>
+            <input type="url" id="project-url" placeholder="https://exemplo.com">
+          </div>
+
+          <div class="form-group form-checkbox">
+            <input type="checkbox" id="project-featured">
+            <label for="project-featured">Projeto em destaque</label>
+          </div>
+
+          <div class="form-group form-checkbox">
+            <input type="checkbox" id="project-published" checked>
+            <label for="project-published">Publicar imediatamente</label>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-outline" onclick="cancelForm()">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Salvar Projeto</button>
+          </div>
+        </form>
+      </div>
+
+      <div id="projects-list" class="items-grid">
+        <!-- Projetos serão carregados aqui -->
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/cms-admin.js"></script>
 </body>
-</html> 
+
+</html>
