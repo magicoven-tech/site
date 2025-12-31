@@ -12,12 +12,12 @@
       "services": [],
       "technologies": [],
       "image": "",
-      "imageGradient": "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+      "imageGradient": "linear-gradient(135deg, #f00 0%, #764ba2 100%)",
       "number": "01",
-      "featured": true,
+      "featured": false,
       "published": true,
       "gallery": [],
-      "url": "https://exemplo.com",
+      "url": "https://bruno.work/",
       "tags": []
     },
     {

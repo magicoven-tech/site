@@ -204,8 +204,8 @@ body {
 }
 
 .logo-memoji {
-    width: 32px;
-    height: 32px;
+    width: 64px;
+    height: 64px;
     filter: drop-shadow(0 0 10px var(--color-glow-green));
     transition: filter var(--transition-base);
 }
@@ -215,10 +215,15 @@ body {
 }
 
 .logo-text {
-    font-size: var(--font-size-base);
+    font-size: var(--font-size-lg);
     font-weight: var(--font-weight-bold);
     font-style: italic;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, #fff 0%, #a0a0a0 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    padding-right: 0.15em;
 }
 
 .nav-menu {
@@ -860,6 +865,7 @@ section {
     font-weight: var(--font-weight-bold);
     font-style: italic;
     letter-spacing: -0.01em;
+    padding-right: 0.15em;
 }
 
 .footer-tagline {
