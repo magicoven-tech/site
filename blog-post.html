@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="page-title">Post - Magic Oven</title>
+    <meta name="description" content="Magic Oven - Estúdio criativo digital">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+        rel="stylesheet">
+
+    <!-- AOS Animation Library -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="css/main.css">
+</head>
+
+<body>
+    <!-- Vignette Effect (Green Glow Border) -->
+    <div class="vignette-frame"></div>
+
+    <!-- Navigation -->
+    <nav class="main-nav">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <span class="logo-icon">🧙‍♂️</span>
+                <span class="logo-text">MAGIC OVEN</span>
+                <span class="logo-icon">🔮</span>
+            </a>
+
+            <div class="nav-links">
+                <a href="index.html#inicio">INÍCIO</a>
+                <a href="portfolio.html">TRABALHOS</a>
+                <a href="blog.html" class="active">BLOG</a>
+                <a href="index.html#sobre">SOBRE</a>
+                <a href="index.html#contato">CONTATO</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Post Content -->
+    <article class="post-content" id="post-container">
+        <!-- Loading state -->
+        <div class="loading-state" style="text-align: center; padding: 100px 20px;">
+            <p style="color: var(--color-text-secondary);">Carregando...</p>
+        </div>
+    </article>
+
+    <!-- Footer -->
+    <footer class="main-footer">
+        <div class="footer-container">
+            <div class="footer-top">
+                <div class="footer-column">
+                    <h3 class="footer-title">
+                        <span class="footer-icon">🧙‍♂️</span>
+                        MAGIC OVEN
+                        <span class="footer-icon">🔮</span>
+                    </h3>
+                    <p class="footer-description">
+                        Transformando ideias em experiências digitais extraordinárias através de design, código e
+                        criatividade.
+                    </p>
+                </div>
+
+                <div class="footer-column">
+                    <h4>Navegação</h4>
+                    <ul class="footer-links">
+                        <li><a href="index.html">Início</a></li>
+                        <li><a href="portfolio.html">Trabalhos</a></li>
+                        <li><a href="blog.html">Blog</a></li>
+                        <li><a href="index.html#sobre">Sobre</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-column">
+                    <h4>Contato</h4>
+                    <ul class="footer-links">
+                        <li><a href="mailto:contato@magicoven.tech">contato@magicoven.tech</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2025 Magic Oven. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="js/cms.js"></script>
+    <script>
+        // Inicializa AOS
+        AOS.init({
+            duration: 800,
+            easing: 'ease-out-cubic',
+            once: true,
+            offset: 100
+        });
+
+        // Carrega o post
+        async function loadPost() {
+            const params = new URLSearchParams(window.location.search);
+            const slug = params.get('slug');
+
+            const container = document.getElementById('post-container');
+
+            if (!slug) {
+                container.innerHTML = `
+                    <div class="section-container" style="padding: 100px 20px; text-align: center;">
+                        <h1 style="color: var(--color-accent-primary); font-size: 2rem; margin-bottom: 1rem;">Post não encontrado</h1>
+                        <p style="color: var(--color-text-secondary); margin-bottom: 2rem;">O post que você está procurando não existe.</p>
+                        <a href="blog.html" class="btn btn-primary">← Voltar ao Blog</a>
+                    </div>
+                `;
+                return;
+            }
+
+            try {
+                const post = await CMS.getPostBySlug(slug);
+
+                if (!post) {
+                    container.innerHTML = `
+                        <div class="section-container" style="padding: 100px 20px; text-align: center;">
+                            <h1 style="color: var(--color-accent-primary); font-size: 2rem; margin-bottom: 1rem;">Post não encontrado</h1>
+                            <p style="color: var(--color-text-secondary); margin-bottom: 2rem;">O post "${slug}" não existe.</p>
+                            <a href="blog.html" class="btn btn-primary">← Voltar ao Blog</a>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Atualiza título da página
+                document.getElementById('page-title').textContent = `${post.title} - Magic Oven`;
+
+                // Renderiza o post
+                container.innerHTML = `
+                    <div class="section-container" style="max-width: 800px; padding: var(--spacing-3xl) var(--spacing-lg);">
+                        <div style="margin-bottom: var(--spacing-xl);">
+                            <a href="blog.html" class="btn btn-outline" style="margin-bottom: var(--spacing-lg);">← Voltar ao Blog</a>
+                        </div>
+
+                        <header style="margin-bottom: var(--spacing-2xl);">
+                            <div style="display: flex; gap: var(--spacing-md); margin-bottom: var(--spacing-lg); flex-wrap: wrap;">
+                                <span style="color: var(--color-text-secondary); font-family: var(--font-mono); font-size: var(--font-size-sm);">
+                                    ${CMS.formatDate(post.date)}
+                                </span>
+                                <span style="color: var(--color-accent-primary); font-weight: var(--font-weight-bold); font-size: var(--font-size-sm);">
+                                    ${post.category}
+                                </span>
+                            </div>
+
+                            <h1 style="font-size: clamp(2rem, 5vw, 3.5rem); font-weight: var(--font-weight-bold); line-height: 1.2; margin-bottom: var(--spacing-lg); color: var(--color-text-primary);">
+                                ${post.title}
+                            </h1>
+
+                            <p style="font-size: var(--font-size-lg); color: var(--color-text-secondary); line-height: 1.6;">
+                                ${post.excerpt}
+                            </p>
+
+                            ${post.tags && post.tags.length > 0 ? `
+                                <div style="display: flex; gap: var(--spacing-sm); flex-wrap: wrap; margin-top: var(--spacing-lg);">
+                                    ${post.tags.map(tag => `
+                                        <span style="padding: var(--spacing-xs) var(--spacing-sm); background: rgba(39, 255, 43, 0.1); border: 1px solid rgba(39, 255, 43, 0.3); border-radius: var(--radius-sm); font-size: var(--font-size-sm); color: var(--color-accent-primary); font-family: var(--font-mono);">
+                                            #${tag}
+                                        </span>
+                                    `).join('')}
+                                </div>
+                            ` : ''}
+                        </header>
+
+                        <div class="post-body" style="color: var(--color-text-secondary); line-height: 1.8; font-size: var(--font-size-base);">
+                            ${post.content}
+                        </div>
+
+                        <footer style="margin-top: var(--spacing-3xl); padding-top: var(--spacing-2xl); border-top: 1px solid rgba(255, 255, 255, 0.1);">
+                            <p style="color: var(--color-text-secondary); margin-bottom: var(--spacing-lg);">
+                                Escrito por <strong style="color: var(--color-accent-primary);">${post.author}</strong>
+                            </p>
+                            <a href="blog.html" class="btn btn-outline">← Voltar ao Blog</a>
+                        </footer>
+                    </div>
+                `;
+
+                // Adiciona estilos ao conteúdo do post
+                const postBody = container.querySelector('.post-body');
+                if (postBody) {
+                    postBody.querySelectorAll('p').forEach(p => {
+                        p.style.marginBottom = 'var(--spacing-lg)';
+                    });
+                    postBody.querySelectorAll('h2').forEach(h => {
+                        h.style.color = 'var(--color-text-primary)';
+                        h.style.fontWeight = 'var(--font-weight-bold)';
+                        h.style.marginTop = 'var(--spacing-2xl)';
+                        h.style.marginBottom = 'var(--spacing-lg)';
+                        h.style.fontSize = 'var(--font-size-2xl)';
+                    });
+                    postBody.querySelectorAll('h3').forEach(h => {
+                        h.style.color = 'var(--color-text-primary)';
+                        h.style.fontWeight = 'var(--font-weight-semibold)';
+                        h.style.marginTop = 'var(--spacing-xl)';
+                        h.style.marginBottom = 'var(--spacing-md)';
+                        h.style.fontSize = 'var(--font-size-xl)';
+                    });
+                    postBody.querySelectorAll('a').forEach(a => {
+                        a.style.color = 'var(--color-accent-primary)';
+                        a.style.textDecoration = 'underline';
+                    });
+                    postBody.querySelectorAll('code').forEach(code => {
+                        code.style.fontFamily = 'var(--font-mono)';
+                        code.style.background = 'rgba(39, 255, 43, 0.1)';
+                        code.style.padding = '2px 6px';
+                        code.style.borderRadius = '4px';
+                        code.style.fontSize = '0.9em';
+                    });
+                }
+
+            } catch (error) {
+                console.error('Erro ao carregar post:', error);
+                container.innerHTML = `
+                    <div class="section-container" style="padding: 100px 20px; text-align: center;">
+                        <h1 style="color: var(--color-accent-primary); font-size: 2rem; margin-bottom: 1rem;">Erro ao carregar post</h1>
+                        <p style="color: var(--color-text-secondary); margin-bottom: 2rem;">Ocorreu um erro ao carregar o post. Por favor, tente novamente.</p>
+                        <a href="blog.html" class="btn btn-primary">← Voltar ao Blog</a>
+                    </div>
+                `;
+            }
+        }
+
+        // Carrega o post quando a página carregar
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', loadPost);
+        } else {
+            loadPost();
+        }
+    </script>
+    <script src="js/main.js"></script>
+</body>
+
+</html>
