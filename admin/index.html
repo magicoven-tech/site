@@ -256,6 +256,58 @@
     .status-draft {
       background: #ffcc00;
     }
+
+    /* Dropzone Styles */
+    .dropzone {
+      border: 2px dashed rgba(255, 255, 255, 0.2);
+      border-radius: var(--radius-md);
+      padding: var(--spacing-xl);
+      text-align: center;
+      transition: all var(--transition-base);
+      cursor: pointer;
+      position: relative;
+      background: var(--color-surface);
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .dropzone:hover,
+    .dropzone.dragover {
+      border-color: var(--color-accent-primary);
+      background: rgba(39, 255, 43, 0.05);
+    }
+
+    .dropzone-text {
+      color: var(--color-text-secondary);
+      pointer-events: none;
+    }
+
+    .dropzone-preview {
+      margin-top: var(--spacing-md);
+      display: none;
+    }
+
+    .dropzone-preview img {
+      max-width: 100%;
+      max-height: 200px;
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow-md);
+    }
+
+    .dropzone-clear {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(0, 0, 0, 0.5);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
   </style>
 </head>
 
@@ -376,8 +428,21 @@
           </div>
 
           <div class="form-group">
-            <label for="project-gradient">Gradiente CSS</label>
+            <label for="project-gradient">Gradiente CSS (Caso não tenha imagem)</label>
             <input type="text" id="project-gradient" placeholder="linear-gradient(135deg, #667eea 0%, #764ba2 100%)">
+          </div>
+
+          <div class="form-group">
+            <label>Imagem do Projeto</label>
+            <div id="project-image-dropzone" class="dropzone">
+              <div class="dropzone-text">Arraste uma imagem aqui ou clique para selecionar</div>
+              <input type="file" id="project-image-input" accept="image/*" style="display: none;">
+              <button type="button" class="dropzone-clear" id="clear-image">×</button>
+              <div class="dropzone-preview" id="image-preview-container">
+                <img id="image-preview" src="" alt="Preview">
+              </div>
+            </div>
+            <input type="hidden" id="project-image-url">
           </div>
 
           <div class="form-group">

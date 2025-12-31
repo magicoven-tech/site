@@ -29,28 +29,16 @@
       "fullDescription": "<p>Descrição completa do segundo projeto...</p>",
       "client": "Outro Cliente",
       "year": "2025",
-      "services": [
-        "Branding",
-        "Arte Digital",
-        "Motion Design"
-      ],
-      "technologies": [
-        "After Effects",
-        "Illustrator",
-        "Blender"
-      ],
-      "image": "assets/projects/project-02.jpg",
+      "services": [],
+      "technologies": [],
+      "image": "",
       "imageGradient": "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
       "number": "02",
       "featured": true,
       "published": true,
       "gallery": [],
       "url": "",
-      "tags": [
-        "branding",
-        "arte",
-        "motion"
-      ]
+      "tags": []
     },
     {
       "id": "3",
@@ -61,28 +49,16 @@
       "fullDescription": "<p>Descrição completa do experimento visual...</p>",
       "client": "Projeto Pessoal",
       "year": "2025",
-      "services": [
-        "Arte Interativa",
-        "3D",
-        "WebGL"
-      ],
-      "technologies": [
-        "Three.js",
-        "GLSL",
-        "WebGL"
-      ],
-      "image": "assets/projects/project-03.jpg",
+      "services": [],
+      "technologies": [],
+      "image": "",
       "imageGradient": "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
       "number": "03",
       "featured": true,
       "published": true,
       "gallery": [],
       "url": "",
-      "tags": [
-        "3d",
-        "arte",
-        "experimental"
-      ]
+      "tags": []
     }
   ]
 }

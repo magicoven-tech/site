@@ -50,18 +50,20 @@ window.apiRequest = async function (endpoint, options = {}) {
     const url = `${API_CONFIG.baseURL}${endpoint}`;
     const token = window.getAuthToken();
 
-    const defaultOptions = {
-        headers: {
-            'Content-Type': 'application/json',
-            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-        }
+    // Inicia headers padrão
+    const headers = {
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
     };
 
+    // Só adiciona Content-Type se não for FormData e se não foi passado nos options
+    if (!(options.body instanceof FormData) && (!options.headers || !options.headers['Content-Type'])) {
+        headers['Content-Type'] = 'application/json';
+    }
+
     const finalOptions = {
-        ...defaultOptions,
         ...options,
         headers: {
-            ...defaultOptions.headers,
+            ...headers,
             ...(options.headers || {})
         }
     };

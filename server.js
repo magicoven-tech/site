@@ -10,6 +10,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const fs = require('fs').promises;
 const path = require('path');
+const multer = require('multer');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -37,6 +38,35 @@ app.use(cors({
 }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+// Servir arquivos de upload
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Configuração do Multer para uploads de imagem
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'uploads/');
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+    }
+});
+
+const upload = multer({
+    storage: storage,
+    limits: { fileSize: 5 * 1024 * 1024 }, // Limite de 5MB
+    fileFilter: function (req, file, cb) {
+        const filetypes = /jpeg|jpg|png|webp|gif/;
+        const mimetype = filetypes.test(file.mimetype);
+        const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+
+        if (mimetype && extname) {
+            return cb(null, true);
+        }
+        cb(new Error('Apenas imagens são permitidas (jpeg, jpg, png, webp, gif)'));
+    }
+});
 
 // Logging Middleware
 app.use((req, res, next) => {
@@ -138,7 +168,7 @@ app.post('/api/auth/login', async (req, res) => {
     const { username, password } = req.body;
 
     if (!username || !password) {
-        return res.status(400).json({ error: 'Username e password são obrigatórios' });
+        return res.status(400).json({ error: 'Usuário e senha são obrigatórios' });
     }
 
     const usersData = await readJSON(USERS_FILE);
@@ -169,6 +199,17 @@ app.post('/api/auth/login', async (req, res) => {
             name: user.name
         }
     });
+});
+
+// Endpoint para Upload de Imagem (Protegido)
+app.post('/api/upload', requireAuth, upload.single('image'), (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ error: 'Nenhum arquivo enviado' });
+    }
+
+    // Retorna a URL pública da imagem
+    const imageUrl = `/uploads/${req.file.filename}`;
+    res.json({ url: imageUrl });
 });
 
 

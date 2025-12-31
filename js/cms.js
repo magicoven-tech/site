@@ -118,12 +118,19 @@ const CMS = {
      * Renderiza um card de projeto
      */
     renderProjectCard(project, delay = 0) {
+        let imageHTML = `
+            <div class="project-image-placeholder" style="background: ${project.imageGradient || 'var(--gradient-primary)'};">
+            </div>
+        `;
+
+        if (project.image && project.image.trim() !== '') {
+            imageHTML = `<img src="${project.image}" alt="${project.title}">`;
+        }
+
         return `
             <article class="project-card" data-aos="fade-up" data-aos-delay="${delay}">
                 <div class="project-image">
-                    <div class="project-image-placeholder" style="background: ${project.imageGradient};">
-                        <span class="project-number">${project.number}</span>
-                    </div>
+                    ${imageHTML}
                 </div>
                 <div class="project-info">
                     <h3 class="project-title">${project.title}</h3>
