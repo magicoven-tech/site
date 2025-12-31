@@ -10,6 +10,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const fs = require('fs').promises;
 const path = require('path');
+const nodemailer = require('nodemailer');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -50,12 +51,6 @@ app.use((req, res, next) => {
 app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
-
-// Servir arquivos estáticos
-
-
-// Servir arquivos estáticos - MOVIDO PARA O FINAL DO ARQUIVO PARA NÃO BLOQUEAR API
-// app.use(express.static(path.join(__dirname)));
 
 // Caminhos dos arquivos de dados
 const BLOG_FILE = path.join(__dirname, 'data', 'blog.json');
@@ -125,6 +120,18 @@ function generateToken(user) {
         { expiresIn: '24h' }
     );
 }
+
+// ============================================
+// CONFIGURAÇÃO DE EMAIL (NODEMAILER)
+// ============================================
+
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+    }
+});
 
 
 // ============================================
@@ -408,6 +415,34 @@ app.delete('/api/projects/:id', requireAuth, async (req, res) => {
 });
 
 // ============================================
+// INICIALIZAÇÃO
+// ============================================
+
+// Criar usuário admin padrão se não existir
+async function initializeUsers() {
+    try {
+        await fs.access(USERS_FILE);
+    } catch {
+        // Arquivo não existe, criar com usuário padrão
+        const defaultPassword = await bcrypt.hash('admin123', 10);
+        const usersData = {
+            users: [
+                {
+                    id: '1',
+                    username: 'admin',
+                    password: defaultPassword,
+                    name: 'Administrador',
+                    email: 'magicoven.tech@gmail.com'
+                }
+            ]
+        };
+        await writeJSON(USERS_FILE, usersData);
+        console.log('✅ Usuário admin criado (username: admin, password: admin123)');
+        console.log('⚠️  ALTERE A SENHA EM PRODUÇÃO!');
+    }
+}
+
+// ============================================
 // ROTAS - Contato
 // ============================================
 
@@ -453,7 +488,41 @@ app.post('/api/contact', async (req, res) => {
         return res.status(500).json({ error: 'Erro ao salvar mensagem' });
     }
 
-    // Em um cenário real, aqui seria enviado o email via Nodemailer/SendGrid
+    // Enviar email via Nodemailer
+    if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+        try {
+            await transporter.sendMail({
+                from: process.env.EMAIL_USER,
+                to: 'magicoven.tech@gmail.com', // Destinatário fixo
+                replyTo: email, // Responder para o cliente
+                subject: `[Novo Contato] ${name} - ${project || 'Geral'}`,
+                text: `
+Nome: ${name}
+Email: ${email}
+Projeto: ${project}
+
+Mensagem:
+${message}
+                `,
+                html: `
+<h3>Nova Mensagem de Contato</h3>
+<p><strong>Nome:</strong> ${name}</p>
+<p><strong>Email:</strong> ${email}</p>
+<p><strong>Projeto:</strong> ${project}</p>
+<hr>
+<p><strong>Mensagem:</strong></p>
+<p>${message.replace(/\n/g, '<br>')}</p>
+                `
+            });
+            console.log(`📨 Email enviado com sucesso para ${email}`);
+        } catch (emailError) {
+            console.error('Erro ao enviar email:', emailError);
+            // Não falha a requisição se o email falhar, mas loga o erro
+        }
+    } else {
+        console.warn('⚠️ Credenciais de email não configuradas (EMAIL_USER/EMAIL_PASS). Email não enviado.');
+    }
+
     console.log(`📨 Nova mensagem recebida de ${name} (${email})`);
 
     res.json({ success: true, message: 'Mensagem recebida com sucesso' });
@@ -464,34 +533,6 @@ app.get('/api/contact', requireAuth, async (req, res) => {
     const data = await readJSON(MESSAGES_FILE);
     res.json(data || { messages: [] });
 });
-
-// ============================================
-// INICIALIZAÇÃO
-// ============================================
-
-// Criar usuário admin padrão se não existir
-async function initializeUsers() {
-    try {
-        await fs.access(USERS_FILE);
-    } catch {
-        // Arquivo não existe, criar com usuário padrão
-        const defaultPassword = await bcrypt.hash('admin123', 10);
-        const usersData = {
-            users: [
-                {
-                    id: '1',
-                    username: 'admin',
-                    password: defaultPassword,
-                    name: 'Administrador',
-                    email: 'admin@magicoven.tech'
-                }
-            ]
-        };
-        await writeJSON(USERS_FILE, usersData);
-        console.log('✅ Usuário admin criado (username: admin, password: admin123)');
-        console.log('⚠️  ALTERE A SENHA EM PRODUÇÃO!');
-    }
-}
 
 // Servir arquivos estáticos (Fallback para SPA/Arquivos)
 // Colocado após as APIs para garantir que rotas da API tenham prioridade
