@@ -258,148 +258,7 @@ const Utils = {
     }
 };
 
-// ============================================
-// FORM HANDLING (for contact page)
-// ============================================
-class FormHandler {
-    constructor(formId) {
-        this.form = document.getElementById(formId);
-        if (this.form) {
-            this.init();
-        }
-    }
 
-    init() {
-        this.form.addEventListener('submit', (e) => this.handleSubmit(e));
-
-        // Add validation feedback
-        const inputs = this.form.querySelectorAll('input, textarea');
-        inputs.forEach(input => {
-            input.addEventListener('blur', () => this.validateField(input));
-        });
-    }
-
-    async handleSubmit(e) {
-        e.preventDefault();
-
-        // Validate all fields
-        const inputs = this.form.querySelectorAll('input, textarea');
-        let isValid = true;
-
-        inputs.forEach(input => {
-            if (!this.validateField(input)) {
-                isValid = false;
-            }
-        });
-
-        if (!isValid) return;
-
-        // Get form data
-        const formData = new FormData(this.form);
-        const data = Object.fromEntries(formData);
-
-        const submitBtn = this.form.querySelector('button[type="submit"]');
-        const originalText = submitBtn ? submitBtn.innerText : 'ENVIAR';
-
-        try {
-            if (submitBtn) {
-                submitBtn.innerText = 'ENVIANDO...';
-                submitBtn.disabled = true;
-            }
-
-            const baseURL = window.API_CONFIG ? window.API_CONFIG.baseURL : '';
-            const response = await fetch(`${baseURL}/api/contact`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            });
-
-            const result = await response.json();
-
-            if (response.ok) {
-                this.showMessage('Mensagem enviada com sucesso! Entraremos em contato em breve.', 'success');
-                this.form.reset();
-            } else {
-                throw new Error(result.error || 'Erro ao enviar mensagem');
-            }
-        } catch (error) {
-            console.error('Erro no envio:', error);
-            this.showMessage('Ocorreu um erro ao enviar sua mensagem. Tente novamente.', 'error');
-        } finally {
-            if (submitBtn) {
-                submitBtn.innerText = originalText;
-                submitBtn.disabled = false;
-            }
-        }
-    }
-
-    validateField(field) {
-        const value = field.value.trim();
-        let isValid = true;
-
-        // Required field check
-        if (field.hasAttribute('required') && !value) {
-            isValid = false;
-            this.showFieldError(field, 'Este campo é obrigatório');
-        }
-
-        // Email validation
-        if (field.type === 'email' && value) {
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(value)) {
-                isValid = false;
-                this.showFieldError(field, 'Por favor, insira um email válido');
-            }
-        }
-
-        if (isValid) {
-            this.clearFieldError(field);
-        }
-
-        return isValid;
-    }
-
-    showFieldError(field, message) {
-        this.clearFieldError(field);
-
-        field.classList.add('error');
-        const errorDiv = document.createElement('div');
-        errorDiv.className = 'field-error';
-        errorDiv.textContent = message;
-        errorDiv.style.cssText = 'color: #ff6b6b; font-size: 0.875rem; margin-top: 0.25rem;';
-        field.parentNode.appendChild(errorDiv);
-    }
-
-    clearFieldError(field) {
-        field.classList.remove('error');
-        const error = field.parentNode.querySelector('.field-error');
-        if (error) {
-            error.remove();
-        }
-    }
-
-    showMessage(message, type = 'success') {
-        const messageDiv = document.createElement('div');
-        messageDiv.className = `form-message ${type}`;
-        messageDiv.textContent = message;
-        messageDiv.style.cssText = `
-            padding: 1rem;
-            margin-top: 1rem;
-            border-radius: 8px;
-            background: ${type === 'success' ? 'rgba(78, 205, 196, 0.1)' : 'rgba(255, 107, 107, 0.1)'};
-            color: ${type === 'success' ? '#4ecdc4' : '#ff6b6b'};
-            text-align: center;
-        `;
-
-        this.form.appendChild(messageDiv);
-
-        setTimeout(() => {
-            messageDiv.remove();
-        }, 5000);
-    }
-}
 
 // ============================================
 // PARALLAX EFFECTS (Optional)
@@ -442,9 +301,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Optional features (uncomment if needed)
     // new CursorGlow();
     // new ParallaxEffect();
-
-    // Initialize contact form if it exists
-    new FormHandler('contactForm');
+    // Formulário usa Formspree (configurado no HTML)
 
     const form = document.getElementById("contactForm");
 
