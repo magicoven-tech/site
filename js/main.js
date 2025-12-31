@@ -307,7 +307,8 @@ class FormHandler {
                 submitBtn.disabled = true;
             }
 
-            const response = await fetch('/api/contact', {
+            const baseURL = window.API_CONFIG ? window.API_CONFIG.baseURL : '';
+            const response = await fetch(`${baseURL}/api/contact`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
