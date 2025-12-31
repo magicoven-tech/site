@@ -10,6 +10,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const fs = require('fs').promises;
 const path = require('path');
+const nodemailer = require('nodemailer');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -38,11 +39,18 @@ app.use(cors({
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Servir arquivos estáticos
+// Logging Middleware
+app.use((req, res, next) => {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+    next();
+});
 
-
-// Servir arquivos estáticos
-app.use(express.static(path.join(__dirname)));
+// ============================================
+// ROTAS - Health Check
+// ============================================
+app.get('/api/health', (req, res) => {
+    res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
 
 // Caminhos dos arquivos de dados
 const BLOG_FILE = path.join(__dirname, 'data', 'blog.json');
@@ -112,6 +120,18 @@ function generateToken(user) {
         { expiresIn: '24h' }
     );
 }
+
+// ============================================
+// CONFIGURAÇÃO DE EMAIL (NODEMAILER)
+// ============================================
+
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+    }
+});
 
 
 // ============================================
@@ -412,7 +432,7 @@ async function initializeUsers() {
                     username: 'admin',
                     password: defaultPassword,
                     name: 'Administrador',
-                    email: 'admin@magicoven.tech'
+                    email: 'magicoven.tech@gmail.com'
                 }
             ]
         };
@@ -468,7 +488,41 @@ app.post('/api/contact', async (req, res) => {
         return res.status(500).json({ error: 'Erro ao salvar mensagem' });
     }
 
-    // Em um cenário real, aqui seria enviado o email via Nodemailer/SendGrid
+    // Enviar email via Nodemailer
+    if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+        try {
+            await transporter.sendMail({
+                from: process.env.EMAIL_USER,
+                to: 'magicoven.tech@gmail.com', // Destinatário fixo
+                replyTo: email, // Responder para o cliente
+                subject: `[Novo Contato] ${name} - ${project || 'Geral'}`,
+                text: `
+Nome: ${name}
+Email: ${email}
+Projeto: ${project}
+
+Mensagem:
+${message}
+                `,
+                html: `
+<h3>Nova Mensagem de Contato</h3>
+<p><strong>Nome:</strong> ${name}</p>
+<p><strong>Email:</strong> ${email}</p>
+<p><strong>Projeto:</strong> ${project}</p>
+<hr>
+<p><strong>Mensagem:</strong></p>
+<p>${message.replace(/\n/g, '<br>')}</p>
+                `
+            });
+            console.log(`📨 Email enviado com sucesso para ${email}`);
+        } catch (emailError) {
+            console.error('Erro ao enviar email:', emailError);
+            // Não falha a requisição se o email falhar, mas loga o erro
+        }
+    } else {
+        console.warn('⚠️ Credenciais de email não configuradas (EMAIL_USER/EMAIL_PASS). Email não enviado.');
+    }
+
     console.log(`📨 Nova mensagem recebida de ${name} (${email})`);
 
     res.json({ success: true, message: 'Mensagem recebida com sucesso' });
@@ -479,6 +533,10 @@ app.get('/api/contact', requireAuth, async (req, res) => {
     const data = await readJSON(MESSAGES_FILE);
     res.json(data || { messages: [] });
 });
+
+// Servir arquivos estáticos (Fallback para SPA/Arquivos)
+// Colocado após as APIs para garantir que rotas da API tenham prioridade
+app.use(express.static(path.join(__dirname)));
 
 // Iniciar servidor
 app.listen(PORT, async () => {
@@ -491,6 +549,7 @@ app.listen(PORT, async () => {
 🚀 Servidor rodando em: http://localhost:${PORT}
 📝 Admin CMS: http://localhost:${PORT}/admin/
 🔐 Login padrão: admin / admin123
+📨 Contact API: /api/contact enabled
 
 ⚠️  Altere a senha padrão em produção!
     `);
