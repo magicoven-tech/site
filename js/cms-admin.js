@@ -34,10 +34,7 @@ const AdminCMS = {
      */
     async checkAuth() {
         try {
-            const apiBase = window.API_CONFIG ? window.API_CONFIG.baseURL : '';
-            const response = await fetch(`${apiBase}/api/auth/check`, {
-                credentials: 'include'
-            });
+            const response = await apiRequest('/api/auth/check');
             const data = await response.json();
             return data.authenticated;
         } catch (error) {
@@ -54,10 +51,8 @@ const AdminCMS = {
         if (logoutBtn) {
             logoutBtn.addEventListener('click', async () => {
                 try {
-                    await fetch('/api/auth/logout', {
-                        method: 'POST',
-                        credentials: 'include'
-                    });
+                    // Limpa o token JWT
+                    clearAuthToken();
                     window.location.href = '/admin/login.html';
                 } catch (error) {
                     console.error('Erro no logout:', error);
