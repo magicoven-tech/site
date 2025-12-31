@@ -418,8 +418,8 @@ const AdminCMS = {
             }
 
             if (response.ok && data.success) {
-                console.log('✅ Post salvo com sucesso!');
-                alert('✅ Post salvo com sucesso!');
+                console.log('✅ Artigo salvo com sucesso!');
+                alert('✅ Artigo salvo com sucesso!');
                 cancelForm(); // Removido 'this.'
                 await this.loadBlogPosts();
             } else {
@@ -429,7 +429,7 @@ const AdminCMS = {
                     alert('❌ Sessão expirada. Faça login novamente.');
                     window.location.href = '/admin/login.html';
                 } else {
-                    alert('❌ Erro ao salvar post: ' + (data.error || 'Erro desconhecido'));
+                    alert('❌ Erro ao salvar artigo: ' + (data.error || 'Erro desconhecido'));
                 }
             }
         } catch (error) {
