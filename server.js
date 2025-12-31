@@ -36,18 +36,28 @@ app.use(cors({
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Sessões
-app.use(session({
+// Configuração de sessão
+const sessionConfig = {
     secret: process.env.SESSION_SECRET || 'magic-oven-secret-key-change-in-production',
     resave: false,
     saveUninitialized: false,
+    name: 'magicoven.sid', // Nome customizado do cookie
     cookie: {
         secure: process.env.NODE_ENV === 'production', // true em produção (HTTPS)
         httpOnly: true,
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' para cross-origin em produção
-        maxAge: 24 * 60 * 60 * 1000 // 24 horas
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' para cross-origin
+        maxAge: 24 * 60 * 60 * 1000, // 24 horas
+        path: '/' // Disponível em todas as rotas
     }
-}));
+};
+
+// Log da configuração (apenas em dev)
+if (process.env.NODE_ENV !== 'production') {
+    console.log('📋 Configuração de sessão:', sessionConfig);
+}
+
+app.use(session(sessionConfig));
+
 
 // Servir arquivos estáticos
 app.use(express.static(path.join(__dirname)));
