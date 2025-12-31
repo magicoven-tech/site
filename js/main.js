@@ -446,6 +446,66 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize contact form if it exists
     new FormHandler('contactForm');
 
+    const form = document.getElementById("contactForm");
+
+    async function handleSubmit(event) {
+        event.preventDefault();
+        const status = document.querySelector(".form-submit"); // Vamos mudar o texto do botão
+        const originalBtnText = status.innerHTML;
+        const data = new FormData(event.target);
+
+        // Feedback visual de carregamento
+        status.innerHTML = "Enviando...";
+        status.disabled = true;
+        status.style.opacity = "0.7";
+
+        try {
+            const response = await fetch(event.target.action, {
+                method: form.method,
+                body: data,
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                // Sucesso!
+                status.innerHTML = "Mensagem Enviada! ✨";
+                status.style.backgroundColor = "var(--color-accent-secondary)"; // Opcional: cor de sucesso
+                form.reset(); // Limpa o formulário
+
+                // Volta o botão ao normal após 3 segundos
+                setTimeout(() => {
+                    status.innerHTML = originalBtnText;
+                    status.disabled = false;
+                    status.style.opacity = "1";
+                    status.style.backgroundColor = "";
+                }, 3000);
+            } else {
+                // Erro do servidor
+                const data = await response.json();
+                if (Object.hasOwn(data, 'errors')) {
+                    status.innerHTML = "Erro nos dados. Verifique e tente novamente.";
+                } else {
+                    status.innerHTML = "Oops! Algo deu errado.";
+                }
+                setTimeout(() => {
+                    status.innerHTML = originalBtnText;
+                    status.disabled = false;
+                }, 3000);
+            }
+        } catch (error) {
+            // Erro de rede
+            status.innerHTML = "Erro de conexão.";
+            setTimeout(() => {
+                status.innerHTML = originalBtnText;
+                status.disabled = false;
+            }, 3000);
+        }
+    }
+
+    form.addEventListener("submit", handleSubmit);
+
     console.log('🧙‍♂️ Magic Oven initialized ✨');
 });
 

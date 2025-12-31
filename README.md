@@ -57,11 +57,6 @@ site/
 │   ├── main.js           # JavaScript principal
 │   ├── cms.js            # Sistema CMS (frontend)
 │   └── cms-admin.js      # Admin CMS (frontend)
-│
-├── data/                  # Dados persistidos (JSON)
-│   ├── blog.json         # Posts do blog
-│   ├── projects.json     # Projetos/trabalhos
-│   └── users.json        # Usuários (gerado automaticamente)
 
 ---
 
@@ -225,11 +220,6 @@ npm start
 }
 ```
 
----
-
-## 📄 Licença
-
-© 2025 Magic Oven. Todos os direitos reservados.
 
 ---
 

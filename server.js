@@ -3,7 +3,6 @@
  * Servidor Express com autenticação JWT e API REST
  */
 
-require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
@@ -11,7 +10,6 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const fs = require('fs').promises;
 const path = require('path');
-const nodemailer = require('nodemailer');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -121,18 +119,6 @@ function generateToken(user) {
         { expiresIn: '24h' }
     );
 }
-
-// ============================================
-// CONFIGURAÇÃO DE EMAIL (NODEMAILER)
-// ============================================
-
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-    }
-});
 
 
 // ============================================
@@ -443,97 +429,6 @@ async function initializeUsers() {
     }
 }
 
-// ============================================
-// ROTAS - Contato
-// ============================================
-
-const MESSAGES_FILE = path.join(__dirname, 'data', 'messages.json');
-
-// Receber nova mensagem de contato
-app.post('/api/contact', async (req, res) => {
-    const { name, email, project, message } = req.body;
-
-    // Validação básica
-    if (!name || !email || !message) {
-        return res.status(400).json({ error: 'Campos obrigatórios faltando' });
-    }
-
-    let data = await readJSON(MESSAGES_FILE);
-    if (!data) {
-        // Se o arquivo não existir ou estiver vazio, inicializa
-        data = { messages: [] };
-    }
-
-    const newMessage = {
-        id: String(Date.now()),
-        name,
-        email,
-        project: project || '',
-        message,
-        date: new Date().toISOString(),
-        read: false
-    };
-
-    data.messages.unshift(newMessage);
-
-    // Tenta criar o diretório se não existir (embora já deva existir)
-    try {
-        await fs.mkdir(path.dirname(MESSAGES_FILE), { recursive: true });
-    } catch (err) {
-        // Ignora erro se diretório já existe
-    }
-
-    const success = await writeJSON(MESSAGES_FILE, data);
-
-    if (!success) {
-        return res.status(500).json({ error: 'Erro ao salvar mensagem' });
-    }
-
-    // Enviar email via Nodemailer
-    if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-        try {
-            await transporter.sendMail({
-                from: process.env.EMAIL_USER,
-                to: 'magicoven.tech@gmail.com', // Destinatário fixo
-                replyTo: email, // Responder para o cliente
-                subject: `[Novo Contato] ${name} - ${project || 'Geral'}`,
-                text: `
-Nome: ${name}
-Email: ${email}
-Projeto: ${project}
-
-Mensagem:
-${message}
-                `,
-                html: `
-<h3>Nova Mensagem de Contato</h3>
-<p><strong>Nome:</strong> ${name}</p>
-<p><strong>Email:</strong> ${email}</p>
-<p><strong>Projeto:</strong> ${project}</p>
-<hr>
-<p><strong>Mensagem:</strong></p>
-<p>${message.replace(/\n/g, '<br>')}</p>
-                `
-            });
-            console.log(`📨 Email enviado com sucesso para ${email}`);
-        } catch (emailError) {
-            console.error('Erro ao enviar email:', emailError);
-            // Não falha a requisição se o email falhar, mas loga o erro
-        }
-    } else {
-        console.warn('⚠️ Credenciais de email não configuradas (EMAIL_USER/EMAIL_PASS). Email não enviado.');
-    }
-
-    console.log(`📨 Nova mensagem recebida de ${name} (${email})`);
-
-    res.json({ success: true, message: 'Mensagem recebida com sucesso' });
-});
-
-// Listar mensagens (protegido - para o admin ler)
-app.get('/api/contact', requireAuth, async (req, res) => {
-    const data = await readJSON(MESSAGES_FILE);
-    res.json(data || { messages: [] });
-});
 
 // Servir arquivos estáticos (Fallback para SPA/Arquivos)
 // Colocado após as APIs para garantir que rotas da API tenham prioridade
@@ -550,7 +445,6 @@ app.listen(PORT, async () => {
 🚀 Servidor rodando em: http://localhost:${PORT}
 📝 Admin CMS: http://localhost:${PORT}/admin/
 🔐 Login padrão: admin / admin123
-📨 Contact API: /api/contact enabled
 
 ⚠️  Altere a senha padrão em produção!
     `);
