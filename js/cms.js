@@ -193,6 +193,13 @@ const CMS = {
         // Re-inicializa animações AOS se disponível
         if (typeof AOS !== 'undefined') {
             AOS.refresh();
+        } else {
+            // Se AOS não estiver disponível, garante que os elementos fiquem visíveis
+            const cards = container.querySelectorAll('[data-aos]');
+            cards.forEach(card => {
+                card.style.opacity = '1';
+                card.style.transform = 'none';
+            });
         }
     },
 

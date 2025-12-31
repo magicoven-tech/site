@@ -1,103 +1,88 @@
 {
-    "projects": [
-        {
-            "id": "1",
-            "title": "NOME DO PROJETO",
-            "slug": "nome-projeto",
-            "category": "Web Design • Desenvolvimento",
-            "description": "Descrição breve do projeto que vocês realizaram. Destaque os principais desafios e soluções criativas.",
-            "fullDescription": "<p>Descrição completa do projeto com todos os detalhes...</p>",
-            "client": "Nome do Cliente",
-            "year": "2025",
-            "services": [
-                "Web Design",
-                "Desenvolvimento",
-                "Branding"
-            ],
-            "technologies": [
-                "React",
-                "Next.js",
-                "Three.js"
-            ],
-            "image": "assets/projects/project-01.jpg",
-            "imageGradient": "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-            "number": "01",
-            "featured": true,
-            "published": true,
-            "gallery": [
-                "assets/projects/project-01-1.jpg",
-                "assets/projects/project-01-2.jpg"
-            ],
-            "url": "https://exemplo.com",
-            "tags": [
-                "web",
-                "design",
-                "desenvolvimento"
-            ]
-        },
-        {
-            "id": "2",
-            "title": "OUTRO PROJETO",
-            "slug": "outro-projeto",
-            "category": "Branding • Arte Digital",
-            "description": "Cada projeto é uma oportunidade de explorar novas tecnologias e criar algo único e memorável.",
-            "fullDescription": "<p>Descrição completa do segundo projeto...</p>",
-            "client": "Outro Cliente",
-            "year": "2025",
-            "services": [
-                "Branding",
-                "Arte Digital",
-                "Motion Design"
-            ],
-            "technologies": [
-                "After Effects",
-                "Illustrator",
-                "Blender"
-            ],
-            "image": "assets/projects/project-02.jpg",
-            "imageGradient": "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
-            "number": "02",
-            "featured": true,
-            "published": true,
-            "gallery": [],
-            "url": "",
-            "tags": [
-                "branding",
-                "arte",
-                "motion"
-            ]
-        },
-        {
-            "id": "3",
-            "title": "EXPERIMENTO VISUAL",
-            "slug": "experimento-visual",
-            "category": "Arte Interativa • 3D",
-            "description": "Experimentação com tecnologias emergentes para criar experiências visuais imersivas.",
-            "fullDescription": "<p>Descrição completa do experimento visual...</p>",
-            "client": "Projeto Pessoal",
-            "year": "2025",
-            "services": [
-                "Arte Interativa",
-                "3D",
-                "WebGL"
-            ],
-            "technologies": [
-                "Three.js",
-                "GLSL",
-                "WebGL"
-            ],
-            "image": "assets/projects/project-03.jpg",
-            "imageGradient": "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
-            "number": "03",
-            "featured": true,
-            "published": true,
-            "gallery": [],
-            "url": "",
-            "tags": [
-                "3d",
-                "arte",
-                "experimental"
-            ]
-        }
-    ]
+  "projects": [
+    {
+      "id": "1",
+      "title": "NOME DO PROJETODDDDD",
+      "slug": "nome-do-projetoddddd",
+      "category": "Web Design • Desenvolvimento",
+      "description": "Descrição breve do projeto que vocês realizaram. Destaque os principais desafios e soluções criativas.",
+      "fullDescription": "<p>Descrição completa do projeto com todos os detalhes...</p>",
+      "client": "Nome do Cliente",
+      "year": "2025",
+      "services": [],
+      "technologies": [],
+      "image": "",
+      "imageGradient": "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+      "number": "01",
+      "featured": true,
+      "published": true,
+      "gallery": [],
+      "url": "https://exemplo.com",
+      "tags": []
+    },
+    {
+      "id": "2",
+      "title": "OUTRO PROJETO",
+      "slug": "outro-projeto",
+      "category": "Branding • Arte Digital",
+      "description": "Cada projeto é uma oportunidade de explorar novas tecnologias e criar algo único e memorável.",
+      "fullDescription": "<p>Descrição completa do segundo projeto...</p>",
+      "client": "Outro Cliente",
+      "year": "2025",
+      "services": [
+        "Branding",
+        "Arte Digital",
+        "Motion Design"
+      ],
+      "technologies": [
+        "After Effects",
+        "Illustrator",
+        "Blender"
+      ],
+      "image": "assets/projects/project-02.jpg",
+      "imageGradient": "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+      "number": "02",
+      "featured": true,
+      "published": true,
+      "gallery": [],
+      "url": "",
+      "tags": [
+        "branding",
+        "arte",
+        "motion"
+      ]
+    },
+    {
+      "id": "3",
+      "title": "EXPERIMENTO VISUAL",
+      "slug": "experimento-visual",
+      "category": "Arte Interativa • 3D",
+      "description": "Experimentação com tecnologias emergentes para criar experiências visuais imersivas.",
+      "fullDescription": "<p>Descrição completa do experimento visual...</p>",
+      "client": "Projeto Pessoal",
+      "year": "2025",
+      "services": [
+        "Arte Interativa",
+        "3D",
+        "WebGL"
+      ],
+      "technologies": [
+        "Three.js",
+        "GLSL",
+        "WebGL"
+      ],
+      "image": "assets/projects/project-03.jpg",
+      "imageGradient": "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
+      "number": "03",
+      "featured": true,
+      "published": true,
+      "gallery": [],
+      "url": "",
+      "tags": [
+        "3d",
+        "arte",
+        "experimental"
+      ]
+    }
+  ]
 }
