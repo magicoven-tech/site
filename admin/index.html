@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CMS Admin - Magic Oven</title>
+  <title>Painel Administrativo - Magic Oven</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -256,6 +256,58 @@
     .status-draft {
       background: #ffcc00;
     }
+
+    /* Dropzone Styles */
+    .dropzone {
+      border: 2px dashed rgba(255, 255, 255, 0.2);
+      border-radius: var(--radius-md);
+      padding: var(--spacing-xl);
+      text-align: center;
+      transition: all var(--transition-base);
+      cursor: pointer;
+      position: relative;
+      background: var(--color-surface);
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .dropzone:hover,
+    .dropzone.dragover {
+      border-color: var(--color-accent-primary);
+      background: rgba(39, 255, 43, 0.05);
+    }
+
+    .dropzone-text {
+      color: var(--color-text-secondary);
+      pointer-events: none;
+    }
+
+    .dropzone-preview {
+      margin-top: var(--spacing-md);
+      display: none;
+    }
+
+    .dropzone-preview img {
+      max-width: 100%;
+      max-height: 200px;
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow-md);
+    }
+
+    .dropzone-clear {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(0, 0, 0, 0.5);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
   </style>
 </head>
 
@@ -265,7 +317,7 @@
   <nav class="main-nav">
     <div class="nav-container">
       <a href="../index.html" class="logo">
-        <span class="logo-text">MAGIC OVEN CMS</span>
+        <span class="logo-text">PAINEL ADMINISTRATIVO</span>
       </a>
 
       <div style="display: flex; gap: var(--spacing-md); align-items: center;">
@@ -284,14 +336,14 @@
     </div>
 
     <div class="admin-tabs">
-      <button class="tab-button active" onclick="switchTab('blog')">📝 Blog Posts</button>
+      <button class="tab-button active" onclick="switchTab('blog')">📝 Artigos do Blog</button>
       <button class="tab-button" onclick="switchTab('projects')">🎨 Projetos</button>
     </div>
 
     <!-- Blog Tab -->
     <div id="blog-tab" class="tab-content active">
       <div class="form-container" id="blog-form" style="display: none;">
-        <h2>Novo Post do Blog</h2>
+        <h2>Novo Artigo do Blog</h2>
         <form id="blogPostForm">
           <div class="form-group">
             <label for="blog-title">Título *</label>
@@ -320,7 +372,7 @@
 
           <div class="form-group form-checkbox">
             <input type="checkbox" id="blog-featured">
-            <label for="blog-featured">Post em destaque</label>
+            <label for="blog-featured">Artigo em destaque</label>
           </div>
 
           <div class="form-group form-checkbox">
@@ -330,7 +382,7 @@
 
           <div class="form-actions">
             <button type="button" class="btn btn-outline" onclick="cancelForm()">Cancelar</button>
-            <button type="submit" class="btn btn-primary">Salvar Post</button>
+            <button type="submit" class="btn btn-primary">Salvar Artigo</button>
           </div>
         </form>
       </div>
@@ -376,8 +428,21 @@
           </div>
 
           <div class="form-group">
-            <label for="project-gradient">Gradiente CSS</label>
+            <label for="project-gradient">Gradiente CSS (Caso não tenha imagem)</label>
             <input type="text" id="project-gradient" placeholder="linear-gradient(135deg, #667eea 0%, #764ba2 100%)">
+          </div>
+
+          <div class="form-group">
+            <label>Imagem do Projeto</label>
+            <div id="project-image-dropzone" class="dropzone">
+              <div class="dropzone-text">Arraste uma imagem aqui ou clique para selecionar</div>
+              <input type="file" id="project-image-input" accept="image/*" style="display: none;">
+              <button type="button" class="dropzone-clear" id="clear-image">×</button>
+              <div class="dropzone-preview" id="image-preview-container">
+                <img id="image-preview" src="" alt="Pré-visualização">
+              </div>
+            </div>
+            <input type="hidden" id="project-image-url">
           </div>
 
           <div class="form-group">

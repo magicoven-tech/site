@@ -26,6 +26,7 @@ const AdminCMS = {
         await this.loadBlogPosts();
         await this.loadProjects();
         this.setupForms();
+        this.setupImageUpload();
         this.setupLogout();
     },
 
@@ -235,6 +236,135 @@ const AdminCMS = {
     },
 
     /**
+     * Configura upload de imagem com drag and drop
+     */
+    setupImageUpload() {
+        const dropzone = document.getElementById('project-image-dropzone');
+        const input = document.getElementById('project-image-input');
+        const previewImg = document.getElementById('image-preview');
+        const previewContainer = document.getElementById('image-preview-container');
+        const clearBtn = document.getElementById('clear-image');
+        const urlInput = document.getElementById('project-image-url');
+
+        if (!dropzone || !input) return;
+
+        // Clique no dropzone abre o seletor de arquivo
+        dropzone.addEventListener('click', (e) => {
+            if (e.target !== clearBtn) {
+                input.click();
+            }
+        });
+
+        // Eventos de drag and drop
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropzone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+            });
+        });
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropzone.addEventListener(eventName, () => dropzone.classList.add('dragover'));
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropzone.addEventListener(eventName, () => dropzone.classList.remove('dragover'));
+        });
+
+        // Drop de arquivo
+        dropzone.addEventListener('drop', (e) => {
+            const file = e.dataTransfer.files[0];
+            if (file) this.handleImageUpload(file);
+        });
+
+        // Seleção de arquivo via input
+        input.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) this.handleImageUpload(file);
+        });
+
+        // Limpar imagem
+        clearBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.clearImagePreview();
+        });
+    },
+
+    /**
+     * Faz upload da imagem para o servidor
+     */
+    async handleImageUpload(file) {
+        if (!file.type.startsWith('image/')) {
+            alert('Por favor, selecione apenas arquivos de imagem.');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('image', file);
+
+        try {
+            const dropzoneText = document.querySelector('.dropzone-text');
+            const originalText = dropzoneText.textContent;
+            dropzoneText.textContent = 'Enviando...';
+
+            const response = await apiRequest('/api/upload', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+            dropzoneText.textContent = originalText;
+
+            if (response.ok && data.url) {
+                this.showImagePreview(data.url);
+            } else {
+                alert('Erro ao fazer upload: ' + (data.error || 'Erro desconhecido'));
+            }
+        } catch (error) {
+            console.error('Erro no upload:', error);
+            alert('Erro ao fazer upload da imagem.');
+        }
+    },
+
+    /**
+     * Mostra preview da imagem
+     */
+    showImagePreview(url) {
+        const previewImg = document.getElementById('image-preview');
+        const previewContainer = document.getElementById('image-preview-container');
+        const clearBtn = document.getElementById('clear-image');
+        const urlInput = document.getElementById('project-image-url');
+        const dropzoneText = document.querySelector('.dropzone-text');
+
+        const fullUrl = url.startsWith('http') ? url : `${API_CONFIG.baseURL}${url}`;
+
+        previewImg.src = fullUrl;
+        previewContainer.style.display = 'block';
+        clearBtn.style.display = 'flex';
+        urlInput.value = url;
+        dropzoneText.style.display = 'none';
+    },
+
+    /**
+     * Limpa preview da imagem
+     */
+    clearImagePreview() {
+        const previewImg = document.getElementById('image-preview');
+        const previewContainer = document.getElementById('image-preview-container');
+        const clearBtn = document.getElementById('clear-image');
+        const urlInput = document.getElementById('project-image-url');
+        const dropzoneText = document.querySelector('.dropzone-text');
+        const input = document.getElementById('project-image-input');
+
+        previewImg.src = '';
+        previewContainer.style.display = 'none';
+        clearBtn.style.display = 'none';
+        urlInput.value = '';
+        dropzoneText.style.display = 'block';
+        input.value = ''; // Reseta input de arquivo
+    },
+
+    /**
      * Salva post do blog via API
      */
     async saveBlogPost() {
@@ -288,8 +418,8 @@ const AdminCMS = {
             }
 
             if (response.ok && data.success) {
-                console.log('✅ Post salvo com sucesso!');
-                alert('✅ Post salvo com sucesso!');
+                console.log('✅ Artigo salvo com sucesso!');
+                alert('✅ Artigo salvo com sucesso!');
                 cancelForm(); // Removido 'this.'
                 await this.loadBlogPosts();
             } else {
@@ -299,7 +429,7 @@ const AdminCMS = {
                     alert('❌ Sessão expirada. Faça login novamente.');
                     window.location.href = '/admin/login.html';
                 } else {
-                    alert('❌ Erro ao salvar post: ' + (data.error || 'Erro desconhecido'));
+                    alert('❌ Erro ao salvar artigo: ' + (data.error || 'Erro desconhecido'));
                 }
             }
         } catch (error) {
@@ -336,7 +466,7 @@ const AdminCMS = {
             year: year || new Date().getFullYear().toString(),
             services: [],
             technologies: [],
-            image: '',
+            image: document.getElementById('project-image-url').value || '',
             imageGradient: gradient || 'linear-gradient(135deg, #27FF2B 0%, #1ed923 100%)',
             featured,
             published,
@@ -467,6 +597,13 @@ const AdminCMS = {
             document.getElementById('project-featured').checked = item.featured;
             document.getElementById('project-published').checked = item.published;
 
+            // Preview da imagem se existir
+            if (item.image) {
+                this.showImagePreview(item.image);
+            } else {
+                this.clearImagePreview();
+            }
+
             document.getElementById('project-form').style.display = 'block';
             document.getElementById('project-form').scrollIntoView({ behavior: 'smooth' });
         }
@@ -548,6 +685,7 @@ function cancelForm() {
     document.getElementById('blog-form').style.display = 'none';
     document.getElementById('project-form').style.display = 'none';
     AdminCMS.editingId = null;
+    AdminCMS.clearImagePreview();
 }
 
 // Inicializa quando o DOM estiver pronto
