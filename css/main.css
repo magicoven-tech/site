@@ -855,8 +855,8 @@ section {
 }
 
 .footer-memoji {
-    width: 28px;
-    height: 28px;
+    width: 64px;
+    height: 64px;
     filter: drop-shadow(0 0 8px var(--color-glow-green));
 }
 
