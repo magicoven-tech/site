@@ -26,21 +26,27 @@
     <div class="vignette-frame"></div>
 
     <!-- Navigation -->
-    <nav class="main-nav">
+    <nav class="main-nav" id="mainNav">
         <div class="nav-container">
             <a href="index.html" class="logo">
-                <span class="logo-icon">🧙‍♂️</span>
+                <img src="assets/bruno.png" alt="Bruno" class="logo-memoji">
                 <span class="logo-text">MAGIC OVEN</span>
-                <span class="logo-icon">🔮</span>
+                <img src="assets/julia.png" alt="Julia" class="logo-memoji">
             </a>
 
-            <div class="nav-links">
-                <a href="index.html#inicio">INÍCIO</a>
-                <a href="portfolio.html">TRABALHOS</a>
-                <a href="blog.html" class="active">BLOG</a>
-                <a href="index.html#sobre">SOBRE</a>
-                <a href="index.html#contato">CONTATO</a>
+            <div class="nav-menu" id="navMenu">
+                <a href="index.html" class="nav-link">INÍCIO</a>
+                <a href="portfolio.html" class="nav-link">TRABALHOS</a>
+                <a href="blog.html" class="nav-link active">BLOG</a>
+                <a href="sobre.html" class="nav-link">SOBRE</a>
+                <a href="contato.html" class="nav-link">CONTATO</a>
             </div>
+
+            <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
         </div>
     </nav>
 
