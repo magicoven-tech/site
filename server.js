@@ -58,6 +58,10 @@ async function readJSON(filepath) {
         const data = await fs.readFile(filepath, 'utf8');
         return JSON.parse(data);
     } catch (error) {
+        // Se o arquivo não existir, retorna null silenciosamente
+        if (error.code === 'ENOENT') {
+            return null;
+        }
         console.error(`Erro ao ler ${filepath}:`, error);
         return null;
     }
