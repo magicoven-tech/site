@@ -6,7 +6,6 @@
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const session = require('express-session');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const fs = require('fs').promises;
@@ -39,27 +38,7 @@ app.use(cors({
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Configuração de sessão
-const sessionConfig = {
-    secret: process.env.SESSION_SECRET || 'magic-oven-secret-key-change-in-production',
-    resave: false,
-    saveUninitialized: false,
-    name: 'magicoven.sid', // Nome customizado do cookie
-    cookie: {
-        secure: process.env.NODE_ENV === 'production', // true em produção (HTTPS)
-        httpOnly: true,
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' para cross-origin
-        maxAge: 24 * 60 * 60 * 1000, // 24 horas
-        path: '/' // Disponível em todas as rotas
-    }
-};
-
-// Log da configuração (apenas em dev)
-if (process.env.NODE_ENV !== 'production') {
-    console.log('📋 Configuração de sessão:', sessionConfig);
-}
-
-app.use(session(sessionConfig));
+// Servir arquivos estáticos
 
 
 // Servir arquivos estáticos
@@ -184,12 +163,8 @@ app.post('/api/auth/login', async (req, res) => {
 
 // Logout
 app.post('/api/auth/logout', (req, res) => {
-    req.session.destroy((err) => {
-        if (err) {
-            return res.status(500).json({ error: 'Erro ao fazer logout' });
-        }
-        res.json({ success: true });
-    });
+    // Com JWT, o logout é feito no frontend
+    res.json({ success: true });
 });
 
 // Verificar autenticação
