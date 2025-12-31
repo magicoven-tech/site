@@ -62,12 +62,6 @@ site/
 │   ├── blog.json         # Posts do blog
 │   ├── projects.json     # Projetos/trabalhos
 │   └── users.json        # Usuários (gerado automaticamente)
-│
-└── docs/                  # Documentação
-    ├── backend-setup.md  # Guia do backend
-    ├── cms-guide.md      # Guia do CMS
-    └── color-palette.md  # Paleta de cores
-```
 
 ---
 
@@ -142,16 +136,6 @@ O backend fornece uma API REST completa:
 - `POST /api/projects` - Criar projeto
 - `PUT /api/projects/:id` - Atualizar projeto
 - `DELETE /api/projects/:id` - Deletar projeto
-
-**Documentação completa**: `/docs/backend-setup.md`
-
----
-
-## 📚 Documentação
-
-- **Backend Setup**: `/docs/backend-setup.md`
-- **Guia do CMS**: `/docs/cms-guide.md`
-- **Paleta de Cores**: `/docs/color-palette.md`
 
 ---
 
@@ -246,14 +230,6 @@ npm start
 ## 📄 Licença
 
 © 2025 Magic Oven. Todos os direitos reservados.
-
----
-
-## 🆘 Suporte
-
-Para questões e suporte:
-- **Email**: contato@magicoven.tech
-- **Documentação**: `/docs/`
 
 ---
 
