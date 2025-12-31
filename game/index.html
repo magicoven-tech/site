@@ -824,8 +824,26 @@
         let touchStartY = 0;
         let isDragging = false;
 
+        // Touch to Start (Specific listener on the overlay)
+        const overlay = document.getElementById('overlay-screen');
+        overlay.addEventListener('touchstart', (e) => {
+            e.preventDefault(); // Prevent ghost clicks
+            if (gameState !== STATE.PLAYING) {
+                startGame();
+            }
+        }, { passive: false });
+
+        // Also allow click for good measure (hybrid devices)
+        overlay.addEventListener('click', () => {
+            if (gameState !== STATE.PLAYING) {
+                startGame();
+            }
+        });
+
+        // Joystick Logic (Document level)
         document.addEventListener('touchstart', (e) => {
-            if (e.touches.length > 1) return; // Single touch only
+            if (gameState !== STATE.PLAYING) return; // Only joystick when playing
+            if (e.touches.length > 1) return;
 
             touchStartX = e.touches[0].clientX;
             touchStartY = e.touches[0].clientY;
@@ -833,6 +851,7 @@
         }, { passive: false });
 
         document.addEventListener('touchmove', (e) => {
+            if (gameState !== STATE.PLAYING) return;
             e.preventDefault(); // Prevent scroll
             if (e.touches.length > 1) return;
 
@@ -864,14 +883,7 @@
         }, { passive: false });
 
         document.addEventListener('touchend', (e) => {
-            // If it wasn't a drag, treat as Tap (Space)
-            if (!isDragging) {
-                if (gameState !== STATE.PLAYING) {
-                    startGame();
-                } else if (gameState === STATE.GAME_OVER) {
-                    startGame(); // Restart
-                }
-            }
+            if (gameState !== STATE.PLAYING) return;
 
             // Reset keys on release
             keys.up = false;
