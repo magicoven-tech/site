@@ -391,34 +391,6 @@ app.delete('/api/projects/:id', requireAuth, async (req, res) => {
 });
 
 // ============================================
-// INICIALIZAÇÃO
-// ============================================
-
-// Criar usuário admin padrão se não existir
-async function initializeUsers() {
-    try {
-        await fs.access(USERS_FILE);
-    } catch {
-        // Arquivo não existe, criar com usuário padrão
-        const defaultPassword = await bcrypt.hash('admin123', 10);
-        const usersData = {
-            users: [
-                {
-                    id: '1',
-                    username: 'admin',
-                    password: defaultPassword,
-                    name: 'Administrador',
-                    email: 'admin@magicoven.tech'
-                }
-            ]
-        };
-        await writeJSON(USERS_FILE, usersData);
-        console.log('✅ Usuário admin criado (username: admin, password: admin123)');
-        console.log('⚠️  ALTERE A SENHA EM PRODUÇÃO!');
-    }
-}
-
-// ============================================
 // ROTAS - Contato
 // ============================================
 
@@ -476,6 +448,34 @@ app.get('/api/contact', requireAuth, async (req, res) => {
     res.json(data || { messages: [] });
 });
 
+// ============================================
+// INICIALIZAÇÃO
+// ============================================
+
+// Criar usuário admin padrão se não existir
+async function initializeUsers() {
+    try {
+        await fs.access(USERS_FILE);
+    } catch {
+        // Arquivo não existe, criar com usuário padrão
+        const defaultPassword = await bcrypt.hash('admin123', 10);
+        const usersData = {
+            users: [
+                {
+                    id: '1',
+                    username: 'admin',
+                    password: defaultPassword,
+                    name: 'Administrador',
+                    email: 'admin@magicoven.tech'
+                }
+            ]
+        };
+        await writeJSON(USERS_FILE, usersData);
+        console.log('✅ Usuário admin criado (username: admin, password: admin123)');
+        console.log('⚠️  ALTERE A SENHA EM PRODUÇÃO!');
+    }
+}
+
 // Iniciar servidor
 app.listen(PORT, async () => {
     await initializeUsers();
@@ -487,6 +487,7 @@ app.listen(PORT, async () => {
 🚀 Servidor rodando em: http://localhost:${PORT}
 📝 Admin CMS: http://localhost:${PORT}/admin/
 🔐 Login padrão: admin / admin123
+📨 Contact API: /api/contact enabled
 
 ⚠️  Altere a senha padrão em produção!
     `);
