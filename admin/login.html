@@ -170,6 +170,7 @@
         </div>
     </div>
 
+    <script src="../js/config.js"></script>
     <script>
         const loginForm = document.getElementById('loginForm');
         const errorMessage = document.getElementById('errorMessage');
@@ -179,9 +180,7 @@
 
         async function checkAuth() {
             try {
-                const response = await fetch('/api/auth/check', {
-                    credentials: 'include'
-                });
+                const response = await apiRequest('/api/auth/check');
                 const data = await response.json();
 
                 if (data.authenticated) {
@@ -204,14 +203,11 @@
             errorMessage.classList.remove('show');
 
             try {
-                const response = await fetch('/api/auth/login', {
+                const response = await apiRequest('/api/auth/login', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    credentials: 'include',
                     body: JSON.stringify({ username, password })
                 });
+
 
                 const data = await response.json();
 

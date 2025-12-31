@@ -14,9 +14,23 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Configurações
+// Middleware de CORS
 app.use(cors({
-    origin: true,
+    origin: function (origin, callback) {
+        // Permite localhost e o domínio em produção
+        const allowedOrigins = [
+            'http://localhost:3000',
+            'https://magicoven.tech',
+            'https://www.magicoven.tech'
+        ];
+
+        // Permite requisições sem origin (mobile apps, curl, etc)
+        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     credentials: true
 }));
 app.use(bodyParser.json());
@@ -24,12 +38,13 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 // Sessões
 app.use(session({
-    secret: 'magic-oven-secret-key-change-in-production',
+    secret: process.env.SESSION_SECRET || 'magic-oven-secret-key-change-in-production',
     resave: false,
     saveUninitialized: false,
     cookie: {
-        secure: false, // true em produção com HTTPS
+        secure: process.env.NODE_ENV === 'production', // true em produção (HTTPS)
         httpOnly: true,
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' para cross-origin em produção
         maxAge: 24 * 60 * 60 * 1000 // 24 horas
     }
 }));
