@@ -975,6 +975,130 @@ section {
 }
 
 /* ============================================
+   CTA SECTION ASCII & GLITCH
+   ============================================ */
+.cta-section {
+    position: relative;
+    overflow: hidden;
+    background: #080808;
+    z-index: 1;
+}
+
+#cta-canvas-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    opacity: 0.6;
+    /* Leve transparência para não brigar com o texto */
+    pointer-events: auto;
+    /* Permite interação do mouse */
+}
+
+.cta-content {
+    position: relative;
+    z-index: 2;
+    background: rgba(8, 8, 8, 0.4);
+    /* Fundo sutil para legibilidade */
+    padding: var(--spacing-xl);
+    border-radius: var(--radius-lg);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* Glitch Effect */
+.glitch-text {
+    position: relative;
+    display: inline-block;
+}
+
+.glitch-text::before,
+.glitch-text::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.glitch-text.glitch-active::before {
+    left: 2px;
+    text-shadow: -1px 0 #ff00c1;
+    clip-path: inset(0 0 0 0);
+    animation: glitch-anim-1 0.4s infinite linear alternate-reverse;
+    opacity: 1;
+    z-index: -1;
+}
+
+.glitch-text.glitch-active::after {
+    left: -2px;
+    text-shadow: -1px 0 #00fff9;
+    clip-path: inset(0 0 0 0);
+    animation: glitch-anim-2 0.4s infinite linear alternate-reverse;
+    opacity: 1;
+    z-index: -2;
+}
+
+@keyframes glitch-anim-1 {
+    0% {
+        clip-path: inset(20% 0 80% 0);
+    }
+
+    20% {
+        clip-path: inset(60% 0 10% 0);
+    }
+
+    40% {
+        clip-path: inset(40% 0 50% 0);
+    }
+
+    60% {
+        clip-path: inset(80% 0 5% 0);
+    }
+
+    80% {
+        clip-path: inset(10% 0 70% 0);
+    }
+
+    100% {
+        clip-path: inset(30% 0 20% 0);
+    }
+}
+
+@keyframes glitch-anim-2 {
+    0% {
+        clip-path: inset(10% 0 60% 0);
+    }
+
+    20% {
+        clip-path: inset(30% 0 10% 0);
+    }
+
+    40% {
+        clip-path: inset(80% 0 5% 0);
+    }
+
+    60% {
+        clip-path: inset(10% 0 80% 0);
+    }
+
+    80% {
+        clip-path: inset(40% 0 20% 0);
+    }
+
+    100% {
+        clip-path: inset(5% 0 60% 0);
+    }
+}
+
+/* ============================================
    PAGE HEADERS (for internal pages)
    ============================================ */
 .page-header {
