@@ -164,12 +164,13 @@
     </section>
 
     <!-- CTA Section -->
-    <section class="cta-section">
+    <section class="cta-section" id="cta-section">
+        <div id="cta-canvas-container"></div>
         <div class="cta-content">
             <h2 class="cta-title">
-                <span class="cta-title-line">VAMOS CRIAR</span>
-                <span class="cta-title-line cta-title-italic">ALGO MÁGICO</span>
-                <span class="cta-title-line">JUNTOS?</span>
+                <span class="cta-title-line glitch-text" data-text="VAMOS CRIAR">VAMOS CRIAR</span>
+                <span class="cta-title-line cta-title-italic glitch-text" data-text="ALGO MÁGICO">ALGO MÁGICO</span>
+                <span class="cta-title-line glitch-text" data-text="JUNTOS?">JUNTOS?</span>
             </h2>
             <p class="cta-subtitle">
                 Estamos sempre abertos a novos projetos e colaborações
@@ -229,9 +230,12 @@
         </div>
     </footer>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js"></script>
     <script src="js/config.js"></script>
     <script src="js/cms.js"></script>
     <script src="js/main.js"></script>
+    <script src="js/ascii-cta.js"></script>
+    <script src="js/glitch-text.js"></script>
 </body>
 
 </html>
