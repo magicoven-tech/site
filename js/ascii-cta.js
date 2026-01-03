@@ -311,30 +311,3 @@ function setupObserver() {
     }
 }
 
-
-// Glitch Effect Controller
-function initGlitchEffect() {
-    // Seleciona elementos com a classe glitch-text
-    const glitchElements = document.querySelectorAll('.glitch-text');
-
-    if (glitchElements.length === 0) return;
-
-    function triggerRandomGlitch() {
-        // Escolhe um elemento aleatório
-        const el = glitchElements[Math.floor(Math.random() * glitchElements.length)];
-
-        el.classList.add('glitch-active');
-
-        setTimeout(() => {
-            el.classList.remove('glitch-active');
-
-            // Próximo glitch
-            const nextTime = Math.random() * 3000 + 1000; // 1 a 4 segundos
-            setTimeout(triggerRandomGlitch, nextTime);
-        }, 200 + Math.random() * 300); // 200ms a 500ms de duração
-    }
-
-    triggerRandomGlitch();
-}
-
-document.addEventListener('DOMContentLoaded', initGlitchEffect);
