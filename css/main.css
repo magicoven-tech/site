@@ -991,7 +991,7 @@ section {
     width: 100%;
     height: 100%;
     z-index: -1;
-    opacity: 0.6;
+    opacity: 1;
     /* Leve transparência para não brigar com o texto */
     pointer-events: auto;
     /* Permite interação do mouse */
@@ -1000,12 +1000,12 @@ section {
 .cta-content {
     position: relative;
     z-index: 2;
-    background: rgba(8, 8, 8, 0.4);
+    /* background: rgba(8, 8, 8, 0.4); */
     /* Fundo sutil para legibilidade */
     padding: var(--spacing-xl);
     border-radius: var(--radius-lg);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
+    /* backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px); */
     max-width: 800px;
     margin: 0 auto;
 }
