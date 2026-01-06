@@ -266,15 +266,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    const heroSection = document.getElementById('hero-section');
-    const interactionTarget = heroSection || canvas;
-
-    interactionTarget.addEventListener('pointerdown', e => {
-        addImpact(e.clientX, e.clientY, 1.0); // Clicks are full size
+    // Global interaction to handle overlaps
+    window.addEventListener('pointerdown', e => {
+        const rect = canvas.getBoundingClientRect();
+        if (e.clientY >= rect.top && e.clientY <= rect.bottom) {
+            addImpact(e.clientX, e.clientY, 1.0);
+        }
     });
 
-    interactionTarget.addEventListener('pointermove', e => {
-        onPointerMove(e.clientX, e.clientY);
+    window.addEventListener('pointermove', e => {
+        const rect = canvas.getBoundingClientRect();
+        if (e.clientY >= rect.top && e.clientY <= rect.bottom) {
+            onPointerMove(e.clientX, e.clientY);
+        }
     });
 
     const clock = new THREE.Clock();
