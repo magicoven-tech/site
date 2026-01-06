@@ -21,9 +21,9 @@ function initGlitchEffect() {
             el.classList.remove('glitch-active');
 
             // Próximo glitch
-            const nextTime = Math.random() * 3000 + 1000; // 1 a 4 segundos
+            const nextTime = Math.random() * 500 + 250; // 1 a 4 segundos
             setTimeout(triggerRandomGlitch, nextTime);
-        }, 200 + Math.random() * 300); // 200ms a 500ms de duração
+        }, 200 + Math.random() * 1000); // 200ms a 500ms de duração
     }
 
     // Inicia o ciclo

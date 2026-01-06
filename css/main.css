@@ -1013,7 +1013,7 @@ section {
 /* Glitch Effect */
 .glitch-text {
     position: relative;
-    display: inline-block;
+    /* display: inline-block; */
 }
 
 .glitch-text::before,
