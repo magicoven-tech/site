@@ -366,7 +366,6 @@ body {
     text-align: center;
     background-color: transparent;
     /* Changed to transparent for canvas */
-    overflow: hidden;
 }
 
 #hero-bg {
@@ -374,9 +373,13 @@ body {
     top: 0;
     left: 0;
     width: 100%;
-    height: 100%;
+    height: 120%;
+    /* Bleed more into next section */
     z-index: 0;
     opacity: 1;
+    -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 70%, rgba(0, 0, 0, 0) 100%);
+    mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 70%, rgba(0, 0, 0, 0) 100%);
+    pointer-events: none;
 }
 
 .hero-content {
@@ -585,7 +588,11 @@ section {
    PROJECTS GRID
    ============================================ */
 .featured-projects {
-    background: var(--color-surface);
+    position: relative;
+    background: linear-gradient(to bottom, transparent 0%, var(--color-surface) 300px, var(--color-surface) 100%);
+    margin-top: -300px;
+    padding-top: calc(300px + var(--spacing-4xl));
+    z-index: 1;
 }
 
 .projects-grid {
