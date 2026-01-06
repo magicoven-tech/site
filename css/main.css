@@ -19,6 +19,7 @@
     --color-accent-primary: #27FF2B;
     --color-accent-secondary: #1ed923;
     --color-accent-tertiary: #39ff3d;
+    --color-dithering: #a0a0a0;
 
     --color-glow-green: rgba(39, 255, 43, 0.5);
     --color-glow-green-soft: rgba(39, 255, 43, 0.2);
@@ -351,73 +352,63 @@ body {
 /* ============================================
    HERO SECTION
    ============================================ */
+/* ============================================
+   HERO SECTION
+   ============================================ */
 .hero {
+    position: relative;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     padding: var(--spacing-4xl) var(--spacing-lg);
-    position: relative;
     text-align: center;
+    background-color: transparent;
+    /* Changed to transparent for canvas */
+}
+
+#hero-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 120%;
+    /* Bleed more into next section */
+    z-index: 0;
+    opacity: 1;
+    -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 70%, rgba(0, 0, 0, 0) 100%);
+    mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 70%, rgba(0, 0, 0, 0) 100%);
+    pointer-events: none;
 }
 
 .hero-content {
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-.hero-title {
-    font-size: clamp(3rem, 10vw, 7rem);
-    font-weight: var(--font-weight-bold);
-    line-height: 0.95;
-    letter-spacing: -0.03em;
-    margin-bottom: var(--spacing-lg);
-}
-
-.hero-title-line {
-    display: block;
-    animation: fadeInUp 0.8s ease-out backwards;
-}
-
-.hero-title-line:nth-child(1) {
-    animation-delay: 0.1s;
-}
-
-.hero-title-line:nth-child(2) {
-    animation-delay: 0.2s;
-}
-
-.hero-title-line:nth-child(3) {
-    animation-delay: 0.3s;
-}
-
-.hero-title-italic {
-    font-style: italic;
-    background: var(--gradient-primary);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    max-width: 900px;
+    width: 100%;
+    z-index: 2;
     position: relative;
-}
-
-.hero-subtitle {
-    font-size: var(--font-size-xl);
-    color: var(--color-text-secondary);
-    max-width: 600px;
-    margin: 0 auto var(--spacing-xl);
-    animation: fadeInUp 0.8s ease-out backwards;
-    animation-delay: 0.4s;
-}
-
-.hero-cta {
     display: flex;
-    gap: var(--spacing-md);
-    justify-content: center;
-    flex-wrap: wrap;
-    animation: fadeInUp 0.8s ease-out backwards;
-    animation-delay: 0.5s;
+    flex-direction: column;
+    align-items: center;
 }
+
+.hero-logo-container {
+    margin-bottom: var(--spacing-xl);
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    animation: fadeInUp 0.8s ease-out backwards;
+}
+
+.hero-logo {
+    width: 100%;
+    max-width: 800px;
+    height: auto;
+    display: block;
+    filter: drop-shadow(0 0 20px rgba(71, 255, 69, 0.3));
+    /* Float animation is nice but glitch is already active */
+}
+
 
 .scroll-indicator {
     position: absolute;
@@ -433,7 +424,9 @@ body {
     letter-spacing: 0.1em;
     text-transform: uppercase;
     animation: fadeIn 1s ease-out backwards;
-    animation-delay: 0.8s;
+    animation-delay: 1s;
+    z-index: 2;
+    /* Ensure above background */
 }
 
 .scroll-arrow {
@@ -595,7 +588,11 @@ section {
    PROJECTS GRID
    ============================================ */
 .featured-projects {
-    background: var(--color-surface);
+    position: relative;
+    background: linear-gradient(to bottom, transparent 0%, var(--color-surface) 300px, var(--color-surface) 100%);
+    margin-top: -300px;
+    padding-top: calc(300px + var(--spacing-4xl));
+    z-index: 1;
 }
 
 .projects-grid {
