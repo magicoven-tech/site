@@ -19,6 +19,7 @@
     --color-accent-primary: #27FF2B;
     --color-accent-secondary: #1ed923;
     --color-accent-tertiary: #39ff3d;
+    --color-dithering: #a0a0a0;
 
     --color-glow-green: rgba(39, 255, 43, 0.5);
     --color-glow-green-soft: rgba(39, 255, 43, 0.2);

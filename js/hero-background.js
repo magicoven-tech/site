@@ -181,7 +181,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // Config attributes
     const shapeAttr = bg.getAttribute('data-shape') || 'square';
     const pixelSizeAttr = bg.getAttribute('data-pixel-size') || '4';
-    const inkAttr = bg.getAttribute('data-ink') || '#FFFFFF';
+    let inkAttr = bg.getAttribute('data-ink') || '#FFFFFF';
+
+    // Resolve CSS variable if provided
+    if (inkAttr.startsWith('var(')) {
+        const varName = inkAttr.substring(4, inkAttr.length - 1);
+        inkAttr = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+    } else if (inkAttr.startsWith('--')) {
+        inkAttr = getComputedStyle(document.documentElement).getPropertyValue(inkAttr).trim();
+    }
 
     const SHAPE_MAP = {
         square: 0,
