@@ -1,17 +1,15 @@
-# 🚀 Magic Oven - Site & CMS
+# 🚀 Magic Oven - Estúdio Digital Experimental
 
-Estúdio digital experimental com sistema de gerenciamento de conteúdo integrado.
+Estúdio digital focado em experiências interativas de alta performance, unindo design brutalista moderno e tecnologia WebGL.
 
 ## ⚡ Quick Start
 
 ### 1. Instalar Dependências
-
 ```bash
 npm install
 ```
 
 ### 2. Iniciar o Servidor
-
 ```bash
 npm start
 ```
@@ -20,206 +18,75 @@ O site estará disponível em: **http://localhost:3000**
 
 ---
 
-## 🔐 Acessar o CMS
+## 🎨 Design & Tecnologia
 
-### Login no Painel Administrativo
+### Bruralismo Digital
+O site utiliza uma estética inspirada no brutalismo moderno e cyberpunk, com foco em tipografia forte e interatividade crua.
 
+**Core Stack:**
+- **Frontend**: HTML5, Vanilla CSS, JavaScript (ES6+)
+- **Gráficos**: [Three.js](https://threejs.org/) para o fundo interativo.
+- **Efeitos**: Bayer Dithering (Ordered Dithering) e Glitch dinâmico.
+- **Backend**: Node.js + Express para o CMS integrado.
+
+**Cores:**
+- **Background**: `#080808`
+- **Accent (Green)**: `#27FF2B` (Logo e interações especiais)
+- **Dithering**: `#a0a0a0` (Camada visual de textura)
+
+---
+
+## ✨ Funcionalidades em Destaque
+
+### 1. Hero Background Interativo
+Implementado com Three.js e Shaders customizados:
+- **Bayer Dithering**: Técnica de dithering ordenado para textura retrô-digital.
+- **Rastro Generativo**: O mouse deixa um caminho de partículas que desvanecem organicamente.
+- **Impact Ripples**: Cliques no fundo geram ondas de choque que alteram a densidade do dithering.
+- **Transição Fluida**: O fundo se funde suavemente com a seção de projetos através de um efeito de *bleed* e gradientes de máscara.
+
+### 2. Glitch System
+Efeito de glitch procedimental aplicado ao logotipo e textos de destaque, simulando instabilidade digital.
+
+---
+
+## � CMS & Gerenciamento
+
+O projeto possui um CMS (Content Management System) leve e customizado para gerenciar o blog e o portfólio.
+
+### Acesso ao Painel
 ```
 URL: http://localhost:3000/admin/login.html
-
 Usuário: admin
 Senha: admin123
 ```
 
-⚠️ **Altere a senha padrão em produção!**
+---
+
+## � Referências & Créditos
+
+- **Favicon**: Gerado via [favicon.io](https://favicon.io/favicon-converter/).
+- **Bayer Dithering Concept**: Inspirado no tutorial da [Codrops (Tympanus)](https://tympanus.net/Tutorials/BayerDithering/).
+- **Visual Inspiration**: Inspirado na estética experimental do estúdio `ejtech.studio`.
 
 ---
 
-## � Estrutura do Projeto
+## �️ Estrutura do Projeto
 
 ```
 site/
-├── server.js              # Backend Node.js + Express
-├── package.json           # Dependências
-│
-├── index.html            # Página inicial
-├── blog.html              # Blog (carrega posts do CMS)
-├── portfolio.html         # Portfolio (carrega projetos do CMS)
-│
-├── admin/                 # Painel Administrativo
-│   ├── index.html        # Dashboard (requer login)
-│   └── login.html        # Página de login
-│
+├── server.js              # Servidor Node.js
+├── data/                  # Armazenamento JSON (Blog/Projetos)
+├── assets/                # Imagens, SVGs e Favicons
 ├── css/
-│   └── main.css          # Estilos principais
-│
+│   └── main.css          # Design System e Layout
 ├── js/
-│   ├── main.js           # JavaScript principal
-│   ├── cms.js            # Sistema CMS (frontend)
-│   └── cms-admin.js      # Admin CMS (frontend)
-
----
-
-## 🎨 Design System
-
-**Cores Principais:**
-- **Preto**: `#080808`
-- **Verde Neon**: `#27FF2B`
-
-**Fontes:**
-- Primary: Space Grotesk
-- Mono: JetBrains Mono
-
-**Estética**: Cyberpunk Modern com efeito vinheta verde
-
----
-
-## 📝 Gerenciar Conteúdo
-
-### Via Painel Admin (Recomendado)
-
-1. Acesse http://localhost:3000/admin/login.html
-2. Faça login com as credenciais
-3. Crie, edite ou delete posts e projetos
-4. Alterações são salvas automaticamente
-
-### Via Arquivos JSON (Manual)
-
-Edite diretamente:
-- **Blog**: `/data/blog.json`
-- **Projetos**: `/data/projects.json`
-
----
-
-## 🛠️ Funcionalidades do CMS
-
-### ✅ Blog
-- Criar, editar e deletar posts
-- Sistema de categorias
-- Tags
-- Posts em destaque
-- Publicar/Rascunho
-- Editor HTML
-
-### ✅ Projetos/Portfolio
-- Criar, editar e deletar projetos
-- Categorização
-- Gradientes customizáveis
-- Projetos em destaque
-- Publicar/Rascunho
-- Links externos
-
-### ✅ Autenticação
-- Login/Logout
-- Sessões seguras
-- Proteção de rotas administrativas
-
----
-
-## 📡 API REST
-
-O backend fornece uma API REST completa:
-
-### Endpoints Públicos
-- `GET /api/blog` - Lista posts publicados
-- `GET /api/projects` - Lista projetos publicados
-
-### Endpoints Protegidos (requer login)
-- `POST /api/blog` - Criar post
-- `PUT /api/blog/:id` - Atualizar post
-- `DELETE /api/blog/:id` - Deletar post
-- `POST /api/projects` - Criar projeto
-- `PUT /api/projects/:id` - Atualizar projeto
-- `DELETE /api/projects/:id` - Deletar projeto
-
----
-
-## 🚀 Deploy em Produção
-
-### Preparação
-
-1. **Alterar credenciais padrão**
-2. **Configurar variáveis de ambiente**:
-   ```bash
-   PORT=3000
-   SESSION_SECRET=sua-chave-secreta
-   NODE_ENV=production
-   ```
-3. **Habilitar HTTPS** (secure: true)
-4. **Configurar banco de dados** (opcional, substituir JSON)
-
-### Plataformas Recomendadas
-
-- **Heroku**: Fácil deploy com Git
-- **Railway**: Moderno e simples
-- **Render**: Free tier generoso
-- **Vercel**: Para frontend + Serverless
-- **DigitalOcean**: VPS tradicional
-
----
-
-## 🐛 Troubleshooting
-
-### Servidor não inicia
-```bash
-# Verificar porta
-lsof -ti:3000
-
-# Reinstalar dependências
-rm -rf node_modules
-npm install
+│   ├── hero-background.js # Engine Three.js + Shaders
+│   ├── glitch-text.js     # Lógica do efeito de glitch
+│   ├── cms.js             # Consumo dinâmico de dados
+│   └── main.js            # Interações globais
+└── admin/                 # Interface do CMS
 ```
-
-### Não consegue fazer login
-```bash
-# Deletar arquivo de usuários e reiniciar
-rm data/users.json
-npm start
-```
-
-### Dados não são salvos
-- Verificar que o servidor backend está rodando
-- Verificar permissões da pasta `data/`
-- Verificar console do navegador (F12)
-
----
-
-## 🔧 Desenvolvimento
-
-### Estrutura de Dados
-
-#### Blog Post
-```json
-{
-  "id": "1",
-  "title": "Título",
-  "slug": "titulo",
-  "category": "DESIGN",
-  "date": "2025-12-31",
-  "excerpt": "Resumo...",
-  "content": "<p>HTML...</p>",
-  "author": "Magic Oven",
-  "tags": ["design", "web"],
-  "featured": true,
-  "published": true
-}
-```
-
-#### Projeto
-```json
-{
-  "id": "1",
-  "title": "PROJETO",
-  "slug": "projeto",
-  "category": "Web Design",
-  "description": "Descrição...",
-  "imageGradient": "linear-gradient(...)",
-  "year": "2025",
-  "featured": true,
-  "published": true
-}
-```
-
 
 ---
 
