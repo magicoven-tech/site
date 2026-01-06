@@ -279,14 +279,15 @@ function mouseMoved() {
     window.pointerTimer = setTimeout(() => { pointerActive = false; }, 1000);
 }
 
-function touchMoved() {
-    if (touches.length > 0) {
-        pointerX = touches[0].x;
-        pointerY = touches[0].y;
-        pointerActive = true;
-    }
-    return false; // Prevent scrolling? Maybe not desired in a long page
-}
+// function touchMoved() {
+//     if (touches.length > 0) {
+//         pointerX = touches[0].x;
+//         pointerY = touches[0].y;
+//         pointerActive = true;
+//     }
+//     // Removed return false to allow scrolling
+//     // return false; 
+// }
 
 function touchEnded() {
     pointerActive = false;
