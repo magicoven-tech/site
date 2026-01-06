@@ -213,10 +213,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const resize = () => {
         const w = bg.clientWidth;
         const h = bg.clientHeight;
+        const dpr = renderer.getPixelRatio();
+
+        // Update canvas drawing buffer size
         renderer.setSize(w, h, false);
+
+        // Ensure CSS size matches container
         canvas.style.width = '100%';
         canvas.style.height = '100%';
-        uniforms.uResolution.value.set(w, h);
+
+        // Pass PHYSICAL pixels to shader
+        uniforms.uResolution.value.set(w * dpr, h * dpr);
     };
     window.addEventListener('resize', resize);
     resize();
@@ -225,13 +232,14 @@ document.addEventListener('DOMContentLoaded', () => {
     let clickIx = 0;
     const onPointerDown = (x, y) => {
         const rect = canvas.getBoundingClientRect();
-        // Adjust for canvas scale if needed, but getBoundingClientRect should be correct
-        // Need to account for the shader doing (pos - uResolution * .5) logic if it expects center-relative or corner-relative
-        // Shader uses: vec2 cuv = (((pos - uResolution * .5 ...)
-        // 'pos' passed to shader should be in pixel coords 0..width, 0..height
 
-        const fx = x - rect.left;
-        const fy = rect.height - (y - rect.top); // Flip Y for typical Shader/GL coords
+        // Convert client coordinates to canvas physical pixels
+        // (x - rect.left) gives CSS pixel relative to left
+        // * (canvas.width / rect.width) scales it to physical pixels
+        const fx = (x - rect.left) * (canvas.width / rect.width);
+
+        // Typical WebGL Y flip: height - y
+        const fy = (rect.height - (y - rect.top)) * (canvas.height / rect.height);
 
         uniforms.uClickPos.value[clickIx].set(fx, fy);
         uniforms.uClickTimes.value[clickIx] = uniforms.uTime.value;
