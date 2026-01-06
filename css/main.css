@@ -406,24 +406,6 @@ body {
     /* Float animation is nice but glitch is already active */
 }
 
-.hero-subtitle {
-    font-size: clamp(1.1rem, 3vw, 1.5rem);
-    color: var(--color-text-secondary);
-    max-width: 600px;
-    margin: 0 auto var(--spacing-2xl);
-    line-height: 1.6;
-    animation: fadeInUp 0.8s ease-out backwards;
-    animation-delay: 0.2s;
-}
-
-.hero-cta {
-    display: flex;
-    gap: var(--spacing-md);
-    justify-content: center;
-    flex-wrap: wrap;
-    animation: fadeInUp 0.8s ease-out backwards;
-    animation-delay: 0.4s;
-}
 
 .scroll-indicator {
     position: absolute;
