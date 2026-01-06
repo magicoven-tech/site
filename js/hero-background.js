@@ -272,14 +272,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.clientY >= rect.top && e.clientY <= rect.bottom) {
             addImpact(e.clientX, e.clientY, 1.0);
         }
-    });
+    }, { passive: true });
 
     window.addEventListener('pointermove', e => {
         const rect = canvas.getBoundingClientRect();
         if (e.clientY >= rect.top && e.clientY <= rect.bottom) {
             onPointerMove(e.clientX, e.clientY);
         }
-    });
+    }, { passive: true });
 
     const clock = new THREE.Clock();
     (function animate() {
