@@ -285,7 +285,7 @@ function touchMoved() {
         pointerY = touches[0].y;
         pointerActive = true;
     }
-    return false; // Prevent scrolling? Maybe not desired in a long page
+    return true; // Allow scrolling
 }
 
 function touchEnded() {
