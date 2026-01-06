@@ -24,10 +24,11 @@ const int SHAPE_CIRCLE   = 1;
 const int SHAPE_TRIANGLE = 2;
 const int SHAPE_DIAMOND  = 3;
 
-const int   MAX_CLICKS = 10;
+const int   MAX_CLICKS = 50;
 
 uniform vec2  uClickPos  [MAX_CLICKS];
 uniform float uClickTimes[MAX_CLICKS];
+uniform float uClickScales[MAX_CLICKS]; // 1.0 for click, 0.3 for trail
 
 // Bayer matrix helpers
 float Bayer2(vec2 a) {
@@ -129,11 +130,11 @@ void main() {
     float feed = fbm2(uv, uTime * 0.05);
     feed = feed * 0.5 - 0.65; // contrast / brightness
 
-    /* Ripple clicks */
+    /* Impact ripples (Clicks & Trail) */
     const float speed     = 0.30;
     const float thickness = 0.10;
-    const float dampT     = 1.0;
-    const float dampR     = 10.0;
+    const float dampT     = 1.5; // Slightly faster damping for trail spots
+    const float dampR     = 8.0;
 
     for (int i = 0; i < MAX_CLICKS; ++i) {
         vec2 pos = uClickPos[i];
@@ -143,11 +144,18 @@ void main() {
 
         float t = max(uTime - uClickTimes[i], 0.0);
         float r = distance(uv, cuv);
+        float scale = uClickScales[i];
 
-        float waveR = speed * t;
-        float ring  = exp(-pow((r - waveR) / thickness, 2.0));
-        float atten = exp(-dampT * t) * exp(-dampR * r);
-        feed = max(feed, ring * atten);
+        // Click vs Trail logic
+        // Trail points expand much less and fade faster
+        float curSpeed = mix(0.02, speed, step(0.5, scale));
+        float waveR = curSpeed * t;
+        float curThickness = mix(0.04, thickness, step(0.5, scale));
+        
+        float ring  = exp(-pow((r - waveR) / curThickness, 2.0));
+        float atten = exp(-dampT * t / scale) * exp(-dampR * r);
+        
+        feed = max(feed, ring * atten * scale);
     }
 
     float bayer = Bayer8(fragCoord / uPixelSize) - 0.5;
@@ -162,7 +170,7 @@ void main() {
     else                                   M = coverage;
 
     vec3 color = uColor; 
-    gl_FragColor = vec4(color, M); // WebGL1/ThreeJS ShaderMaterial default uses gl_FragColor if not GLSL3
+    gl_FragColor = vec4(color, M); 
 }
 `;
 
@@ -185,16 +193,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize Three.js
     const canvas = document.createElement('canvas');
     const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-    renderer.setPixelRatio(window.devicePixelRatio); // Ensure sharp rendering
+    renderer.setPixelRatio(window.devicePixelRatio);
     bg.appendChild(canvas);
 
-    const MAX_CLICKS = 10;
+    const MAX_CLICKS = 50;
     const uniforms = {
         uResolution: { value: new THREE.Vector2() },
         uTime: { value: 0 },
         uColor: { value: new THREE.Color(inkAttr) },
         uClickPos: { value: Array.from({ length: MAX_CLICKS }, () => new THREE.Vector2(-1, -1)) },
         uClickTimes: { value: new Float32Array(MAX_CLICKS) },
+        uClickScales: { value: new Float32Array(MAX_CLICKS) },
         uShapeType: { value: SHAPE_MAP[shapeAttr] || 0 },
         uPixelSize: { value: parseFloat(pixelSizeAttr) || 4 },
     };
@@ -209,61 +218,56 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material));
 
-    // Ref resize logic
     const resize = () => {
         const w = bg.clientWidth;
         const h = bg.clientHeight;
         const dpr = renderer.getPixelRatio();
-
-        // Update canvas drawing buffer size
         renderer.setSize(w, h, false);
-
-        // Ensure CSS size matches container
         canvas.style.width = '100%';
         canvas.style.height = '100%';
-
-        // Pass PHYSICAL pixels to shader
         uniforms.uResolution.value.set(w * dpr, h * dpr);
     };
     window.addEventListener('resize', resize);
     resize();
 
-    // Interaction
-    let clickIx = 0;
-    const onPointerDown = (x, y) => {
+    const getPhysicalCoords = (x, y) => {
         const rect = canvas.getBoundingClientRect();
-
-        // Convert client coordinates to canvas physical pixels
-        // (x - rect.left) gives CSS pixel relative to left
-        // * (canvas.width / rect.width) scales it to physical pixels
         const fx = (x - rect.left) * (canvas.width / rect.width);
-
-        // Typical WebGL Y flip: height - y
         const fy = (rect.height - (y - rect.top)) * (canvas.height / rect.height);
+        return { x: fx, y: fy };
+    };
 
-        uniforms.uClickPos.value[clickIx].set(fx, fy);
+    let clickIx = 0;
+    const addImpact = (x, y, scale = 1.0) => {
+        const coords = getPhysicalCoords(x, y);
+        uniforms.uClickPos.value[clickIx].set(coords.x, coords.y);
         uniforms.uClickTimes.value[clickIx] = uniforms.uTime.value;
+        uniforms.uClickScales.value[clickIx] = scale;
         clickIx = (clickIx + 1) % MAX_CLICKS;
     };
 
-    // Mouse
-    canvas.addEventListener('pointerdown', e => {
-        onPointerDown(e.clientX, e.clientY);
-    });
+    // Trail logic
+    let lastTrailPos = { x: 0, y: 0 };
+    const TRAIL_THRESHOLD = 20; // pixels distance before creating new spot
 
-    // Pass through clicks to underlying elements if background is decorative? 
-    // Usually hero background should not block clicks. 
-    // We might need 'pointer-events: none' on canvas and listen on window or hero container?
-    // Let's listen on the container instead for the ripple effect.
+    const onPointerMove = (x, y) => {
+        const dist = Math.hypot(x - lastTrailPos.x, y - lastTrailPos.y);
+        if (dist > TRAIL_THRESHOLD) {
+            addImpact(x, y, 0.3); // Trail points are smaller
+            lastTrailPos = { x, y };
+        }
+    };
 
     const heroSection = document.getElementById('hero-section');
-    if (heroSection) {
-        heroSection.addEventListener('pointerdown', e => {
-            // Only ripple if clicking strictly on background or non-interactive elements?
-            // For now, ripple everywhere in hero.
-            onPointerDown(e.clientX, e.clientY);
-        });
-    }
+    const interactionTarget = heroSection || canvas;
+
+    interactionTarget.addEventListener('pointerdown', e => {
+        addImpact(e.clientX, e.clientY, 1.0); // Clicks are full size
+    });
+
+    interactionTarget.addEventListener('pointermove', e => {
+        onPointerMove(e.clientX, e.clientY);
+    });
 
     const clock = new THREE.Clock();
     (function animate() {
