@@ -191,27 +191,56 @@ body {
     align-items: center;
 }
 
-.logo {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-xs);
-    text-decoration: none;
-    transition: transform var(--transition-base);
-}
-
 .logo:hover {
-    transform: scale(1.05);
+    transform: scale(1.02);
 }
 
-.logo-memoji {
-    width: 64px;
-    height: 64px;
-    filter: drop-shadow(0 0 10px var(--color-glow-green));
+.logo-svg {
+    height: 24px;
+    width: auto;
+    display: block;
+    filter: drop-shadow(0 0 5px var(--color-glow-green-soft));
     transition: filter var(--transition-base);
 }
 
-.logo:hover .logo-memoji {
-    filter: drop-shadow(0 0 20px var(--color-glow-green));
+.logo:hover .logo-svg {
+    filter: drop-shadow(0 0 10px var(--color-glow-green));
+}
+
+/* Logo Glitch Effect */
+.logo.glitch-active .logo-svg {
+    animation: logo-glitch 0.4s cubic-bezier(.25, .46, .45, .94) both infinite;
+}
+
+@keyframes logo-glitch {
+    0% {
+        transform: translate(0);
+        filter: drop-shadow(2px 0 red);
+    }
+
+    20% {
+        transform: translate(-2px, 2px);
+        filter: drop-shadow(-2px 0 blue);
+    }
+
+    40% {
+        transform: translate(-2px, -2px);
+        filter: drop-shadow(2px 0 green);
+    }
+
+    60% {
+        transform: translate(2px, 2px);
+        filter: drop-shadow(-2px 0 red);
+    }
+
+    80% {
+        transform: translate(2px, -2px);
+        filter: drop-shadow(2px 0 blue);
+    }
+
+    100% {
+        transform: translate(0);
+    }
 }
 
 .logo-text {
@@ -852,20 +881,6 @@ section {
     align-items: center;
     gap: var(--spacing-xs);
     margin-bottom: var(--spacing-sm);
-}
-
-.footer-memoji {
-    width: 64px;
-    height: 64px;
-    filter: drop-shadow(0 0 8px var(--color-glow-green));
-}
-
-.footer-logo-text {
-    font-size: var(--font-size-base);
-    font-weight: var(--font-weight-bold);
-    font-style: italic;
-    letter-spacing: -0.01em;
-    padding-right: 0.15em;
 }
 
 .footer-tagline {
