@@ -164,7 +164,13 @@
 
                 // Custom Image Renderer
                 renderer.image = function (href, title, text) {
-                    const cleanHref = href.replace(/#(medium|full)$/, '');
+                    let cleanHref = href.replace(/#(medium|full)$/, '');
+
+                    // Se a imagem for local (/uploads/...) prefixa com a URL da API do Render
+                    if (cleanHref.startsWith('/uploads/')) {
+                        cleanHref = `${API_CONFIG.baseURL}${cleanHref}`;
+                    }
+
                     let className = 'post-image';
                     let wrapperClass = '';
 

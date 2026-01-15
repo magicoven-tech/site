@@ -126,7 +126,10 @@ const CMS = {
         `;
 
         if (project.image && project.image.trim() !== '') {
-            imageHTML = `<img src="${project.image}" alt="${project.title}">`;
+            const imgSrc = project.image.startsWith('/uploads/')
+                ? `${API_CONFIG.baseURL}${project.image}`
+                : project.image;
+            imageHTML = `<img src="${imgSrc}" alt="${project.title}">`;
         }
 
         return `
