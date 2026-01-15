@@ -453,6 +453,43 @@
       transform: translateY(0);
     }
 
+    /* Image Sizing Menu */
+    .image-menu {
+      position: absolute;
+      display: flex;
+      gap: 8px;
+      background: #1a1a1a;
+      padding: 5px 8px;
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.2s, visibility 0.2s;
+      pointer-events: none;
+      transform: translateY(-10px);
+      margin-top: 10px;
+      /* Offset to appear below cursor/line */
+    }
+
+    .image-menu.active {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+
+    .image-menu::after {
+      content: '';
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 6px;
+      border-style: solid;
+      border-color: transparent transparent #1a1a1a transparent;
+    }
+
     .format-btn {
       background: transparent;
       border: none;
@@ -712,6 +749,30 @@
     <button type="button" class="format-btn" data-format="quote" title="Citação">
       <svg viewBox="0 0 24 24">
         <path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z"></path>
+      </svg>
+    </button>
+  </div>
+
+  <div class="image-menu" id="image-menu">
+    <button type="button" class="format-btn" data-size="standard" title="Padrão (Inset)">
+      <svg viewBox="0 0 24 24">
+        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" fill="none" stroke="currentColor" stroke-width="2">
+        </rect>
+        <rect x="7" y="7" width="10" height="10" fill="currentColor" fill-opacity="0.5"></rect>
+      </svg>
+    </button>
+    <button type="button" class="format-btn" data-size="medium" title="Médio (Wide)">
+      <svg viewBox="0 0 24 24">
+        <rect x="2" y="4" width="20" height="16" rx="2" ry="2" fill="none" stroke="currentColor" stroke-width="2">
+        </rect>
+        <rect x="4" y="8" width="16" height="8" fill="currentColor" fill-opacity="0.5"></rect>
+      </svg>
+    </button>
+    <button type="button" class="format-btn" data-size="full" title="Tela Cheia (Full)">
+      <svg viewBox="0 0 24 24">
+        <rect x="2" y="5" width="20" height="14" rx="2" ry="2" fill="none" stroke="currentColor" stroke-width="2">
+        </rect>
+        <path d="M2 12h20" stroke="currentColor" stroke-width="2"></path>
       </svg>
     </button>
   </div>

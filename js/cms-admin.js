@@ -239,11 +239,147 @@ const AdminCMS = {
 
         // Menu de Formatação (Seleção)
         this.setupFormattingMenu();
+
+        // Menu de Imagem (Cursor)
+        this.setupImageMenu();
     },
 
     /**
-     * Configura o menu de formatação de texto (seleção)
+     * Configura o menu de formatação de imagem (Tamanhos)
      */
+    setupImageMenu() {
+        const textarea = document.getElementById('blog-content');
+        const menu = document.getElementById('image-menu');
+
+        if (!textarea || !menu) return;
+
+        // Detectar cursor em imagem
+        const checkCursor = (e) => this.handleImageCursor(e, textarea, menu);
+
+        textarea.addEventListener('mouseup', checkCursor);
+        textarea.addEventListener('keyup', checkCursor);
+        textarea.addEventListener('click', checkCursor);
+
+        // Esconder menu ao clicar fora
+        document.addEventListener('mousedown', (e) => {
+            if (!menu.contains(e.target) && e.target !== textarea) {
+                menu.classList.remove('active');
+            }
+        });
+
+        // Ações de redimensionamento
+        menu.querySelectorAll('.format-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const size = btn.dataset.size;
+                this.resizeImage(size, textarea);
+                // Manter menu ativo ou atualizar posição?
+                // checkCursor(); // Re-verifica para manter o menu
+            });
+        });
+    },
+
+    /**
+     * Verifica se o cursor está dentro de uma imagem Markdown e mostra o menu
+     */
+    handleImageCursor(e, textarea, menu) {
+        // Pequeno delay
+        setTimeout(() => {
+            const cursor = textarea.selectionStart;
+            const text = textarea.value;
+
+            // Regex para capturar imagem Markdown: ![alt](url)
+            // Precisamos encontrar a imagem que contém o cursor
+            const regex = /!\[(.*?)\]\((.*?)\)/g;
+            let match;
+            let currentImage = null;
+
+            while ((match = regex.exec(text)) !== null) {
+                const start = match.index;
+                const end = start + match[0].length;
+
+                if (cursor >= start && cursor <= end) {
+                    currentImage = {
+                        start: start,
+                        end: end,
+                        details: match // [full, alt, url]
+                    };
+                    break;
+                }
+            }
+
+            if (currentImage) {
+                // Cursor está em uma imagem
+                this.currentImageRange = currentImage; // Salvar referência
+
+                // Posicionar Menu
+                let top, left;
+
+                if (e.type === 'mouseup' || e.type === 'click') {
+                    top = e.clientY + 20; // Abaixo do cursor
+                    left = e.clientX;
+                } else {
+                    // Fallback
+                    const rect = textarea.getBoundingClientRect();
+                    top = rect.top + (rect.height / 2);
+                    left = rect.left + (rect.width / 2);
+                }
+
+                // Ajustes
+                if (left < 0) left = 10;
+
+                menu.style.top = `${top + window.scrollY}px`;
+                menu.style.left = `${left + window.scrollX}px`;
+                menu.style.transform = 'translate(-50%, 0)';
+
+                // Esconder o menu de formatação de texto se estiver aberto
+                document.getElementById('formatting-menu').classList.remove('active');
+
+                menu.classList.add('active');
+            } else {
+                menu.classList.remove('active');
+                this.currentImageRange = null;
+            }
+        }, 10);
+    },
+
+    /**
+     * Aplica o redimensionamento (hash) à imagem selecionada
+     */
+    resizeImage(size, textarea) {
+        if (!this.currentImageRange) return;
+
+        const { start, end, details } = this.currentImageRange;
+        const [fullMatch, alt, url] = details;
+
+        let newUrl = url;
+
+        // Remover hashes existentes
+        newUrl = newUrl.replace(/#medium$/, '').replace(/#full$/, '');
+
+        // Adicionar novo hash se não for standard
+        if (size === 'medium') {
+            newUrl += '#medium';
+        } else if (size === 'full') {
+            newUrl += '#full';
+        }
+
+        const newMarkdown = `![${alt}](${newUrl})`;
+
+        // Substituir texto
+        textarea.setRangeText(newMarkdown, start, end, 'select');
+
+        // Atualizar referência currentImageRange para o novo tamanho
+        // para que o menu continue funcionando se o usuário clicar de novo
+        this.currentImageRange = {
+            start: start,
+            end: start + newMarkdown.length,
+            details: [newMarkdown, alt, newUrl]
+        };
+    },
+
+    /**
+     * Lida com a seleção de texto e posicionamento do menu (Formatação)
     setupFormattingMenu() {
         const textarea = document.getElementById('blog-content');
         const menu = document.getElementById('formatting-menu');
