@@ -322,12 +322,23 @@
 
     .editor-toolbar {
       position: absolute;
-      left: -50px;
+      left: -55px;
       top: 35px;
-      /* Ajuste conforme necessário */
       z-index: 100;
       display: flex;
       align-items: center;
+      padding: 4px;
+      border-radius: 40px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 1px solid transparent;
+    }
+
+    .editor-toolbar.active {
+      background: rgba(10, 10, 10, 0.6);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-color: rgba(255, 255, 255, 0.1);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
     }
 
     .toolbar-toggle {
@@ -361,17 +372,22 @@
     .toolbar-options {
       display: flex;
       gap: 8px;
-      margin-left: 12px;
+      margin-left: 0;
+      width: 0;
+      overflow: hidden;
       opacity: 0;
       visibility: hidden;
       transform: translateX(-10px);
-      transition: all 0.2s ease;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .editor-toolbar.active .toolbar-options {
+      width: auto;
+      margin-left: 12px;
       opacity: 1;
       visibility: visible;
       transform: translateX(0);
+      padding-right: 8px;
     }
 
     .toolbar-btn {
