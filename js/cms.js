@@ -105,11 +105,13 @@ const CMS = {
                     <span class="blog-date">${this.formatDate(post.date)}</span>
                     <span class="blog-category">${post.category}</span>
                 </div>
-                <h3 class="blog-title">${post.title}</h3>
+                <a href="blog-post.html?slug=${post.slug}" class="blog-title-link">
+                    <h3 class="blog-title">${post.title}</h3>
+                </a>
                 <p class="blog-excerpt">
                     ${post.excerpt}
                 </p>
-                <a href="blog-post.html?slug=${post.slug}" class="blog-link">LER MAIS →</a>
+                <a href="blog-post.html?slug=${post.slug}" class="blog-read-more">LER MAIS →</a>
             </article>
         `;
     },

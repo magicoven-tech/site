@@ -233,6 +233,361 @@ const AdminCMS = {
                 this.saveProject();
             });
         }
+
+        // Toolbar do Editor (Blog)
+        this.setupEditorToolbar();
+
+        // Menu de Formatação (Seleção)
+        this.setupFormattingMenu();
+
+        // Menu de Imagem (Cursor)
+        this.setupImageMenu();
+    },
+
+    /**
+     * Configura o menu de formatação de imagem (Tamanhos)
+     */
+    setupImageMenu() {
+        const textarea = document.getElementById('blog-content');
+        const menu = document.getElementById('image-menu');
+
+        if (!textarea || !menu) return;
+
+        // Detectar cursor em imagem
+        const checkCursor = (e) => this.handleImageCursor(e, textarea, menu);
+
+        textarea.addEventListener('mouseup', checkCursor);
+        textarea.addEventListener('keyup', checkCursor);
+        textarea.addEventListener('click', checkCursor);
+
+        // Esconder menu ao clicar fora
+        document.addEventListener('mousedown', (e) => {
+            if (!menu.contains(e.target) && e.target !== textarea) {
+                menu.classList.remove('active');
+            }
+        });
+
+        // Ações de redimensionamento
+        menu.querySelectorAll('.format-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const size = btn.dataset.size;
+                this.resizeImage(size, textarea);
+                // Manter menu ativo ou atualizar posição?
+                // checkCursor(); // Re-verifica para manter o menu
+            });
+        });
+    },
+
+    /**
+     * Verifica se o cursor está dentro de uma imagem Markdown e mostra o menu
+     */
+    handleImageCursor(e, textarea, menu) {
+        // Pequeno delay
+        setTimeout(() => {
+            const cursor = textarea.selectionStart;
+            const text = textarea.value;
+
+            // Regex para capturar imagem Markdown: ![alt](url)
+            // Precisamos encontrar a imagem que contém o cursor
+            const regex = /!\[(.*?)\]\((.*?)\)/g;
+            let match;
+            let currentImage = null;
+
+            while ((match = regex.exec(text)) !== null) {
+                const start = match.index;
+                const end = start + match[0].length;
+
+                if (cursor >= start && cursor <= end) {
+                    currentImage = {
+                        start: start,
+                        end: end,
+                        details: match // [full, alt, url]
+                    };
+                    break;
+                }
+            }
+
+            if (currentImage) {
+                // Cursor está em uma imagem
+                this.currentImageRange = currentImage; // Salvar referência
+
+                // Posicionar Menu
+                let top, left;
+
+                if (e.type === 'mouseup' || e.type === 'click') {
+                    top = e.clientY + 20; // Abaixo do cursor
+                    left = e.clientX;
+                } else {
+                    // Fallback
+                    const rect = textarea.getBoundingClientRect();
+                    top = rect.top + (rect.height / 2);
+                    left = rect.left + (rect.width / 2);
+                }
+
+                // Ajustes
+                if (left < 0) left = 10;
+
+                menu.style.top = `${top + window.scrollY}px`;
+                menu.style.left = `${left + window.scrollX}px`;
+                menu.style.transform = 'translate(-50%, 0)';
+
+                // Esconder o menu de formatação de texto se estiver aberto
+                document.getElementById('formatting-menu').classList.remove('active');
+
+                menu.classList.add('active');
+            } else {
+                menu.classList.remove('active');
+                this.currentImageRange = null;
+            }
+        }, 10);
+    },
+
+    /**
+     * Aplica o redimensionamento (hash) à imagem selecionada
+     */
+    resizeImage(size, textarea) {
+        if (!this.currentImageRange) return;
+
+        const { start, end, details } = this.currentImageRange;
+        const [fullMatch, alt, url] = details;
+
+        let newUrl = url;
+
+        // Remover hashes existentes
+        newUrl = newUrl.replace(/#medium$/, '').replace(/#full$/, '');
+
+        // Adicionar novo hash se não for standard
+        if (size === 'medium') {
+            newUrl += '#medium';
+        } else if (size === 'full') {
+            newUrl += '#full';
+        }
+
+        const newMarkdown = `![${alt}](${newUrl})`;
+
+        // Substituir texto
+        textarea.setRangeText(newMarkdown, start, end, 'select');
+
+        // Atualizar referência currentImageRange para o novo tamanho
+        // para que o menu continue funcionando se o usuário clicar de novo
+        this.currentImageRange = {
+            start: start,
+            end: start + newMarkdown.length,
+            details: [newMarkdown, alt, newUrl]
+        };
+    },
+
+    /**
+     * Lida com a seleção de texto e posicionamento do menu (Formatação)
+     */
+    setupFormattingMenu() {
+        const textarea = document.getElementById('blog-content');
+        const menu = document.getElementById('formatting-menu');
+
+        if (!textarea || !menu) return;
+
+        // Mostrar menu na seleção
+        textarea.addEventListener('mouseup', (e) => this.handleTextSelection(e, textarea, menu));
+        textarea.addEventListener('keyup', (e) => {
+            if (e.key === 'Shift' || e.key.startsWith('Arrow')) {
+                this.handleTextSelection(e, textarea, menu);
+            }
+        });
+
+        // Esconder menu ao clicar fora
+        document.addEventListener('mousedown', (e) => {
+            if (!menu.contains(e.target) && e.target !== textarea) {
+                menu.classList.remove('active');
+            }
+        });
+
+        // Ações de formatação
+        menu.querySelectorAll('.format-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const format = btn.dataset.format;
+                this.applyFormat(format, textarea);
+                menu.classList.remove('active');
+            });
+        });
+    },
+
+    /**
+     * Lida com a seleção de texto e posicionamento do menu
+     */
+    handleTextSelection(e, textarea, menu) {
+        // Pequeno delay para garantir que a seleção foi atualizada
+        setTimeout(() => {
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+
+            if (start !== end) {
+                // Há texto selecionado
+                // Calcular posição
+                // Como textarea não dá coordenadas X/Y do cursor facilmente,
+                // vamos posicionar próximo ao mouse (mouseup) ou centralizado (fallback)
+
+                let top, left;
+
+                if (e.type === 'mouseup') {
+                    top = e.clientY - 50;
+                    left = e.clientX;
+                } else {
+                    // Fallback para seleção via teclado: centralizado na textarea (aproximado)
+                    const rect = textarea.getBoundingClientRect();
+                    top = rect.top + (rect.height / 2); // Apenas um fallback visual
+                    left = rect.left + (rect.width / 2);
+                }
+
+                // Ajustes de limites da tela
+                if (left < 0) left = 10;
+                if (top < 0) top = 10;
+
+                menu.style.top = `${top + window.scrollY}px`;
+                menu.style.left = `${left + window.scrollX}px`;
+
+                // Centralizar o menu no ponto X
+                menu.style.transform = 'translate(-50%, 0)';
+
+                menu.classList.add('active');
+            } else {
+                menu.classList.remove('active');
+            }
+        }, 10);
+    },
+
+    /**
+     * Aplica a formatação selecionada ao texto
+     */
+    applyFormat(format, textarea) {
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const selectedText = textarea.value.substring(start, end);
+        let replacement = '';
+        let cursorOffset = 0;
+
+        switch (format) {
+            case 'bold':
+                replacement = `**${selectedText}**`;
+                cursorOffset = 2; // Move cursor para dentro se não houver texto selecionado (futuro)
+                break;
+            case 'italic':
+                replacement = `*${selectedText}*`;
+                break;
+            case 'link':
+                const url = prompt('URL do link:', 'https://');
+                if (url) {
+                    replacement = `[${selectedText}](${url})`;
+                } else {
+                    return; // Cancelado
+                }
+                break;
+            case 'h2':
+                // Remove # existetes se houver
+                const cleanH2 = selectedText.replace(/^#+\s*/, '');
+                replacement = `\n## ${cleanH2}`;
+                break;
+            case 'h3':
+                const cleanH3 = selectedText.replace(/^#+\s*/, '');
+                replacement = `\n### ${cleanH3}`;
+                break;
+            case 'quote':
+                const cleanQuote = selectedText.replace(/^>\s*/, '');
+                replacement = `\n> ${cleanQuote}`;
+                break;
+        }
+
+        // Aplicar substituição
+        textarea.setRangeText(replacement, start, end, 'select');
+
+        // Focar de volta e ajustar cursor se necessário
+        textarea.focus();
+    },
+
+    /**
+     * Configura a toolbar do editor
+     */
+    setupEditorToolbar() {
+        const toggleBtn = document.getElementById('toolbar-toggle');
+        const toolbar = document.querySelector('.editor-toolbar');
+        const blogImageInput = document.getElementById('blog-image-input');
+
+        if (!toggleBtn || !toolbar) return;
+
+        // Toggle do menu
+        toggleBtn.addEventListener('click', (e) => {
+            e.preventDefault(); // Evita submit do form se estiver dentro dele
+            toolbar.classList.toggle('active');
+            toggleBtn.textContent = toolbar.classList.contains('active') ? '×' : '+';
+        });
+
+        // Opção de Imagem
+        document.getElementById('toolbar-image').addEventListener('click', () => {
+            blogImageInput.click();
+        });
+
+        blogImageInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                this.handleImageUpload(file, (url) => {
+                    const markdown = `\n![Legenda da Imagem](${url})\n`;
+                    this.insertAtCursor('blog-content', markdown);
+                    toolbar.classList.remove('active');
+                    toggleBtn.textContent = '+';
+                    // Scroll para o fim da inserção se necessário ou foco
+                });
+            }
+        });
+
+        // Opção de Vídeo
+        document.getElementById('toolbar-video').addEventListener('click', () => {
+            const code = `\n<div class="video-container">\n  <iframe src="URL_DO_VIDEO_AQUI" title="Video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>\n</div>\n`;
+            this.insertAtCursor('blog-content', code);
+            toolbar.classList.remove('active');
+            toggleBtn.textContent = '+';
+        });
+
+        // Opção de Código
+        document.getElementById('toolbar-code').addEventListener('click', () => {
+            const code = `\n\`\`\`javascript\n// Seu código aqui\n\`\`\`\n`;
+            this.insertAtCursor('blog-content', code);
+            toolbar.classList.remove('active');
+            toggleBtn.textContent = '+';
+        });
+
+        // Opção de Divisor
+        document.getElementById('toolbar-divider').addEventListener('click', () => {
+            this.insertAtCursor('blog-content', '\n---\n');
+            toolbar.classList.remove('active');
+            toggleBtn.textContent = '+';
+        });
+
+        // Opção de Embed/Link
+        document.getElementById('toolbar-embed').addEventListener('click', () => {
+            this.insertAtCursor('blog-content', '\n[Texto do Link](https://exemplo.com)\n');
+            toolbar.classList.remove('active');
+            toggleBtn.textContent = '+';
+        });
+    },
+
+    /**
+     * Insere texto na posição do cursor em um textarea
+     */
+    insertAtCursor(fieldId, text) {
+        const textarea = document.getElementById(fieldId);
+        if (!textarea) return;
+
+        const startPos = textarea.selectionStart;
+        const endPos = textarea.selectionEnd;
+        const scrollTop = textarea.scrollTop;
+
+        textarea.value = textarea.value.substring(0, startPos) + text + textarea.value.substring(endPos, textarea.value.length);
+
+        textarea.focus();
+        textarea.selectionStart = startPos + text.length;
+        textarea.selectionEnd = startPos + text.length;
+        textarea.scrollTop = scrollTop;
     },
 
     /**
@@ -274,13 +629,13 @@ const AdminCMS = {
         // Drop de arquivo
         dropzone.addEventListener('drop', (e) => {
             const file = e.dataTransfer.files[0];
-            if (file) this.handleImageUpload(file);
+            if (file) this.handleImageUpload(file, (url) => this.showImagePreview(url));
         });
 
         // Seleção de arquivo via input
         input.addEventListener('change', (e) => {
             const file = e.target.files[0];
-            if (file) this.handleImageUpload(file);
+            if (file) this.handleImageUpload(file, (url) => this.showImagePreview(url));
         });
 
         // Limpar imagem
@@ -292,8 +647,10 @@ const AdminCMS = {
 
     /**
      * Faz upload da imagem para o servidor
+     * @param {File} file Arquivo de imagem
+     * @param {Function} onSuccess Callback chamado com a URL da imagem em caso de sucesso
      */
-    async handleImageUpload(file) {
+    async handleImageUpload(file, onSuccess) {
         if (!file.type.startsWith('image/')) {
             alert('Por favor, selecione apenas arquivos de imagem.');
             return;
@@ -304,8 +661,11 @@ const AdminCMS = {
 
         try {
             const dropzoneText = document.querySelector('.dropzone-text');
-            const originalText = dropzoneText.textContent;
-            dropzoneText.textContent = 'Enviando...';
+            let originalText = '';
+            if (dropzoneText) {
+                originalText = dropzoneText.textContent;
+                dropzoneText.textContent = 'Enviando...';
+            }
 
             const response = await apiRequest('/api/upload', {
                 method: 'POST',
@@ -313,10 +673,32 @@ const AdminCMS = {
             });
 
             const data = await response.json();
-            dropzoneText.textContent = originalText;
 
-            if (response.ok && data.url) {
-                this.showImagePreview(data.url);
+            if (dropzoneText) {
+                dropzoneText.textContent = originalText;
+            }
+
+            if (response.ok) {
+                // Tentativa robusta de encontrar a URL
+                let finalUrl = '';
+
+                if (typeof data.url === 'string') {
+                    finalUrl = data.url;
+                } else if (data && typeof data === 'object') {
+                    if (data.url && typeof data.url === 'string') finalUrl = data.url;
+                    else if (data.path) finalUrl = data.path;
+                    else if (data.file && data.file.path) finalUrl = data.file.path;
+                    else if (data.location) finalUrl = data.location; // S3 style
+                    else {
+                        console.error('Erro: URL não encontrada na resposta do upload', data);
+                        alert('Erro ao processar imagem. Tente novamente.');
+                        return;
+                    }
+                } else {
+                    finalUrl = String(data);
+                }
+
+                if (onSuccess) onSuccess(finalUrl);
             } else {
                 alert('Erro ao fazer upload: ' + (data.error || 'Erro desconhecido'));
             }

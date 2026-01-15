@@ -730,75 +730,127 @@ section {
 }
 
 /* ============================================
-   BLOG GRID
+   BLOG / STORIES LIST (Grid Layout)
    ============================================ */
 .blog-section {
     padding: var(--spacing-4xl) var(--spacing-lg);
 }
 
-.latest-blog {
-    background: var(--color-surface);
-}
-
 .blog-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: var(--spacing-2xl);
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-lg);
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
 .blog-card {
-    background: var(--color-surface-elevated);
-    border-radius: var(--radius-lg);
-    padding: var(--spacing-xl);
-    transition: transform var(--transition-base);
+    background: var(--color-surface);
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-md);
+    transition: all var(--transition-base);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid rgba(255, 255, 255, 0.03);
 }
 
 .blog-card:hover {
-    transform: translateY(-4px);
+    transform: translateY(-8px);
+    background: var(--color-surface-elevated);
+    border-color: rgba(39, 255, 43, 0.2);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
 .blog-meta {
     display: flex;
-    gap: var(--spacing-sm);
+    align-items: center;
+    gap: var(--spacing-md);
     margin-bottom: var(--spacing-md);
     font-size: var(--font-size-xs);
+    font-family: var(--font-mono);
+}
+
+.blog-category {
+    color: var(--color-accent-primary);
+    font-weight: var(--font-weight-bold);
     letter-spacing: 0.1em;
     text-transform: uppercase;
 }
 
 .blog-date {
     color: var(--color-text-tertiary);
+    text-transform: uppercase;
 }
 
-.blog-category {
-    color: var(--color-accent-secondary);
-    font-weight: var(--font-weight-semibold);
+.blog-title-link {
+    text-decoration: none;
+    display: block;
+    margin-bottom: var(--spacing-sm);
 }
 
 .blog-title {
-    font-size: var(--font-size-xl);
+    font-size: 1.5rem;
     font-weight: var(--font-weight-bold);
-    margin-bottom: var(--spacing-sm);
     line-height: 1.3;
+    color: var(--color-text-primary);
+    letter-spacing: -0.01em;
+    transition: color var(--transition-base);
+}
+
+.blog-card:hover .blog-title {
+    color: var(--color-accent-primary);
 }
 
 .blog-excerpt {
     color: var(--color-text-secondary);
-    margin-bottom: var(--spacing-md);
-    line-height: 1.7;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: var(--spacing-xl);
+    font-weight: 300;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    flex-grow: 1;
 }
 
-.blog-link {
-    color: var(--color-accent-secondary);
+.blog-read-more {
+    font-size: var(--font-size-xs);
+    color: var(--color-accent-primary);
     text-decoration: none;
-    font-weight: var(--font-weight-semibold);
-    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-bold);
+    text-transform: uppercase;
     letter-spacing: 0.05em;
-    transition: color var(--transition-base);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
 }
 
-.blog-link:hover {
-    color: var(--color-text-primary);
+.blog-read-more:hover {
+    gap: 0.8rem;
+    opacity: 0.8;
+}
+
+.blog-tag {
+    display: inline-block;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    background: rgba(39, 255, 43, 0.1);
+    border: 1px solid rgba(39, 255, 43, 0.3);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-sm);
+    color: var(--color-accent-primary);
+    font-family: var(--font-mono);
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.blog-tag:hover {
+    background: rgba(39, 255, 43, 0.2);
+    border-color: rgba(39, 255, 43, 0.6);
+    transform: translateY(-1px);
 }
 
 /* ============================================
@@ -1223,20 +1275,196 @@ section {
 }
 
 /* ============================================
-   UTILITY CLASSES
+   BLOG POST CONTENT STYLES (Medium-like)
+/* ============================================
+   BLOG POST CONTENT (Medium-like Style) - REFINED
    ============================================ */
-.text-center {
-    text-align: center;
+.post-body {
+    font-family: 'Charter', 'Bitstream Charter', 'Sitka Text', 'Cambria', 'Merriweather', 'Georgia', serif;
+    /* Medium Font Stack Priority */
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.58;
+    /* Gold standard for readability (Medium uses this) */
+    font-size: 20px;
+    /* Specific Medium body size */
+    max-width: 680px;
+    /* Slightly tighter reading column */
+    margin: 0 auto;
+    letter-spacing: -0.003em;
+    word-break: break-word;
+    word-wrap: break-word;
 }
 
-.sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
+.post-body p {
+    margin-bottom: 40px;
+    /* Generous paragraph spacing */
+    font-weight: 400;
+}
+
+.post-body h2 {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    /* Headers often Sans on Medium */
+    font-size: 1.8rem;
+    /* ~28-30px */
+    font-weight: 700;
+    margin-top: 3.5em;
+    margin-bottom: 0.5em;
+    color: var(--color-text-primary);
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+}
+
+.post-body h3 {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 1.4rem;
+    /* ~22px */
+    font-weight: 600;
+    margin-top: 2em;
+    margin-bottom: 0.5em;
+    color: var(--color-text-primary);
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+}
+
+.post-body h4,
+.post-body h5,
+.post-body h6 {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-weight: 600;
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+}
+
+/* Links */
+.post-body a {
+    color: var(--color-text-primary);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 4px;
+    text-decoration-color: rgba(255, 255, 255, 0.4);
+    transition: all 0.2s ease;
+}
+
+.post-body a:hover {
+    color: var(--color-accent-primary);
+    text-decoration-color: var(--color-accent-primary);
+}
+
+/* Lists */
+.post-body ul,
+.post-body ol {
+    margin-bottom: var(--spacing-lg);
+    padding-left: var(--spacing-xl);
+}
+
+.post-body li {
+    margin-bottom: 0.5rem;
+    padding-left: 0.5rem;
+}
+
+.post-body li::marker {
+    color: var(--color-text-secondary);
+}
+
+/* Blockquotes (Medium Style) */
+.post-body blockquote {
+    border-left: 3px solid var(--color-accent-primary);
+    padding-left: var(--spacing-lg);
+    margin: var(--spacing-2xl) 0;
+    font-size: 1.5rem;
+    font-style: italic;
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+}
+
+/* Code Blocks */
+.post-body pre {
+    background: #111;
+    border-radius: var(--radius-sm);
+    padding: var(--spacing-lg);
+    overflow-x: auto;
+    margin-bottom: var(--spacing-lg);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.post-body pre code {
+    background: transparent;
     padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border-width: 0;
+    color: #f0f0f0;
+}
+
+/* Image Rendering */
+.post-body figure {
+    margin: var(--spacing-2xl) 0;
+    width: 100%;
+}
+
+.post-body img {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--radius-sm);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    transition: all 0.3s ease;
+}
+
+/* Medium (Wide) Image Breakout */
+.post-body .figure-medium {
+    max-width: 100%;
+    /* Fallback */
+}
+
+@media (min-width: 1024px) {
+    .post-body .figure-medium {
+        width: 1000px;
+        max-width: 100vw;
+        margin-left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .post-body .image-medium {
+        border-radius: var(--radius-md);
+        width: 100%;
+    }
+}
+
+/* Full Width Image Breakout */
+.post-body .figure-full {
+    width: 100vw;
+    max-width: 100vw;
+    margin-left: 50%;
+    transform: translateX(-50%);
+    margin-top: var(--spacing-4xl);
+    margin-bottom: var(--spacing-4xl);
+}
+
+.post-body .image-full {
+    width: 100%;
+    border-radius: 0;
+}
+
+.post-body figcaption {
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+    font-family: var(--font-primary);
+    margin-top: var(--spacing-md);
+}
+
+/* Mobile Adjustments for Images */
+@media (max-width: 1024px) {
+
+    .post-body .figure-medium,
+    .post-body .figure-full {
+        width: 100%;
+        max-width: 100%;
+        margin-left: 0;
+        transform: none;
+    }
+
+    .post-body .image-full {
+        border-radius: var(--radius-sm);
+    }
 }

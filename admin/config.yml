@@ -6,6 +6,22 @@ media_folder: "assets" # Onde as imagens serão salvas no seu repositório (rela
 public_folder: "/assets" # O caminho público para acessar as imagens no seu site
 
 collections:
+  - name: "posts"
+    label: "Stories"
+    folder: "data/posts"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - {label: "Title", name: "title", widget: "string"}
+      - {label: "Subtitle", name: "excerpt", widget: "text"}
+      - {label: "Author", name: "author", widget: "string", default: "Magic Oven"}
+      - {label: "Category", name: "category", widget: "select", options: ["DESIGN", "TECH", "CÓDIGO", "ARTE", "UX", "WORKFLOW", "INSPIRAÇÃO"]}
+      - {label: "Publish Date", name: "date", widget: "datetime", format: "YYYY-MM-DD", dateFormat: "YYYY-MM-DD", timeFormat: false}
+      - {label: "Featured", name: "featured", widget: "boolean", default: false}
+      - {label: "Published", name: "published", widget: "boolean", default: true}
+      - {label: "Tags", name: "tags", widget: "list"}
+      - {label: "Story", name: "body", widget: "markdown"}
+
   - name: "slides"
     label: "Slides da Apresentação"
     file: "pitch/slides.json" # O caminho para o seu arquivo slides.json
