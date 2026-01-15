@@ -236,6 +236,136 @@ const AdminCMS = {
 
         // Toolbar do Editor (Blog)
         this.setupEditorToolbar();
+
+        // Menu de Formatação (Seleção)
+        this.setupFormattingMenu();
+    },
+
+    /**
+     * Configura o menu de formatação de texto (seleção)
+     */
+    setupFormattingMenu() {
+        const textarea = document.getElementById('blog-content');
+        const menu = document.getElementById('formatting-menu');
+
+        if (!textarea || !menu) return;
+
+        // Mostrar menu na seleção
+        textarea.addEventListener('mouseup', (e) => this.handleTextSelection(e, textarea, menu));
+        textarea.addEventListener('keyup', (e) => {
+            if (e.key === 'Shift' || e.key.startsWith('Arrow')) {
+                this.handleTextSelection(e, textarea, menu);
+            }
+        });
+
+        // Esconder menu ao clicar fora
+        document.addEventListener('mousedown', (e) => {
+            if (!menu.contains(e.target) && e.target !== textarea) {
+                menu.classList.remove('active');
+            }
+        });
+
+        // Ações de formatação
+        menu.querySelectorAll('.format-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const format = btn.dataset.format;
+                this.applyFormat(format, textarea);
+                menu.classList.remove('active');
+            });
+        });
+    },
+
+    /**
+     * Lida com a seleção de texto e posicionamento do menu
+     */
+    handleTextSelection(e, textarea, menu) {
+        // Pequeno delay para garantir que a seleção foi atualizada
+        setTimeout(() => {
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+
+            if (start !== end) {
+                // Há texto selecionado
+                // Calcular posição
+                // Como textarea não dá coordenadas X/Y do cursor facilmente,
+                // vamos posicionar próximo ao mouse (mouseup) ou centralizado (fallback)
+
+                let top, left;
+
+                if (e.type === 'mouseup') {
+                    top = e.clientY - 50;
+                    left = e.clientX;
+                } else {
+                    // Fallback para seleção via teclado: centralizado na textarea (aproximado)
+                    const rect = textarea.getBoundingClientRect();
+                    top = rect.top + (rect.height / 2); // Apenas um fallback visual
+                    left = rect.left + (rect.width / 2);
+                }
+
+                // Ajustes de limites da tela
+                if (left < 0) left = 10;
+                if (top < 0) top = 10;
+
+                menu.style.top = `${top + window.scrollY}px`;
+                menu.style.left = `${left + window.scrollX}px`;
+
+                // Centralizar o menu no ponto X
+                menu.style.transform = 'translate(-50%, 0)';
+
+                menu.classList.add('active');
+            } else {
+                menu.classList.remove('active');
+            }
+        }, 10);
+    },
+
+    /**
+     * Aplica a formatação selecionada ao texto
+     */
+    applyFormat(format, textarea) {
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const selectedText = textarea.value.substring(start, end);
+        let replacement = '';
+        let cursorOffset = 0;
+
+        switch (format) {
+            case 'bold':
+                replacement = `**${selectedText}**`;
+                cursorOffset = 2; // Move cursor para dentro se não houver texto selecionado (futuro)
+                break;
+            case 'italic':
+                replacement = `*${selectedText}*`;
+                break;
+            case 'link':
+                const url = prompt('URL do link:', 'https://');
+                if (url) {
+                    replacement = `[${selectedText}](${url})`;
+                } else {
+                    return; // Cancelado
+                }
+                break;
+            case 'h2':
+                // Remove # existetes se houver
+                const cleanH2 = selectedText.replace(/^#+\s*/, '');
+                replacement = `\n## ${cleanH2}`;
+                break;
+            case 'h3':
+                const cleanH3 = selectedText.replace(/^#+\s*/, '');
+                replacement = `\n### ${cleanH3}`;
+                break;
+            case 'quote':
+                const cleanQuote = selectedText.replace(/^>\s*/, '');
+                replacement = `\n> ${cleanQuote}`;
+                break;
+        }
+
+        // Aplicar substituição
+        textarea.setRangeText(replacement, start, end, 'select');
+
+        // Focar de volta e ajustar cursor se necessário
+        textarea.focus();
     },
 
     /**
