@@ -218,21 +218,18 @@
                                 ${post.excerpt}
                             </p>
 
-                            <div style="display: flex; align-items: center; justify-content: center; gap: var(--spacing-sm); margin-top: var(--spacing-2xl);">
-                                <div style="text-align: left;">
-                                    <p style="color: var(--color-text-primary); font-weight: var(--font-weight-medium); font-size: var(--font-size-sm);">
-                                        ${post.author}
-                                    </p>
-                                </div>
-                            </div>
                         </header>
 
                             <div class="markdown-content post-body">
                                 ${marked.parse(post.content)}
                             </div>
 
-                        ${post.tags && post.tags.length > 0 ? `
-                            <div style="margin-top: var(--spacing-4xl); padding-top: var(--spacing-xl); border-top: 1px solid rgba(255, 255, 255, 0.1);">
+                        <div style="margin-top: var(--spacing-4xl); padding-top: var(--spacing-xl); border-top: 1px solid rgba(255, 255, 255, 0.1);">
+                            <p style="color: var(--color-text-secondary); margin-bottom: var(--spacing-lg);">
+                                Escrito por <strong style="color: var(--color-accent-primary);">${post.author}</strong>
+                            </p>
+
+                            ${post.tags && post.tags.length > 0 ? `
                                 <div style="display: flex; gap: var(--spacing-sm); flex-wrap: wrap;">
                                     ${post.tags.map(tag => `
                                         <a href="#" class="blog-tag">
@@ -240,8 +237,8 @@
                                         </a>
                                     `).join('')}
                                 </div>
-                            </div>
-                        ` : ''}
+                            ` : ''}
+                        </div>
 
                         <footer style="margin-top: var(--spacing-3xl); text-align: center;">
                             <a href="blog.html" class="btn btn-outline">← Voltar ao Blog</a>
