@@ -159,6 +159,43 @@
                 // Atualiza título da página
                 document.getElementById('page-title').textContent = `${post.title} - Magic Oven`;
 
+                // Configura renderer do Marked
+                const renderer = new marked.Renderer();
+
+                // Custom Image Renderer
+                renderer.image = function (href, title, text) {
+                    const cleanHref = href.replace(/#(medium|full)$/, '');
+                    let className = 'post-image';
+                    let wrapperClass = '';
+
+                    if (href.endsWith('#medium')) {
+                        className += ' image-medium';
+                        wrapperClass = 'figure-medium';
+                    } else if (href.endsWith('#full')) {
+                        className += ' image-full';
+                        wrapperClass = 'figure-full';
+                    } else {
+                        wrapperClass = 'figure-standard';
+                    }
+
+                    return `
+                        <figure class="${wrapperClass}">
+                            <img src="${cleanHref}" alt="${text}" title="${title || ''}" class="${className}">
+                            ${text ? `<figcaption>${text}</figcaption>` : ''}
+                        </figure>
+                    `;
+                };
+
+                // Remove Wrapping P for Images (hacky but works for marked)
+                renderer.paragraph = function (text) {
+                    if (text.trim().startsWith('<figure')) {
+                        return text;
+                    }
+                    return `<p>${text}</p>`;
+                };
+
+                marked.use({ renderer });
+
                 // Renderiza o post
                 container.innerHTML = `
                     <div class="blog-post-wrapper" style="max-width: 720px; margin: 0 auto; padding: var(--spacing-4xl) var(--spacing-lg);">
@@ -234,7 +271,7 @@
             loadPost();
         }
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js"></script>
     <script src="js/main.js"></script>
     <script src="js/glitch-text.js"></script>
 </body>

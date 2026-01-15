@@ -380,6 +380,7 @@ const AdminCMS = {
 
     /**
      * Lida com a seleção de texto e posicionamento do menu (Formatação)
+     */
     setupFormattingMenu() {
         const textarea = document.getElementById('blog-content');
         const menu = document.getElementById('formatting-menu');
@@ -659,7 +660,6 @@ const AdminCMS = {
         formData.append('image', file);
 
         try {
-            // Feedback visual genérico se possível, se não apenas alert
             const dropzoneText = document.querySelector('.dropzone-text');
             let originalText = '';
             if (dropzoneText) {
@@ -678,8 +678,27 @@ const AdminCMS = {
                 dropzoneText.textContent = originalText;
             }
 
-            if (response.ok && data.url) {
-                if (onSuccess) onSuccess(data.url);
+            if (response.ok) {
+                // Tentativa robusta de encontrar a URL
+                let finalUrl = '';
+
+                if (typeof data.url === 'string') {
+                    finalUrl = data.url;
+                } else if (data && typeof data === 'object') {
+                    if (data.url && typeof data.url === 'string') finalUrl = data.url;
+                    else if (data.path) finalUrl = data.path;
+                    else if (data.file && data.file.path) finalUrl = data.file.path;
+                    else if (data.location) finalUrl = data.location; // S3 style
+                    else {
+                        console.error('Erro: URL não encontrada na resposta do upload', data);
+                        alert('Erro ao processar imagem. Tente novamente.');
+                        return;
+                    }
+                } else {
+                    finalUrl = String(data);
+                }
+
+                if (onSuccess) onSuccess(finalUrl);
             } else {
                 alert('Erro ao fazer upload: ' + (data.error || 'Erro desconhecido'));
             }

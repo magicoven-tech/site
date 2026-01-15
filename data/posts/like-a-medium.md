@@ -9,6 +9,15 @@ tags: []
 featured: false
 published: true
 date: '2026-01-15'
+content: |+
+  like a 
+  ## medium
+
+
+  ![Legenda da Imagem](/uploads/image-1768446047384-956294531.jpg#full)
+
+
+  ---
 ---
 like a 
 ## medium
