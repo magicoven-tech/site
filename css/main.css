@@ -834,6 +834,25 @@ section {
     opacity: 0.8;
 }
 
+.blog-tag {
+    display: inline-block;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    background: rgba(39, 255, 43, 0.1);
+    border: 1px solid rgba(39, 255, 43, 0.3);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-sm);
+    color: var(--color-accent-primary);
+    font-family: var(--font-mono);
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.blog-tag:hover {
+    background: rgba(39, 255, 43, 0.2);
+    border-color: rgba(39, 255, 43, 0.6);
+    transform: translateY(-1px);
+}
+
 /* ============================================
    CTA SECTION
    ============================================ */
