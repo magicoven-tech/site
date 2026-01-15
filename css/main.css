@@ -1267,51 +1267,63 @@ section {
 
 /* ============================================
    BLOG POST CONTENT STYLES (Medium-like)
+/* ============================================
+   BLOG POST CONTENT (Medium-like Style) - REFINED
    ============================================ */
 .post-body {
-    font-family: 'Merriweather', 'Georgia', serif;
-    /* Use serif for body text like Medium */
+    font-family: 'Charter', 'Bitstream Charter', 'Sitka Text', 'Cambria', 'Merriweather', 'Georgia', serif;
+    /* Medium Font Stack Priority */
     color: rgba(255, 255, 255, 0.9);
-    line-height: 2;
-    font-size: 1.25rem;
-    /* Aumentado para 20px aprox */
-    max-width: 700px;
-    /* Largura otimizada para leitura */
+    line-height: 1.58;
+    /* Gold standard for readability (Medium uses this) */
+    font-size: 20px;
+    /* Specific Medium body size */
+    max-width: 680px;
+    /* Slightly tighter reading column */
     margin: 0 auto;
+    letter-spacing: -0.003em;
+    word-break: break-word;
+    word-wrap: break-word;
 }
 
 .post-body p {
-    margin-bottom: var(--spacing-lg);
-    font-weight: 300;
+    margin-bottom: 40px;
+    /* Generous paragraph spacing */
+    font-weight: 400;
 }
 
 .post-body h2 {
-    font-family: var(--font-primary);
-    font-size: 2rem;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    /* Headers often Sans on Medium */
+    font-size: 1.8rem;
+    /* ~28-30px */
     font-weight: 700;
-    margin-top: var(--spacing-3xl);
-    margin-bottom: var(--spacing-sm);
+    margin-top: 3.5em;
+    margin-bottom: 0.5em;
     color: var(--color-text-primary);
-    letter-spacing: -0.01em;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
 }
 
 .post-body h3 {
-    font-family: var(--font-primary);
-    font-size: 1.5rem;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 1.4rem;
+    /* ~22px */
     font-weight: 600;
-    margin-top: var(--spacing-2xl);
-    margin-bottom: var(--spacing-sm);
+    margin-top: 2em;
+    margin-bottom: 0.5em;
     color: var(--color-text-primary);
     line-height: 1.3;
+    letter-spacing: -0.01em;
 }
 
 .post-body h4,
 .post-body h5,
 .post-body h6 {
-    font-family: var(--font-primary);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     font-weight: 600;
-    margin-top: var(--spacing-xl);
-    margin-bottom: var(--spacing-xs);
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
 }
 
 /* Links */
