@@ -233,6 +233,94 @@ const AdminCMS = {
                 this.saveProject();
             });
         }
+
+        // Toolbar do Editor (Blog)
+        this.setupEditorToolbar();
+    },
+
+    /**
+     * Configura a toolbar do editor
+     */
+    setupEditorToolbar() {
+        const toggleBtn = document.getElementById('toolbar-toggle');
+        const toolbar = document.querySelector('.editor-toolbar');
+        const blogImageInput = document.getElementById('blog-image-input');
+
+        if (!toggleBtn || !toolbar) return;
+
+        // Toggle do menu
+        toggleBtn.addEventListener('click', (e) => {
+            e.preventDefault(); // Evita submit do form se estiver dentro dele
+            toolbar.classList.toggle('active');
+            toggleBtn.textContent = toolbar.classList.contains('active') ? '×' : '+';
+        });
+
+        // Opção de Imagem
+        document.getElementById('toolbar-image').addEventListener('click', () => {
+            blogImageInput.click();
+        });
+
+        blogImageInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                this.handleImageUpload(file, (url) => {
+                    const markdown = `\n![Legenda da Imagem](${url})\n`;
+                    this.insertAtCursor('blog-content', markdown);
+                    toolbar.classList.remove('active');
+                    toggleBtn.textContent = '+';
+                    // Scroll para o fim da inserção se necessário ou foco
+                });
+            }
+        });
+
+        // Opção de Vídeo
+        document.getElementById('toolbar-video').addEventListener('click', () => {
+            const code = `\n<div class="video-container">\n  <iframe src="URL_DO_VIDEO_AQUI" title="Video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>\n</div>\n`;
+            this.insertAtCursor('blog-content', code);
+            toolbar.classList.remove('active');
+            toggleBtn.textContent = '+';
+        });
+
+        // Opção de Código
+        document.getElementById('toolbar-code').addEventListener('click', () => {
+            const code = `\n\`\`\`javascript\n// Seu código aqui\n\`\`\`\n`;
+            this.insertAtCursor('blog-content', code);
+            toolbar.classList.remove('active');
+            toggleBtn.textContent = '+';
+        });
+
+        // Opção de Divisor
+        document.getElementById('toolbar-divider').addEventListener('click', () => {
+            this.insertAtCursor('blog-content', '\n---\n');
+            toolbar.classList.remove('active');
+            toggleBtn.textContent = '+';
+        });
+
+        // Opção de Embed/Link
+        document.getElementById('toolbar-embed').addEventListener('click', () => {
+            this.insertAtCursor('blog-content', '\n[Texto do Link](https://exemplo.com)\n');
+            toolbar.classList.remove('active');
+            toggleBtn.textContent = '+';
+        });
+    },
+
+    /**
+     * Insere texto na posição do cursor em um textarea
+     */
+    insertAtCursor(fieldId, text) {
+        const textarea = document.getElementById(fieldId);
+        if (!textarea) return;
+
+        const startPos = textarea.selectionStart;
+        const endPos = textarea.selectionEnd;
+        const scrollTop = textarea.scrollTop;
+
+        textarea.value = textarea.value.substring(0, startPos) + text + textarea.value.substring(endPos, textarea.value.length);
+
+        textarea.focus();
+        textarea.selectionStart = startPos + text.length;
+        textarea.selectionEnd = startPos + text.length;
+        textarea.scrollTop = scrollTop;
     },
 
     /**
@@ -274,13 +362,13 @@ const AdminCMS = {
         // Drop de arquivo
         dropzone.addEventListener('drop', (e) => {
             const file = e.dataTransfer.files[0];
-            if (file) this.handleImageUpload(file);
+            if (file) this.handleImageUpload(file, (url) => this.showImagePreview(url));
         });
 
         // Seleção de arquivo via input
         input.addEventListener('change', (e) => {
             const file = e.target.files[0];
-            if (file) this.handleImageUpload(file);
+            if (file) this.handleImageUpload(file, (url) => this.showImagePreview(url));
         });
 
         // Limpar imagem
@@ -292,8 +380,10 @@ const AdminCMS = {
 
     /**
      * Faz upload da imagem para o servidor
+     * @param {File} file Arquivo de imagem
+     * @param {Function} onSuccess Callback chamado com a URL da imagem em caso de sucesso
      */
-    async handleImageUpload(file) {
+    async handleImageUpload(file, onSuccess) {
         if (!file.type.startsWith('image/')) {
             alert('Por favor, selecione apenas arquivos de imagem.');
             return;
@@ -303,9 +393,13 @@ const AdminCMS = {
         formData.append('image', file);
 
         try {
+            // Feedback visual genérico se possível, se não apenas alert
             const dropzoneText = document.querySelector('.dropzone-text');
-            const originalText = dropzoneText.textContent;
-            dropzoneText.textContent = 'Enviando...';
+            let originalText = '';
+            if (dropzoneText) {
+                originalText = dropzoneText.textContent;
+                dropzoneText.textContent = 'Enviando...';
+            }
 
             const response = await apiRequest('/api/upload', {
                 method: 'POST',
@@ -313,10 +407,13 @@ const AdminCMS = {
             });
 
             const data = await response.json();
-            dropzoneText.textContent = originalText;
+
+            if (dropzoneText) {
+                dropzoneText.textContent = originalText;
+            }
 
             if (response.ok && data.url) {
-                this.showImagePreview(data.url);
+                if (onSuccess) onSuccess(data.url);
             } else {
                 alert('Erro ao fazer upload: ' + (data.error || 'Erro desconhecido'));
             }
