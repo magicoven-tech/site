@@ -301,7 +301,7 @@ app.get('/api/blog/:id', async (req, res) => {
 
 // Criar novo post (protegido)
 app.post('/api/blog', requireAuth, async (req, res) => {
-    const { title, slug, ...otherData } = req.body;
+    const { title, slug, content, ...otherData } = req.body;
 
     // Gera slug se não vier
     const finalSlug = slug || title.toLowerCase()
@@ -318,16 +318,17 @@ app.post('/api/blog', requireAuth, async (req, res) => {
     };
 
     try {
-        const fileContent = matter.stringify(newPost.content || '', {
-            ...newPost,
-            content: undefined // remove content from frontmatter
-        });
+        // Garante que o diretório exista antes de salvar
+        await fs.mkdir(POSTS_DIR, { recursive: true });
+
+        const fileContent = matter.stringify(content || '', newPost);
 
         await fs.writeFile(path.join(POSTS_DIR, `${finalSlug}.md`), fileContent);
-        res.json({ success: true, post: newPost });
+        console.log(`✅ Post criado: ${finalSlug}`);
+        res.json({ success: true, post: { ...newPost, content } });
     } catch (error) {
-        console.error('Erro ao salvar post:', error);
-        res.status(500).json({ error: 'Erro ao salvar post' });
+        console.error('❌ Erro ao salvar post:', error);
+        res.status(500).json({ error: 'Erro ao salvar post', details: error.message });
     }
 });
 
@@ -347,24 +348,27 @@ app.put('/api/blog/:id', requireAuth, async (req, res) => {
     // e apenas atualizar o conteúdo por enquanto, ou assumir que o slug é imutável na edição simples.
     // O CMS geralmente manda o objeto completo.
 
+    const content = req.body.content;
+    const { content: _, ...updateData } = req.body;
+
     const updatedPost = {
         ...existingPost,
-        ...req.body
+        ...updateData
     };
 
-    // Garante que o conteúdo não vá para o frontmatter
-    const content = updatedPost.content;
-    delete updatedPost.content;
-
     try {
+        // Garante que o diretório exista antes de salvar
+        await fs.mkdir(POSTS_DIR, { recursive: true });
+
         const fileContent = matter.stringify(content || '', updatedPost);
         // Usa o slug original para garantir que subscreve o arquivo certo
         await fs.writeFile(path.join(POSTS_DIR, `${existingPost.slug}.md`), fileContent);
 
+        console.log(`✅ Post atualizado: ${existingPost.slug}`);
         res.json({ success: true, post: { ...updatedPost, content } });
     } catch (error) {
-        console.error('Erro ao atualizar post:', error);
-        res.status(500).json({ error: 'Erro ao atualizar post' });
+        console.error('❌ Erro ao atualizar post:', error);
+        res.status(500).json({ error: 'Erro ao atualizar post', details: error.message });
     }
 });
 

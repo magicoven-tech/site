@@ -101,15 +101,24 @@ const CMS = {
     renderBlogCard(post, delay = 0) {
         return `
             <article class="blog-card" data-aos="fade-up" data-aos-delay="${delay}">
-                <div class="blog-meta">
-                    <span class="blog-date">${this.formatDate(post.date)}</span>
-                    <span class="blog-category">${post.category}</span>
+                <div class="blog-content">
+                    <div class="blog-meta">
+                        <span class="blog-category">${post.category}</span>
+                        <span class="blog-date">${this.formatDate(post.date)}</span>
+                    </div>
+                    <a href="blog-post.html?slug=${post.slug}" class="blog-title-link">
+                        <h3 class="blog-title">${post.title}</h3>
+                    </a>
+                    <p class="blog-excerpt">
+                        ${post.excerpt}
+                    </p>
+                    <div class="blog-footer">
+                        <div class="blog-tags">
+                            ${post.tags ? post.tags.slice(0, 2).map(tag => `<span class="blog-tag">#${tag}</span>`).join('') : ''}
+                        </div>
+                        <a href="blog-post.html?slug=${post.slug}" class="blog-read-more">Ler mais →</a>
+                    </div>
                 </div>
-                <h3 class="blog-title">${post.title}</h3>
-                <p class="blog-excerpt">
-                    ${post.excerpt}
-                </p>
-                <a href="blog-post.html?slug=${post.slug}" class="blog-link">LER MAIS →</a>
             </article>
         `;
     },
