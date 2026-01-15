@@ -10,9 +10,15 @@ tags:
 featured: false
 published: true
 date: '2026-01-15'
+content: |
+  bora 
+  ## bora
+
+
+  ![Legenda da Imagem](/uploads/image-1768448222921-643249181.jpeg)
 ---
 bora 
 ## bora
 
 
-![Legenda da Imagem](/uploads/image-1768448222921-643249181.jpeg)
+![Legenda da Imagem](/uploads/image-1768448222921-643249181.jpeg#full)

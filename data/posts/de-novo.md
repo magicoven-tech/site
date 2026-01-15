@@ -19,8 +19,11 @@ content: |
   **title**
 ---
 
-![Legenda da Imagem](/uploads/image-1768449795628-912630200.jpg)
+![Legenda da Imagem](/uploads/image-1768449795628-912630200.jpg#full)
 
 
 
 **title**
+
+
+### subtitle
