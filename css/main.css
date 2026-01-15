@@ -1223,20 +1223,98 @@ section {
 }
 
 /* ============================================
-   UTILITY CLASSES
+   BLOG POST CONTENT STYLES (Medium-like)
    ============================================ */
-.text-center {
-    text-align: center;
+.post-body {
+    font-family: 'Merriweather', 'Georgia', serif;
+    /* Use serif for body text like Medium */
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 2;
+    font-size: 1.125rem;
 }
 
-.sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
+.post-body p {
+    margin-bottom: var(--spacing-lg);
+    font-weight: 300;
+}
+
+.post-body h2 {
+    font-family: var(--font-primary);
+    font-size: 2rem;
+    font-weight: 700;
+    margin-top: var(--spacing-3xl);
+    margin-bottom: var(--spacing-sm);
+    color: var(--color-text-primary);
+    letter-spacing: -0.01em;
+}
+
+.post-body h3 {
+    font-family: var(--font-primary);
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-top: var(--spacing-2xl);
+    margin-bottom: var(--spacing-sm);
+    color: var(--color-text-primary);
+}
+
+.post-body ul,
+.post-body ol {
+    margin-bottom: var(--spacing-lg);
+    padding-left: var(--spacing-lg);
+}
+
+.post-body li {
+    margin-bottom: var(--spacing-xs);
+}
+
+.post-body a {
+    color: var(--color-accent-primary);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    text-decoration-thickness: 1px;
+}
+
+.post-body blockquote {
+    border-left: 3px solid var(--color-accent-primary);
+    margin: var(--spacing-2xl) 0;
+    padding-left: var(--spacing-lg);
+    font-style: italic;
+    font-size: 1.25rem;
+    color: var(--color-text-secondary);
+}
+
+.post-body strong {
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.post-body code {
+    background: rgba(255, 255, 255, 0.1);
+    font-family: var(--font-mono);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    color: var(--color-accent-primary);
+}
+
+.post-body pre {
+    background: #111;
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-md);
+    overflow-x: auto;
+    margin-bottom: var(--spacing-lg);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.post-body pre code {
+    background: transparent;
     padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border-width: 0;
+    color: #f0f0f0;
+}
+
+.post-body img {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--radius-sm);
+    margin: var(--spacing-xl) 0;
 }

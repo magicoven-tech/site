@@ -11,6 +11,7 @@ const jwt = require('jsonwebtoken');
 const fs = require('fs').promises;
 const path = require('path');
 const multer = require('multer');
+const matter = require('gray-matter');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -82,9 +83,14 @@ app.get('/api/health', (req, res) => {
 });
 
 // Caminhos dos arquivos de dados
-const BLOG_FILE = path.join(__dirname, 'data', 'blog.json');
+// Caminhos dos arquivos de dados
+const POSTS_DIR = path.join(__dirname, 'data', 'posts');
 const PROJECTS_FILE = path.join(__dirname, 'data', 'projects.json');
 const USERS_FILE = path.join(__dirname, 'data', 'users.json');
+
+// Ensure posts directory exists
+fs.mkdir(POSTS_DIR, { recursive: true }).catch(console.error);
+
 
 // ============================================
 // HELPERS - Leitura/Escrita de Arquivos
@@ -245,26 +251,47 @@ app.get('/api/auth/check', (req, res) => {
 
 
 // ============================================
-// ROTAS - Blog Posts
+// ROTAS - Blog Posts (Markdown based)
 // ============================================
+
+// Helper para ler todos os posts
+async function getAllPosts() {
+    try {
+        const files = await fs.readdir(POSTS_DIR);
+        const posts = await Promise.all(
+            files
+                .filter(file => file.endsWith('.md'))
+                .map(async file => {
+                    const content = await fs.readFile(path.join(POSTS_DIR, file), 'utf8');
+                    const parsed = matter(content);
+                    return {
+                        ...parsed.data,
+                        content: parsed.content,
+                        slug: file.replace('.md', '')
+                    };
+                })
+        );
+        // Sort by date desc
+        return posts.sort((a, b) => new Date(b.date) - new Date(a.date));
+    } catch (error) {
+        console.error('Erro ao ler posts:', error);
+        return [];
+    }
+}
 
 // Listar todos os posts
 app.get('/api/blog', async (req, res) => {
-    const data = await readJSON(BLOG_FILE);
-    if (!data) {
-        return res.status(500).json({ error: 'Erro ao carregar posts' });
-    }
-    res.json(data);
+    const posts = await getAllPosts();
+    res.json({ posts });
 });
 
-// Obter post por ID
+// Obter post por slug (antigo ID agora é slug na URL, mas mantemos compatibilidade de rota)
+// Nota: O frontend pede por slug na query string ou ID na rota. 
+// Vamos padronizar: se vier ID e não achar, tenta achar pelo slug se o ID parecer um slug.
 app.get('/api/blog/:id', async (req, res) => {
-    const data = await readJSON(BLOG_FILE);
-    if (!data) {
-        return res.status(500).json({ error: 'Erro ao carregar posts' });
-    }
+    const posts = await getAllPosts();
+    const post = posts.find(p => p.id === req.params.id || p.slug === req.params.id);
 
-    const post = data.posts.find(p => p.id === req.params.id);
     if (!post) {
         return res.status(404).json({ error: 'Post não encontrado' });
     }
@@ -274,73 +301,89 @@ app.get('/api/blog/:id', async (req, res) => {
 
 // Criar novo post (protegido)
 app.post('/api/blog', requireAuth, async (req, res) => {
-    const data = await readJSON(BLOG_FILE);
-    if (!data) {
-        return res.status(500).json({ error: 'Erro ao carregar posts' });
-    }
+    const { title, slug, ...otherData } = req.body;
+
+    // Gera slug se não vier
+    const finalSlug = slug || title.toLowerCase()
+        .replace(/[^\w\s-]/g, '')
+        .replace(/[\s_-]+/g, '-')
+        .replace(/^-+|-+$/g, '');
 
     const newPost = {
         id: String(Date.now()),
-        ...req.body,
-        date: new Date().toISOString().split('T')[0]
+        title,
+        slug: finalSlug,
+        ...otherData,
+        date: req.body.date || new Date().toISOString().split('T')[0]
     };
 
-    data.posts.unshift(newPost);
-    const success = await writeJSON(BLOG_FILE, data);
+    try {
+        const fileContent = matter.stringify(newPost.content || '', {
+            ...newPost,
+            content: undefined // remove content from frontmatter
+        });
 
-    if (!success) {
-        return res.status(500).json({ error: 'Erro ao salvar post' });
+        await fs.writeFile(path.join(POSTS_DIR, `${finalSlug}.md`), fileContent);
+        res.json({ success: true, post: newPost });
+    } catch (error) {
+        console.error('Erro ao salvar post:', error);
+        res.status(500).json({ error: 'Erro ao salvar post' });
     }
-
-    res.json({ success: true, post: newPost });
 });
 
 // Atualizar post (protegido)
 app.put('/api/blog/:id', requireAuth, async (req, res) => {
-    const data = await readJSON(BLOG_FILE);
-    if (!data) {
-        return res.status(500).json({ error: 'Erro ao carregar posts' });
-    }
+    // O ID recebido na URL pode ser o ID numérico ou o slug antigo
+    // Para edição, precisamos identificar qual arquivo alterar.
 
-    const index = data.posts.findIndex(p => p.id === req.params.id);
-    if (index === -1) {
+    const posts = await getAllPosts();
+    const existingPost = posts.find(p => p.id === req.params.id || p.slug === req.params.id);
+
+    if (!existingPost) {
         return res.status(404).json({ error: 'Post não encontrado' });
     }
 
-    data.posts[index] = {
-        ...data.posts[index],
-        ...req.body,
-        id: req.params.id // Mantém o ID original
+    // Se o slug mudar, precisaremos renomear o arquivo, mas por segurança vamos manter o arquivo original
+    // e apenas atualizar o conteúdo por enquanto, ou assumir que o slug é imutável na edição simples.
+    // O CMS geralmente manda o objeto completo.
+
+    const updatedPost = {
+        ...existingPost,
+        ...req.body
     };
 
-    const success = await writeJSON(BLOG_FILE, data);
-    if (!success) {
-        return res.status(500).json({ error: 'Erro ao atualizar post' });
-    }
+    // Garante que o conteúdo não vá para o frontmatter
+    const content = updatedPost.content;
+    delete updatedPost.content;
 
-    res.json({ success: true, post: data.posts[index] });
+    try {
+        const fileContent = matter.stringify(content || '', updatedPost);
+        // Usa o slug original para garantir que subscreve o arquivo certo
+        await fs.writeFile(path.join(POSTS_DIR, `${existingPost.slug}.md`), fileContent);
+
+        res.json({ success: true, post: { ...updatedPost, content } });
+    } catch (error) {
+        console.error('Erro ao atualizar post:', error);
+        res.status(500).json({ error: 'Erro ao atualizar post' });
+    }
 });
 
 // Deletar post (protegido)
 app.delete('/api/blog/:id', requireAuth, async (req, res) => {
-    const data = await readJSON(BLOG_FILE);
-    if (!data) {
-        return res.status(500).json({ error: 'Erro ao carregar posts' });
-    }
+    const posts = await getAllPosts();
+    const post = posts.find(p => p.id === req.params.id || p.slug === req.params.id);
 
-    const index = data.posts.findIndex(p => p.id === req.params.id);
-    if (index === -1) {
+    if (!post) {
         return res.status(404).json({ error: 'Post não encontrado' });
     }
 
-    data.posts.splice(index, 1);
-    const success = await writeJSON(BLOG_FILE, data);
-
-    if (!success) {
-        return res.status(500).json({ error: 'Erro ao deletar post' });
+    try {
+        await fs.unlink(path.join(POSTS_DIR, `${post.slug}.md`));
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Erro ao deletar post:', error);
+        res.status(500).json({ error: 'Erro ao deletar post' });
     }
-
-    res.json({ success: true });
 });
 
 // ============================================

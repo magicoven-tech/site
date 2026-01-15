@@ -161,92 +161,66 @@
 
                 // Renderiza o post
                 container.innerHTML = `
-                    <div class="section-container" style="max-width: 800px; padding: var(--spacing-3xl) var(--spacing-lg);">
-                        <div style="margin-bottom: var(--spacing-xl);">
-                            <a href="blog.html" class="btn btn-outline" style="margin-bottom: var(--spacing-lg);">← Voltar ao Blog</a>
-                        </div>
-
-                        <header style="margin-bottom: var(--spacing-2xl);">
-                            <div style="display: flex; gap: var(--spacing-md); margin-bottom: var(--spacing-lg); flex-wrap: wrap;">
-                                <span style="color: var(--color-text-secondary); font-family: var(--font-mono); font-size: var(--font-size-sm);">
+                    <div class="blog-post-wrapper" style="max-width: 720px; margin: 0 auto; padding: var(--spacing-4xl) var(--spacing-lg);">
+                        
+                        <header class="post-header" style="margin-bottom: var(--spacing-3xl); text-align: center;">
+                            <div style="display: flex; justify-content: center; gap: var(--spacing-md); margin-bottom: var(--spacing-lg);">
+                                <span style="color: var(--color-text-secondary); font-family: var(--font-mono); font-size: var(--font-size-sm); letter-spacing: 0.05em;">
                                     ${CMS.formatDate(post.date)}
                                 </span>
-                                <span style="color: var(--color-accent-primary); font-weight: var(--font-weight-bold); font-size: var(--font-size-sm);">
+                                <span style="color: var(--color-accent-primary); font-weight: var(--font-weight-bold); font-size: var(--font-size-sm); letter-spacing: 0.05em;">
                                     ${post.category}
                                 </span>
                             </div>
 
-                            <h1 style="font-size: clamp(2rem, 5vw, 3.5rem); font-weight: var(--font-weight-bold); line-height: 1.2; margin-bottom: var(--spacing-lg); color: var(--color-text-primary);">
+                            <h1 style="font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: var(--font-weight-bold); line-height: 1.1; margin-bottom: var(--spacing-lg); color: var(--color-text-primary); letter-spacing: -0.02em;">
                                 ${post.title}
                             </h1>
 
-                            <p style="font-size: var(--font-size-lg); color: var(--color-text-secondary); line-height: 1.6;">
+                            <p style="font-size: 1.25rem; color: var(--color-text-secondary); line-height: 1.5; font-weight: var(--font-weight-light); max-width: 600px; margin: 0 auto;">
                                 ${post.excerpt}
                             </p>
 
-                            ${post.tags && post.tags.length > 0 ? `
-                                <div style="display: flex; gap: var(--spacing-sm); flex-wrap: wrap; margin-top: var(--spacing-lg);">
-                                    ${post.tags.map(tag => `
-                                        <span style="padding: var(--spacing-xs) var(--spacing-sm); background: rgba(39, 255, 43, 0.1); border: 1px solid rgba(39, 255, 43, 0.3); border-radius: var(--radius-sm); font-size: var(--font-size-sm); color: var(--color-accent-primary); font-family: var(--font-mono);">
-                                            #${tag}
-                                        </span>
-                                    `).join('')}
+                            <div style="display: flex; align-items: center; justify-content: center; gap: var(--spacing-sm); margin-top: var(--spacing-2xl);">
+                                <div style="text-align: left;">
+                                    <p style="color: var(--color-text-primary); font-weight: var(--font-weight-medium); font-size: var(--font-size-sm);">
+                                        ${post.author}
+                                    </p>
                                 </div>
-                            ` : ''}
+                            </div>
                         </header>
 
-                        <div class="post-body" style="color: var(--color-text-secondary); line-height: 1.8; font-size: var(--font-size-base);">
-                            ${post.content}
+                            <div class="markdown-content">
+                                ${marked.parse(post.content)}
+                            </div>
                         </div>
 
-                        <footer style="margin-top: var(--spacing-3xl); padding-top: var(--spacing-2xl); border-top: 1px solid rgba(255, 255, 255, 0.1);">
-                            <p style="color: var(--color-text-secondary); margin-bottom: var(--spacing-lg);">
-                                Escrito por <strong style="color: var(--color-accent-primary);">${post.author}</strong>
-                            </p>
-                            <a href="blog.html" class="btn btn-outline">← Voltar ao Blog</a>
+                        ${post.tags && post.tags.length > 0 ? `
+                            <div style="margin-top: var(--spacing-4xl); padding-top: var(--spacing-xl); border-top: 1px solid rgba(255, 255, 255, 0.1);">
+                                <div style="display: flex; gap: var(--spacing-sm); flex-wrap: wrap;">
+                                    ${post.tags.map(tag => `
+                                        <a href="#" style="text-decoration: none; padding: 0.5em 1em; background: var(--color-surface-elevated); border-radius: 20px; font-size: 0.875rem; color: var(--color-text-secondary); transition: all 0.2s;">
+                                            #${tag}
+                                        </a>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+
+                        <footer style="margin-top: var(--spacing-3xl); text-align: center;">
+                            <a href="blog.html" class="btn btn-outline">← Voltar para Stories</a>
                         </footer>
                     </div>
                 `;
 
-                // Adiciona estilos ao conteúdo do post
-                const postBody = container.querySelector('.post-body');
-                if (postBody) {
-                    postBody.querySelectorAll('p').forEach(p => {
-                        p.style.marginBottom = 'var(--spacing-lg)';
-                    });
-                    postBody.querySelectorAll('h2').forEach(h => {
-                        h.style.color = 'var(--color-text-primary)';
-                        h.style.fontWeight = 'var(--font-weight-bold)';
-                        h.style.marginTop = 'var(--spacing-2xl)';
-                        h.style.marginBottom = 'var(--spacing-lg)';
-                        h.style.fontSize = 'var(--font-size-2xl)';
-                    });
-                    postBody.querySelectorAll('h3').forEach(h => {
-                        h.style.color = 'var(--color-text-primary)';
-                        h.style.fontWeight = 'var(--font-weight-semibold)';
-                        h.style.marginTop = 'var(--spacing-xl)';
-                        h.style.marginBottom = 'var(--spacing-md)';
-                        h.style.fontSize = 'var(--font-size-xl)';
-                    });
-                    postBody.querySelectorAll('a').forEach(a => {
-                        a.style.color = 'var(--color-accent-primary)';
-                        a.style.textDecoration = 'underline';
-                    });
-                    postBody.querySelectorAll('code').forEach(code => {
-                        code.style.fontFamily = 'var(--font-mono)';
-                        code.style.background = 'rgba(39, 255, 43, 0.1)';
-                        code.style.padding = '2px 6px';
-                        code.style.borderRadius = '4px';
-                        code.style.fontSize = '0.9em';
-                    });
-                }
-
             } catch (error) {
                 console.error('Erro ao carregar post:', error);
+
+                // Fallback amigável
                 container.innerHTML = `
                     <div class="section-container" style="padding: 100px 20px; text-align: center;">
                         <h1 style="color: var(--color-accent-primary); font-size: 2rem; margin-bottom: 1rem;">Erro ao carregar post</h1>
-                        <p style="color: var(--color-text-secondary); margin-bottom: 2rem;">Ocorreu um erro ao carregar o post. Por favor, tente novamente.</p>
+                        <p style="color: var(--color-text-secondary); margin-bottom: 2rem;">Não foi possível carregar o conteúdo. Tente recarregar a página.</p>
                         <a href="blog.html" class="btn btn-primary">← Voltar ao Blog</a>
                     </div>
                 `;
@@ -260,6 +234,7 @@
             loadPost();
         }
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="js/main.js"></script>
     <script src="js/glitch-text.js"></script>
 </body>
