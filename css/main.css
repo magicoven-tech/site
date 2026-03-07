@@ -422,7 +422,7 @@ body {
     flex-direction: column;
     align-items: center;
     gap: var(--spacing-xs);
-    color: var(--color-text-tertiary);
+    color: var(--color-text-secondary);
     font-size: var(--font-size-xs);
     letter-spacing: 0.1em;
     text-transform: uppercase;
@@ -566,7 +566,7 @@ section {
     font-weight: var(--font-weight-medium);
     letter-spacing: 0.15em;
     text-transform: uppercase;
-    color: var(--color-text-tertiary);
+    color: var(--color-text-secondary);
     margin-bottom: var(--spacing-xs);
 }
 
@@ -779,7 +779,7 @@ section {
 }
 
 .blog-date {
-    color: var(--color-text-tertiary);
+    color: var(--color-text-secondary);
     text-transform: uppercase;
 }
 
@@ -946,7 +946,7 @@ section {
     font-weight: var(--font-weight-semibold);
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--color-text-tertiary);
+    color: var(--color-accent-primary);
     margin-bottom: var(--spacing-md);
 }
 
