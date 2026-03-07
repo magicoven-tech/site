@@ -99,8 +99,13 @@ Como este projeto utiliza o plano gratuito do **Render**, o servidor entra em mo
 2. No Dashboard, clique em **CREATE CRONJOB**.
 3. **Title**: `Magic Oven Render Ping`
 4. **URL**: `https://prj-d5ahb2je5dus73f4cdm0.onrender.com/api/health`
-5. **Execution schedule**: Configure para rodar **A cada 14 minutos**.
-6. Clique em **CREATE**.
+5. Clique na aba **ADVANCED** no topo da configuração:
+   - Em **Headers**, clique em **ADD** e adicione:
+     - **Key**: `User-Agent`
+     - **Value**: `Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0 Safari/537.36`
+   - Em **Timeout** (no final da página), aumente para **30 seconds** para dar tempo do servidor acordar.
+6. Em **Common** (ou no agendamento principal), configure a execução para **A cada 14 minutos**.
+7. Clique em **SAVE**.
 
 Isso manterá o servidor "acordado" 24/7 sem custos adicionais.
 
