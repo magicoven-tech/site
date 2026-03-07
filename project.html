@@ -264,15 +264,15 @@
                         ` : ''}
 
                         <!-- CTA -->
-                        <footer style="margin-top: var(--spacing-3xl); padding-top: var(--spacing-2xl); border-top: 1px solid rgba(255, 255, 255, 0.1); text-align: center;">
+                        <footer style="margin-top: var(--spacing-3xl); padding-top: var(--spacing-2xl); border-top: 1px solid rgba(255, 255, 255, 0.1); display: flex; justify-content: space-between;">
+                            <div>
+                                <a href="portfolio.html" class="btn btn-outline">← Voltar aos Trabalhos</a>
+                            </div>
                             ${project.url ? `
                                 <a href="${project.url}" target="_blank" rel="noopener" class="btn btn-primary" style="margin-bottom: var(--spacing-lg);">
                                     Visitar Projeto →
                                 </a>
                             ` : ''}
-                            <div>
-                                <a href="portfolio.html" class="btn btn-outline">← Voltar aos Trabalhos</a>
-                            </div>
                         </footer>
                     </div>
                 `;
