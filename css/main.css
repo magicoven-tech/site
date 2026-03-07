@@ -658,7 +658,7 @@ section {
 
 .project-category {
     font-size: var(--font-size-sm);
-    color: var(--color-text-tertiary);
+    color: var(--color-accent-primary);
     text-transform: uppercase;
     letter-spacing: 0.1em;
     margin-bottom: var(--spacing-sm);
