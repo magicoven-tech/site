@@ -1185,7 +1185,7 @@ section {
     font-weight: var(--font-weight-medium);
     letter-spacing: 0.15em;
     text-transform: uppercase;
-    color: var(--color-text-tertiary);
+    color: var(--color-text-secondary);
     margin-bottom: var(--spacing-xs);
 }
 
