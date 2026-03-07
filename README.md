@@ -116,10 +116,17 @@ Isso manterá o servidor "acordado" 24/7 sem custos adicionais.
 Como o Render apaga arquivos locais no plano grátis, implementamos uma rotina de sincronização automática. Toda vez que você salvar, editar ou deletar um post ou projeto no CMS, o servidor fará um `git commit` com o título da alteração e um `git push` de volta para o seu repositório.
 
 ### Como configurar para o Render salvar permanentemente:
-Para que o servidor tenha permissão de gravar no seu GitHub em produção, você deve adicionar estas duas **Environment Variables** no painel do Render em *Dashboard > Seu Serviço > Settings > Env Vars*:
 
-1. **`GITHUB_TOKEN`**: Um Token de Acesso Pessoal (PAT) gerado no seu GitHub com permissão de escrita (*Contents: Read & Write*).
-2. **`GITHUB_REPO`**: O caminho do seu repositório no formato `usuario/projeto` (ex: `magicoven-tech/site`).
+Para que o servidor tenha permissão de gravar no seu GitHub em produção, você deve criar as seguintes **Environment Variables** no painel do Render:
+
+1. Acesse o seu [Dashboard no Render](https://dashboard.render.com/).
+2. Clique no seu serviço **Web Service** (ex: `site`).
+3. No menu lateral esquerdo, clique em **Environment**.
+4. Clique no botão **Add Environment Variable**.
+5. Em **Key**, digite `GITHUB_TOKEN` e em **Value**, cole o seu [Personal Access Token (PAT)](https://github.com/settings/tokens?type=beta) (Permissão necessária: *Contents: Read & Write*).
+6. Clique novamente em **Add Environment Variable**.
+7. Em **Key**, digite `GITHUB_REPO` e em **Value**, coloque o caminho do seu repositório no formato `usuario/nome-do-repositorio` (ex: `magicoven-tech/site`).
+8. Clique no botão **Save Changes**.
 
 **Nota:** Se você estiver rodando localmente (`npm run dev`), o sistema também tentará fazer o commit/push se você tiver permissão de Git configurada na sua máquina!
 
