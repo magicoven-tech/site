@@ -365,7 +365,7 @@ document.addEventListener('DOMContentLoaded', () => {
         form.addEventListener("submit", handleSubmit);
     }
 
-    console.log('🧙‍♂️ Magic Oven initialized ✨');
+    console.log('🧙‍♂️ {{SITE_NAME}} initialized ✨');
 });
 
 // ============================================

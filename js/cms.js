@@ -1,5 +1,5 @@
 /**
- * CMS Data Loader - Magic Oven
+ * CMS Data Loader - {{SITE_NAME}}
  * Sistema para carregar e renderizar conteúdo dinâmico do CMS
  */
 
@@ -20,11 +20,18 @@ const CMS = {
             const apiBase = window.API_CONFIG ? window.API_CONFIG.baseURL : '';
             const response = await fetch(`${apiBase}/api/blog`);
             const data = await response.json();
+
+            // Seed Fallback
+            if (!data.posts || data.posts.length === 0) {
+                console.warn('CMS: Nenhum post encontrado. Carregando dados de exemplo.');
+                return this.getSeedBlogData();
+            }
+
             this.cache.blog = data.posts;
             return data.posts;
         } catch (error) {
-            console.error('Erro ao carregar posts do blog:', error);
-            return [];
+            console.error('Erro ao carregar posts do blog, carregando Seed:', error);
+            return this.getSeedBlogData();
         }
     },
 
@@ -38,12 +45,51 @@ const CMS = {
             const apiBase = window.API_CONFIG ? window.API_CONFIG.baseURL : '';
             const response = await fetch(`${apiBase}/api/projects`);
             const data = await response.json();
+
+            // Seed Fallback
+            if (!data.projects || data.projects.length === 0) {
+                console.warn('CMS: Nenhum projeto encontrado. Carregando dados de exemplo.');
+                return this.getSeedProjectData();
+            }
+
             this.cache.projects = data.projects;
             return data.projects;
         } catch (error) {
-            console.error('Erro ao carregar projetos:', error);
-            return [];
+            console.error('Erro ao carregar projetos, carregando Seed:', error);
+            return this.getSeedProjectData();
         }
+    },
+
+    /**
+     * Seed Data Generators
+     */
+    getSeedBlogData() {
+        return [{
+            id: 'seed-post-1',
+            title: 'Bem-vindo ao seu novo Portfólio',
+            slug: 'bem-vindo',
+            category: 'INÍCIO',
+            date: new Date().toISOString(),
+            excerpt: 'Este é um post de exemplo. Você pode editá-lo ou excluí-lo no seu painel de administração.',
+            content: 'Bem-vindo ao template! Acesse a aba `/admin` para começar a publicar seu próprio conteúdo. Este editor suporta **Markdown**, imagens, e muito mais.',
+            published: true,
+            featured: true
+        }];
+    },
+
+    getSeedProjectData() {
+        return [{
+            id: 'seed-project-1',
+            title: 'Projeto de Exemplo',
+            slug: 'projeto-exemplo',
+            category: 'Web Design',
+            description: 'Um projeto incrível feito com dedicação e código limpo.',
+            fullDescription: 'Este é um projeto de exemplo para você visualizar a estrutura da página de projetos. Acesse o admin para criar o seu próprio.',
+            imageGradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            published: true,
+            featured: true,
+            year: new Date().getFullYear()
+        }];
     },
 
     /**

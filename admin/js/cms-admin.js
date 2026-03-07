@@ -1,5 +1,5 @@
 /**
- * CMS Admin Panel - Magic Oven
+ * CMS Admin Panel - {{SITE_NAME}}
  * Sistema de administração com API REST e autenticação
  */
 
@@ -798,7 +798,7 @@ const AdminCMS = {
             category: category.toUpperCase(),
             excerpt,
             content: content || '<p>Conteúdo em breve...</p>',
-            author: 'Magic Oven',
+            author: '{{SITE_NAME}}',
             tags,
             featured,
             published

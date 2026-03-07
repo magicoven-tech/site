@@ -1,94 +1,82 @@
-# 🚀 Magic Oven - Estúdio Digital Experimental
+# 🎨 Portfólio & CMS Template
 
-Estúdio digital focado em experiências interativas de alta performance, unindo design brutalista moderno e tecnologia WebGL.
-
-## ⚡ Quick Start
-
-### 1. Instalar Dependências
-```bash
-npm install
-```
-
-### 2. Iniciar o Servidor
-```bash
-npm start
-```
-
-O site estará disponível em: **http://localhost:3000**
+Bem-vindo ao template completo de Portfólio + CMS! Este projeto foi estruturado para que você possa colocar seu portfólio no ar de forma rápida, com um visual moderno e um painel administrativo customizado (CMS) para gerenciar seus posts e projetos sem tocar no código novamente.
 
 ---
 
-## 🎨 Design & Tecnologia
-
-### Bruralismo Digital
-O site utiliza uma estética inspirada no brutalismo moderno e cyberpunk, com foco em tipografia forte e interatividade crua.
-
-**Core Stack:**
-- **Frontend**: HTML5, Vanilla CSS, JavaScript (ES6+)
-- **Gráficos**: [Three.js](https://threejs.org/) para o fundo interativo.
-- **Efeitos**: Bayer Dithering (Ordered Dithering) e Glitch dinâmico.
-- **Backend**: Node.js + Express para o CMS integrado.
-
-**Cores:**
-- **Background**: `#080808`
-- **Accent (Green)**: `#27FF2B` (Logo e interações especiais)
-- **Dithering**: `#a0a0a0` (Camada visual de textura)
+## ✨ Funcionalidades
+- **Portfólio & Blog**: Páginas limpas e responsivas prontas para exibir seu trabalho.
+- **Painel Admin**: Área logada para adicionar/editar conteúdos via markdown, com suporte a upload de imagens na pasta local (via backend server) e embeds.
+- **Configuração Simples**: Todas as suas redes sociais, e-mail e nome ficam centralizados num único arquivo.
+- **Modo Offline/Seed**: O site funcionará com dados de "exemplo" até você configurar o banco de dados real.
 
 ---
 
-## ✨ Funcionalidades em Destaque
+## 🚀 Como Começar (Passo a Passo)
 
-### 1. Hero Background Interativo
-Implementado com Three.js e Shaders customizados:
-- **Bayer Dithering**: Técnica de dithering ordenado para textura retrô-digital.
-- **Rastro Generativo**: O mouse deixa um caminho de partículas que desvanecem organicamente.
-- **Impact Ripples**: Cliques no fundo geram ondas de choque que alteram a densidade do dithering.
-- **Transição Fluida**: O fundo se funde suavemente com a seção de projetos através de um efeito de *bleed* e gradientes de máscara.
+### 1. Configure suas Informações Pessoais
+Abra o arquivo `js/config.js` na raiz do site. É aqui que toda a "mágica" acontece.
+Substitua os valores dentro de `TEMPLATE_CONFIG`:
 
-### 2. Glitch System
-Efeito de glitch procedimental aplicado ao logotipo e textos de destaque, simulando instabilidade digital.
-
----
-
-## � CMS & Gerenciamento
-
-O projeto possui um CMS (Content Management System) leve e customizado para gerenciar o blog e o portfólio.
-
-### Acesso ao Painel
+```javascript
+const TEMPLATE_CONFIG = {
+    site: {
+        name: "SEU NOME",
+        // ... outras configs ...
+    },
+    contact: {
+        email: "seu.email@exemplo.com",
+        instagramUrl: "https://instagram.com/seu.perfil",
+        // ... outras configs ...
+    }
+}
 ```
-URL: http://localhost:3000/admin/login.html
-Usuário: admin
-Senha: admin123
-```
+*Dica: o sistema substituirá automaticamente essas informações nos arquivos HTML sem você precisar editá-los um por um.*
+
+### 2. Rodando o Projeto Localmente
+Para testar seu site no seu computador:
+
+1. Certifique-se de ter o Node.js instalado.
+2. Navegue até a pasta do projeto e instale as dependências executando:
+   `npm install`
+3. Inicie o servidor local (que também serve a API):
+   `npm run dev` ou `node server.js`
+4. Acesse `http://localhost:3000` no seu navegador!
+
+### 3. Configuração do Painel Admin (Backend & KVDB)
+O painel administrativo salva suas informações na nuvem (usando o serviço KVDB.io como banco de dados NoSQL gratuito) e faz upload de imagens para a pasta `/uploads`.
+
+1. Acesse [kvdb.io](https://kvdb.io/) e crie um Bucket gratuito apertando em **Create Bucket**.
+2. Copie o **Bucket ID** gerado (uma chave longa com letras e números).
+3. Na raiz do projeto, você verá um arquivo chamado `.env` ou precisará criá-lo (basta renomear um `.env.example`).
+4. Digite a seguinte configuração no seu `.env`:
+   ```env
+   KVDB_BUCKET=seu_bucket_id_aqui
+   ADMIN_PASSWORD=sua_senha_secreta_aqui
+   JWT_SECRET=escreva_qualquer_coisa_aleatoria_aqui
+   ```
+5. Reinicie seu servidor Node (`node server.js`).
+6. Acesse `http://localhost:3000/admin/login.html` e faça o login com o e-mail (usado no passo 1) e a senha (criada no passo 4).
+
+> **Atenção:** As imagens subidas no CMS ficarão salvas na pasta `/uploads` do backend Node.js.
 
 ---
 
-## � Referências & Créditos
+## 🌐 Deploy (Colocando no Ar)
+Como esse projeto depende de um servidor Node.js (por conta do Painel Admin e uploads), a melhor plataforma gratuita para hospedá-lo é o **Render** ou **Railway**.
 
-- **Favicon**: Gerado via [favicon.io](https://favicon.io/favicon-converter/).
-- **Bayer Dithering Concept**: Inspirado no tutorial da [Codrops (Tympanus)](https://tympanus.net/Tutorials/BayerDithering/).
-- **Visual Inspiration**: Inspirado na estética experimental do estúdio `ejtech.studio`.
-
----
-
-## �️ Estrutura do Projeto
-
-```
-site/
-├── server.js              # Servidor Node.js
-├── data/                  # Armazenamento JSON (Blog/Projetos)
-├── assets/                # Imagens, SVGs e Favicons
-├── css/
-│   └── main.css          # Design System e Layout
-├── js/
-│   ├── hero-background.js # Engine Three.js + Shaders
-│   ├── glitch-text.js     # Lógica do efeito de glitch
-│   ├── cms.js             # Consumo dinâmico de dados
-│   └── main.js            # Interações globais
-└── admin/                 # Interface do CMS
-```
+### Hospedando no Render
+1. Crie uma conta no [Render](https://render.com/).
+2. Clique em **New** > **Web Service**.
+3. Conecte seu repositório do GitHub contendo este código.
+4. O Render detectará que é um projeto Node. Deixe o 'Build Command' como `npm install` e o 'Start Command' como `node server.js`.
+5. Vá na aba de **Advanced / Environment Variables** e adicione suas variáveis:
+   - `KVDB_BUCKET` : (seu bucket ID)
+   - `ADMIN_PASSWORD` : (sua senha segura)
+   - `JWT_SECRET` : (seu JWT secret)
+6. Finalize o processo. Após o deploy com sucesso, o Render te dará um link como `https://meu-portfolio.onrender.com`.
+7. **Último Passo:** Volte no seu código, abra o arquivo `js/config.js` e insira essa nova URL do Render em `api.baseURL`! Faça o push pro GitHub e seu site estará finalizado!
 
 ---
 
-**Magic Oven** - Estúdio Digital Experimental  
-Feito com magia e código ✨
+Feito com ☕ e Código. Você pode customizar o CSS na pasta `/css` livremente!

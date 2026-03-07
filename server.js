@@ -1,5 +1,5 @@
 /**
- * Magic Oven CMS - Backend Server
+ * {{SITE_NAME}} CMS - Backend Server
  * Servidor Express com autenticação JWT e API REST
  */
 
@@ -24,8 +24,8 @@ app.use(cors({
         // Permite localhost e o domínio em produção
         const allowedOrigins = [
             'http://localhost:3000',
-            'https://magicoven.tech',
-            'https://www.magicoven.tech'
+            'https://{{SITE_URL}}',
+            'https://www.{{SITE_URL}}'
         ];
 
         // Permite requisições sem origin (mobile apps, curl, etc)
@@ -507,7 +507,7 @@ async function initializeUsers() {
                     username: 'admin',
                     password: defaultPassword,
                     name: 'Administrador',
-                    email: 'magicoven.tech@gmail.com'
+                    email: '{{AUTHOR_EMAIL}}'
                 }
             ]
         };
@@ -527,7 +527,7 @@ app.listen(PORT, async () => {
     await initializeUsers();
     console.log(`
 ╔══════════════════════════════════════╗
-║   Magic Oven CMS Backend Server      ║
+║   {{SITE_NAME}} CMS Backend Server      ║
 ╚══════════════════════════════════════╝
 
 🚀 Servidor rodando em: http://localhost:${PORT}
