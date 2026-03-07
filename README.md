@@ -90,5 +90,21 @@ site/
 
 ---
 
+## 🌐 Manutenção & Disponibilidade (Render)
+
+Como este projeto utiliza o plano gratuito do **Render**, o servidor entra em modo de hibernação após 15 minutos de inatividade. Para garantir que o site carregue instantaneamente para os visitantes, utilizamos um serviço de "ping" externo.
+
+### Como evitar a hibernação do site:
+1. Crie uma conta gratuita em [cron-job.org](https://cron-job.org/en/).
+2. No Dashboard, clique em **CREATE CRONJOB**.
+3. **Title**: `Magic Oven Render Ping`
+4. **URL**: `https://prj-d5ahb2je5dus73f4cdm0.onrender.com/api/health`
+5. **Execution schedule**: Configure para rodar **A cada 14 minutos**.
+6. Clique em **CREATE**.
+
+Isso manterá o servidor "acordado" 24/7 sem custos adicionais.
+
+---
+
 **Magic Oven** - Estúdio Digital Experimental  
 Feito com magia e código ✨
