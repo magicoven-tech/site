@@ -156,11 +156,13 @@ function gitSync(message) {
     const gitToken = process.env.GITHUB_TOKEN;
     const gitRepo = process.env.GITHUB_REPO; // Formato: usuario/repositorio
 
-    let pushCommand = 'git push origin main';
+    // ATENÇÃO: O Render faz o checkout em estado "Detached HEAD".
+    // Precisamos forçar o push do commit atual (HEAD) para a branch remota 'main'.
+    let pushCommand = 'git push origin HEAD:main';
 
     // Se tivermos as credenciais, usamos a URL autenticada
     if (gitToken && gitRepo) {
-        pushCommand = `git push https://${gitToken}@github.com/${gitRepo}.git main`;
+        pushCommand = `git push https://${gitToken}@github.com/${gitRepo}.git HEAD:main`;
     }
 
     // Configuração mínima do Git (necessária para realizar commits)
@@ -171,14 +173,15 @@ function gitSync(message) {
 
     exec(gitCommand, (error, stdout, stderr) => {
         if (error) {
-            console.error(`❌ Erro no Git Sync: ${error.message}`);
+            console.error(`❌ Erro crítico no Git Sync: ${error.message}`);
+            console.error(`🔍 STDERR: ${stderr}`);
             // Em caso de erro localmente, pode ser que o "origin main" não exista ou precise de push manual
             return;
         }
         if (stderr && !stderr.includes('Everything up-to-date') && !stderr.includes('remote:')) {
             console.warn(`⚠️ Git Warning: ${stderr}`);
         }
-        console.log(`✅ Git Sync concluído com sucesso: ${stdout}`);
+        console.log(`✅ Git Sync concluído com sucesso! \nDetalhes: ${stdout}`);
     });
 }
 
