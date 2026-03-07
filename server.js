@@ -166,8 +166,10 @@ function gitSync(message) {
     }
 
     // Configuração mínima do Git (necessária para realizar commits)
-    const setupUser = `git config --global user.email "bot@magicoven.tech" && git config --global user.name "Magic Oven Bot"`;
-    const gitCommand = `${setupUser} && git add . && git commit -m "${message}" && ${pushCommand}`;
+    const setupUser = `git config --global user.email "brunobezerranepomuceno@gmail.com" && git config --global user.name "brunonepomuceno"`;
+    // Escapa aspas simples e coloca a mensagem entre aspas simples para proteger contra quebras no shell bash do Linux (Render)
+    const safeMessage = message.replace(/'/g, "'\\''");
+    const gitCommand = `${setupUser} && git add . && git commit -m '${safeMessage}' && ${pushCommand}`;
 
     console.log(`🚀 Iniciando sincronização Git: ${message}`);
 
