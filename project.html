@@ -165,10 +165,13 @@
 
                         <!-- Hero do Projeto -->
                         <header style="margin-bottom: var(--spacing-3xl);">
+
+
+                            <h1 style="font-size: clamp(2.5rem, 6vw, 4rem); font-weight: var(--font-weight-bold); line-height: 1.1; margin-bottom: var(--spacing-sm); margin-top: var(--spacing-3xl); color: var(--color-text-primary); text-transform: uppercase; font-style: italic;">
+                                ${project.title}
+                            </h1>
+
                             <div style="display: flex; gap: var(--spacing-md); margin-bottom: var(--spacing-lg); flex-wrap: wrap; align-items: center;">
-                                <span style="color: var(--color-text-secondary); font-family: var(--font-mono); font-size: var(--font-size-sm);">
-                                    PROJETO ${project.number || '00'}
-                                </span>
                                 <span style="color: var(--color-accent-primary); font-weight: var(--font-weight-bold); font-size: var(--font-size-sm);">
                                     ${project.category}
                                 </span>
@@ -178,10 +181,6 @@
                                     </span>
                                 ` : ''}
                             </div>
-
-                            <h1 style="font-size: clamp(2.5rem, 6vw, 4rem); font-weight: var(--font-weight-bold); line-height: 1.1; margin-bottom: var(--spacing-sm); margin-top: var(--spacing-3xl); color: var(--color-text-primary); text-transform: uppercase; font-style: italic;">
-                                ${project.title}
-                            </h1>
 
                             <p style="font-size: var(--font-size-xl); color: var(--color-text-secondary); line-height: 1.6; max-width: 800px;">
                                 ${project.description}
