@@ -9,7 +9,14 @@ Estúdio digital focado em experiências interativas de alta performance, unindo
 npm install
 ```
 
-### 2. Iniciar o Servidor
+### 2. Configurar Variáveis de Ambiente Locais
+Crie um arquivo `.env` na raiz do projeto (ele não será enviado ao GitHub). Ele é necessário para a sincronização Git (GitSync) do CMS localmente:
+```env
+GIT_USER_EMAIL=seu-email@exemplo.com
+GIT_USER_NAME="Seu Nome"
+```
+
+### 3. Iniciar o Servidor
 ```bash
 npm start
 ```

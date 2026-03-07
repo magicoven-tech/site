@@ -3,6 +3,7 @@
  * Servidor Express com autenticação JWT e API REST
  */
 
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
@@ -165,8 +166,11 @@ function gitSync(message) {
         pushCommand = `git push https://${gitToken}@github.com/${gitRepo}.git HEAD:main`;
     }
 
-    // Configuração mínima do Git (necessária para realizar commits)
-    const setupUser = `git config --global user.email "brunobezerranepomuceno@gmail.com" && git config --global user.name "brunonepomuceno"`;
+    // Configuração do Git via variáveis de ambiente para segurança
+    const gitEmail = process.env.GIT_USER_EMAIL || "bot@magicoven.tech";
+    const gitName = process.env.GIT_USER_NAME || "Magic Oven Bot";
+
+    const setupUser = `git config --global user.email "${gitEmail}" && git config --global user.name "${gitName}"`;
     // Escapa aspas simples e coloca a mensagem entre aspas simples para proteger contra quebras no shell bash do Linux (Render)
     const safeMessage = message.replace(/'/g, "'\\''");
     const gitCommand = `${setupUser} && git add . && git commit -m '${safeMessage}' && ${pushCommand}`;
