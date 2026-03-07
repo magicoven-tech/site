@@ -111,5 +111,19 @@ Isso manterá o servidor "acordado" 24/7 sem custos adicionais.
 
 ---
 
+## 💾 Persistência com GitHub (GitSync)
+
+Como o Render apaga arquivos locais no plano grátis, implementamos uma rotina de sincronização automática. Toda vez que você salvar, editar ou deletar um post ou projeto no CMS, o servidor fará um `git commit` com o título da alteração e um `git push` de volta para o seu repositório.
+
+### Como configurar para o Render salvar permanentemente:
+Para que o servidor tenha permissão de gravar no seu GitHub em produção, você deve adicionar estas duas **Environment Variables** no painel do Render em *Dashboard > Seu Serviço > Settings > Env Vars*:
+
+1. **`GITHUB_TOKEN`**: Um Token de Acesso Pessoal (PAT) gerado no seu GitHub com permissão de escrita (*Contents: Read & Write*).
+2. **`GITHUB_REPO`**: O caminho do seu repositório no formato `usuario/projeto` (ex: `magicoven-tech/site`).
+
+**Nota:** Se você estiver rodando localmente (`npm run dev`), o sistema também tentará fazer o commit/push se você tiver permissão de Git configurada na sua máquina!
+
+---
+
 **Magic Oven** - Estúdio Digital Experimental  
 Feito com magia e código ✨

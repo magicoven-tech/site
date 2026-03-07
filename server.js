@@ -12,6 +12,7 @@ const fs = require('fs').promises;
 const path = require('path');
 const multer = require('multer');
 const matter = require('gray-matter');
+const { exec } = require('child_process');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -141,6 +142,44 @@ function verifyToken(req, res, next) {
     } catch (error) {
         return res.status(403).json({ error: 'Token inválido ou expirado' });
     }
+}
+
+// ============================================
+// HELPERS - Git Sync
+// ============================================
+
+/**
+ * Realiza o commit e push das alterações para o GitHub
+ */
+function gitSync(message) {
+    // Para funcionar em produção (Render), você deve configurar GITHUB_TOKEN e GITHUB_REPO no painel.
+    const gitToken = process.env.GITHUB_TOKEN;
+    const gitRepo = process.env.GITHUB_REPO; // Formato: usuario/repositorio
+
+    let pushCommand = 'git push origin main';
+
+    // Se tivermos as credenciais, usamos a URL autenticada
+    if (gitToken && gitRepo) {
+        pushCommand = `git push https://${gitToken}@github.com/${gitRepo}.git main`;
+    }
+
+    // Configuração mínima do Git (necessária para realizar commits)
+    const setupUser = `git config --global user.email "bot@magicoven.tech" && git config --global user.name "Magic Oven Bot"`;
+    const gitCommand = `${setupUser} && git add . && git commit -m "${message}" && ${pushCommand}`;
+
+    console.log(`🚀 Iniciando sincronização Git: ${message}`);
+
+    exec(gitCommand, (error, stdout, stderr) => {
+        if (error) {
+            console.error(`❌ Erro no Git Sync: ${error.message}`);
+            // Em caso de erro localmente, pode ser que o "origin main" não exista ou precise de push manual
+            return;
+        }
+        if (stderr && !stderr.includes('Everything up-to-date') && !stderr.includes('remote:')) {
+            console.warn(`⚠️ Git Warning: ${stderr}`);
+        }
+        console.log(`✅ Git Sync concluído com sucesso: ${stdout}`);
+    });
 }
 
 // Função para gerar token
@@ -325,6 +364,10 @@ app.post('/api/blog', requireAuth, async (req, res) => {
 
         await fs.writeFile(path.join(POSTS_DIR, `${finalSlug}.md`), fileContent);
         console.log(`✅ Post criado: ${finalSlug}`);
+
+        // Sincroniza com GitHub
+        gitSync(`cms(blog): adicionar post "${title}"`);
+
         res.json({ success: true, post: { ...newPost, content } });
     } catch (error) {
         console.error('❌ Erro ao salvar post:', error);
@@ -365,6 +408,10 @@ app.put('/api/blog/:id', requireAuth, async (req, res) => {
         await fs.writeFile(path.join(POSTS_DIR, `${existingPost.slug}.md`), fileContent);
 
         console.log(`✅ Post atualizado: ${existingPost.slug}`);
+
+        // Sincroniza com GitHub
+        gitSync(`cms(blog): atualizar post "${updatedPost.title}"`);
+
         res.json({ success: true, post: { ...updatedPost, content } });
     } catch (error) {
         console.error('❌ Erro ao atualizar post:', error);
@@ -383,6 +430,10 @@ app.delete('/api/blog/:id', requireAuth, async (req, res) => {
 
     try {
         await fs.unlink(path.join(POSTS_DIR, `${post.slug}.md`));
+
+        // Sincroniza com GitHub
+        gitSync(`cms(blog): remover post "${post.title}"`);
+
         res.json({ success: true });
     } catch (error) {
         console.error('Erro ao deletar post:', error);
@@ -438,6 +489,9 @@ app.post('/api/projects', requireAuth, async (req, res) => {
         return res.status(500).json({ error: 'Erro ao salvar projeto' });
     }
 
+    // Sincroniza com GitHub
+    gitSync(`cms(projects): adicionar projeto "${newProject.title}"`);
+
     res.json({ success: true, project: newProject });
 });
 
@@ -464,6 +518,9 @@ app.put('/api/projects/:id', requireAuth, async (req, res) => {
         return res.status(500).json({ error: 'Erro ao atualizar projeto' });
     }
 
+    // Sincroniza com GitHub
+    gitSync(`cms(projects): atualizar projeto "${data.projects[index].title}"`);
+
     res.json({ success: true, project: data.projects[index] });
 });
 
@@ -479,12 +536,16 @@ app.delete('/api/projects/:id', requireAuth, async (req, res) => {
         return res.status(404).json({ error: 'Projeto não encontrado' });
     }
 
+    const project = data.projects[index];
     data.projects.splice(index, 1);
     const success = await writeJSON(PROJECTS_FILE, data);
-
     if (!success) {
         return res.status(500).json({ error: 'Erro ao deletar projeto' });
     }
+
+    // Sincroniza com GitHub
+    const projectName = project ? project.title : req.params.id;
+    gitSync(`cms(projects): remover projeto "${projectName}"`);
 
     res.json({ success: true });
 });
