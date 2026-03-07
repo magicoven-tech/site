@@ -23,14 +23,14 @@ content: |+
   > O design digital está em constante evolução...
 
 
-  ![Legenda da Imagem](/uploads/image-1768451781904-285413634.webp)
+  ![futuro do design](/uploads/image-1768451781904-285413634.webp)
 ---
 
 ## O Futuro do Design Digital em 2027
 
 
 
-> O design digital está em constante evolução...
+O design digital está em constante evolução...
 
 
 ![futuro do design](/uploads/image-1768451781904-285413634.webp)
