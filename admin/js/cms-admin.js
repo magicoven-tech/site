@@ -234,21 +234,24 @@ const AdminCMS = {
             });
         }
 
-        // Toolbar do Editor (Blog)
-        this.setupEditorToolbar();
+        // Toolbar do Editor
+        this.setupEditorToolbar('blog-content', 'toolbar', 'blog-image-input');
+        this.setupEditorToolbar('project-full-description', 'project-toolbar', 'project-full-description-image-input');
 
         // Menu de Formatação (Seleção)
-        this.setupFormattingMenu();
+        this.setupFormattingMenu('blog-content');
+        this.setupFormattingMenu('project-full-description');
 
         // Menu de Imagem (Cursor)
-        this.setupImageMenu();
+        this.setupImageMenu('blog-content');
+        this.setupImageMenu('project-full-description');
     },
 
     /**
      * Configura o menu de formatação de imagem (Tamanhos)
      */
-    setupImageMenu() {
-        const textarea = document.getElementById('blog-content');
+    setupImageMenu(textareaId = 'blog-content') {
+        const textarea = document.getElementById(textareaId);
         const menu = document.getElementById('image-menu');
 
         if (!textarea || !menu) return;
@@ -261,11 +264,15 @@ const AdminCMS = {
         textarea.addEventListener('click', checkCursor);
 
         // Esconder menu ao clicar fora
-        document.addEventListener('mousedown', (e) => {
-            if (!menu.contains(e.target) && e.target !== textarea) {
-                menu.classList.remove('active');
-            }
-        });
+        if (!menu.hasAttribute('data-listener')) {
+            document.addEventListener('mousedown', (e) => {
+                const isEditor = e.target.tagName === 'TEXTAREA' || e.target.closest('.editor-wrapper');
+                if (!menu.contains(e.target) && !isEditor) {
+                    menu.classList.remove('active');
+                }
+            });
+            menu.setAttribute('data-listener', 'true');
+        }
 
         // Ações de redimensionamento
         menu.querySelectorAll('.format-btn').forEach(btn => {
@@ -381,8 +388,8 @@ const AdminCMS = {
     /**
      * Lida com a seleção de texto e posicionamento do menu (Formatação)
      */
-    setupFormattingMenu() {
-        const textarea = document.getElementById('blog-content');
+    setupFormattingMenu(textareaId = 'blog-content') {
+        const textarea = document.getElementById(textareaId);
         const menu = document.getElementById('formatting-menu');
 
         if (!textarea || !menu) return;
@@ -396,11 +403,15 @@ const AdminCMS = {
         });
 
         // Esconder menu ao clicar fora
-        document.addEventListener('mousedown', (e) => {
-            if (!menu.contains(e.target) && e.target !== textarea) {
-                menu.classList.remove('active');
-            }
-        });
+        if (!menu.hasAttribute('data-listener')) {
+            document.addEventListener('mousedown', (e) => {
+                const isEditor = e.target.tagName === 'TEXTAREA' || e.target.closest('.editor-wrapper');
+                if (!menu.contains(e.target) && !isEditor) {
+                    menu.classList.remove('active');
+                }
+            });
+            menu.setAttribute('data-listener', 'true');
+        }
 
         // Ações de formatação
         menu.querySelectorAll('.format-btn').forEach(btn => {
@@ -508,10 +519,16 @@ const AdminCMS = {
     /**
      * Configura a toolbar do editor
      */
-    setupEditorToolbar() {
-        const toggleBtn = document.getElementById('toolbar-toggle');
-        const toolbar = document.querySelector('.editor-toolbar');
-        const blogImageInput = document.getElementById('blog-image-input');
+    setupEditorToolbar(textareaId = 'blog-content', toolbarPrefix = 'toolbar', imageInputId = 'blog-image-input') {
+        const toggleBtn = document.getElementById(`${toolbarPrefix}-toggle`);
+
+        // Find the specific toolbar for this textarea
+        const textarea = document.getElementById(textareaId);
+        if (!textarea) return;
+
+        const wrapper = textarea.closest('.editor-wrapper');
+        const toolbar = wrapper ? wrapper.querySelector('.editor-toolbar') : document.querySelector('.editor-toolbar');
+        const imageInput = document.getElementById(imageInputId);
 
         if (!toggleBtn || !toolbar) return;
 
@@ -523,52 +540,69 @@ const AdminCMS = {
         });
 
         // Opção de Imagem
-        document.getElementById('toolbar-image').addEventListener('click', () => {
-            blogImageInput.click();
-        });
+        const btnImage = document.getElementById(`${toolbarPrefix}-image`);
+        if (btnImage && imageInput) {
+            btnImage.addEventListener('click', () => {
+                imageInput.click();
+            });
 
-        blogImageInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                this.handleImageUpload(file, (url) => {
-                    const markdown = `\n![Legenda da Imagem](${url})\n`;
-                    this.insertAtCursor('blog-content', markdown);
-                    toolbar.classList.remove('active');
-                    toggleBtn.textContent = '+';
-                    // Scroll para o fim da inserção se necessário ou foco
-                });
-            }
-        });
+            // Prevent multiple binding if the image setup is called twice, though normally an issue on singletons
+            // Given the inputs are unique per textarea this should be fine
+            imageInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    this.handleImageUpload(file, (url) => {
+                        const markdown = `\n![Legenda da Imagem](${url})\n`;
+                        this.insertAtCursor(textareaId, markdown);
+                        toolbar.classList.remove('active');
+                        toggleBtn.textContent = '+';
+                        // Scroll para o fim da inserção se necessário ou foco
+                    });
+                }
+            });
+        }
 
         // Opção de Vídeo
-        document.getElementById('toolbar-video').addEventListener('click', () => {
-            const code = `\n<div class="video-container">\n  <iframe src="URL_DO_VIDEO_AQUI" title="Video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>\n</div>\n`;
-            this.insertAtCursor('blog-content', code);
-            toolbar.classList.remove('active');
-            toggleBtn.textContent = '+';
-        });
+        const btnVideo = document.getElementById(`${toolbarPrefix}-video`);
+        if (btnVideo) {
+            btnVideo.addEventListener('click', () => {
+                const code = `\n<div class="video-container">\n  <iframe src="URL_DO_VIDEO_AQUI" title="Video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>\n</div>\n`;
+                this.insertAtCursor(textareaId, code);
+                toolbar.classList.remove('active');
+                toggleBtn.textContent = '+';
+            });
+        }
 
         // Opção de Código
-        document.getElementById('toolbar-code').addEventListener('click', () => {
-            const code = `\n\`\`\`javascript\n// Seu código aqui\n\`\`\`\n`;
-            this.insertAtCursor('blog-content', code);
-            toolbar.classList.remove('active');
-            toggleBtn.textContent = '+';
-        });
+        const btnCode = document.getElementById(`${toolbarPrefix}-code`);
+        if (btnCode) {
+            btnCode.addEventListener('click', () => {
+                const code = `\n\`\`\`javascript\n// Seu código aqui\n\`\`\`\n`;
+                this.insertAtCursor(textareaId, code);
+                toolbar.classList.remove('active');
+                toggleBtn.textContent = '+';
+            });
+        }
 
         // Opção de Divisor
-        document.getElementById('toolbar-divider').addEventListener('click', () => {
-            this.insertAtCursor('blog-content', '\n---\n');
-            toolbar.classList.remove('active');
-            toggleBtn.textContent = '+';
-        });
+        const btnDivider = document.getElementById(`${toolbarPrefix}-divider`);
+        if (btnDivider) {
+            btnDivider.addEventListener('click', () => {
+                this.insertAtCursor(textareaId, '\n---\n');
+                toolbar.classList.remove('active');
+                toggleBtn.textContent = '+';
+            });
+        }
 
         // Opção de Embed/Link
-        document.getElementById('toolbar-embed').addEventListener('click', () => {
-            this.insertAtCursor('blog-content', '\n[Texto do Link](https://exemplo.com)\n');
-            toolbar.classList.remove('active');
-            toggleBtn.textContent = '+';
-        });
+        const btnEmbed = document.getElementById(`${toolbarPrefix}-embed`);
+        if (btnEmbed) {
+            btnEmbed.addEventListener('click', () => {
+                this.insertAtCursor(textareaId, '\n[Texto do Link](https://exemplo.com)\n');
+                toolbar.classList.remove('active');
+                toggleBtn.textContent = '+';
+            });
+        }
     },
 
     /**
