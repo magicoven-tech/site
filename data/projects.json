@@ -1,3 +1,24 @@
 {
-  "projects": []
+  "projects": [
+    {
+      "id": "1773714533504",
+      "title": "ALGUÉM ALCIONE OS BOMBEIROS",
+      "slug": "alguem-alcione-os-bombeiros",
+      "category": "Meme",
+      "description": "Alguém Alcione os bombeiros",
+      "fullDescription": "\n## Alguém Alcione os bombeiros\n\n### Alguém Alcione os bombeiros\n\n![Legenda da Imagem](/uploads/image-1773714491414-18743414.jpg)\n",
+      "client": "Magic Oven",
+      "year": "2026",
+      "services": [],
+      "technologies": [],
+      "image": "/uploads/image-1773714508335-889874855.jpg",
+      "imageGradient": "linear-gradient(135deg, #27FF2B 0%, #1ed923 100%)",
+      "featured": true,
+      "published": true,
+      "gallery": [],
+      "url": "https://magicoven.tech",
+      "tags": [],
+      "number": "01"
+    }
+  ]
 }
