@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gerenciar Conteúdo</title>
+  <title>Gerenciar conteúdo</title>
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="../assets/favicon/favicon-32x32.png" sizes="32x32" />
   <link rel="icon" type="image/png" href="../assets/favicon/favicon-16x16.png" sizes="16x16" />
@@ -88,7 +88,7 @@
       align-items: center;
       transition: all var(--transition-base);
     }
-    
+
     .item-card.selected {
       border: 1px solid var(--color-accent-primary);
       background: rgba(39, 255, 43, 0.05);
@@ -99,7 +99,7 @@
       display: flex;
       align-items: center;
     }
-    
+
     .item-checkbox input {
       width: 18px;
       height: 18px;
@@ -116,7 +116,7 @@
       margin-bottom: var(--spacing-md);
       border: 1px solid rgba(255, 255, 255, 0.05);
     }
-    
+
     .select-all-container label {
       cursor: pointer;
       user-select: none;
@@ -125,7 +125,7 @@
       color: var(--color-text-secondary);
       transition: color var(--transition-base);
     }
-    
+
     .select-all-container:hover label {
       color: var(--color-text-primary);
     }
@@ -147,16 +147,23 @@
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-5px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(-5px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
-    
+
     .batch-info {
       font-size: var(--font-size-sm);
       color: var(--color-text-primary);
       font-weight: var(--font-weight-semibold);
     }
-    
+
     .batch-actions-buttons {
       display: flex;
       gap: var(--spacing-md);
@@ -724,7 +731,8 @@
         <div class="batch-info"><span id="blog-selected-count">0</span> item(s) selecionado(s)</div>
         <div class="batch-actions-buttons">
           <button class="btn btn-outline" onclick="AdminCMS.clearSelection('blog')">Cancelar</button>
-          <button class="btn btn-primary" style="background-color: #ff3b30; color: white; border-color: #ff3b30;" onclick="AdminCMS.batchDelete('blog')">🗑️ Excluir Selecionados</button>
+          <button class="btn btn-primary" style="background-color: #ff3b30; color: white; border-color: #ff3b30;"
+            onclick="AdminCMS.batchDelete('blog')">🗑️ Excluir Selecionados</button>
         </div>
       </div>
 
@@ -805,7 +813,8 @@
               </div>
             </div>
 
-            <textarea id="project-full-description" style="min-height: 200px; font-family: 'Space Grotesk', sans-serif; line-height: 1.6;"></textarea>
+            <textarea id="project-full-description"
+              style="min-height: 200px; font-family: 'Space Grotesk', sans-serif; line-height: 1.6;"></textarea>
             <input type="file" id="project-full-description-image-input" accept="image/*" style="display: none;">
           </div>
 
@@ -863,7 +872,8 @@
         <div class="batch-info"><span id="projects-selected-count">0</span> item(s) selecionado(s)</div>
         <div class="batch-actions-buttons">
           <button class="btn btn-outline" onclick="AdminCMS.clearSelection('projects')">Cancelar</button>
-          <button class="btn btn-primary" style="background-color: #ff3b30; color: white; border-color: #ff3b30;" onclick="AdminCMS.batchDelete('projects')">🗑️ Excluir Selecionados</button>
+          <button class="btn btn-primary" style="background-color: #ff3b30; color: white; border-color: #ff3b30;"
+            onclick="AdminCMS.batchDelete('projects')">🗑️ Excluir Selecionados</button>
         </div>
       </div>
 
