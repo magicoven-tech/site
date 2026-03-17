@@ -159,6 +159,49 @@
                 // Atualiza título da página
                 document.getElementById('page-title').textContent = `${project.title} - Magic Oven`;
 
+                // Configura renderer do Marked
+                const renderer = new marked.Renderer();
+
+                // Custom Image Renderer
+                renderer.image = function (href, title, text) {
+                    let cleanHref = href.replace(/#(medium|full)$/, '');
+
+                    // Se a imagem for local (/uploads/...) prefixa com a URL da API da config
+                    if (cleanHref.startsWith('/uploads/')) {
+                        cleanHref = `${API_CONFIG.baseURL}${cleanHref}`;
+                    }
+
+                    let className = 'post-image';
+                    let wrapperClass = '';
+
+                    if (href.endsWith('#medium')) {
+                        className += ' image-medium';
+                        wrapperClass = 'figure-medium';
+                    } else if (href.endsWith('#full')) {
+                        className += ' image-full';
+                        wrapperClass = 'figure-full';
+                    } else {
+                        wrapperClass = 'figure-standard';
+                    }
+
+                    return `
+                        <figure class="${wrapperClass}">
+                            <img src="${cleanHref}" alt="${text || 'Project Image'}" title="${title || ''}" class="${className}">
+                            ${text ? `<figcaption>${text}</figcaption>` : ''}
+                        </figure>
+                    `;
+                };
+
+                // Remove Wrapping P for Images (hacky but works for marked)
+                renderer.paragraph = function (text) {
+                    if (text.trim().startsWith('<figure')) {
+                        return text;
+                    }
+                    return `<p>${text}</p>`;
+                };
+
+                marked.use({ renderer });
+
                 // Renderiza o projeto
                 container.innerHTML = `
                     <div class="section-container" style="max-width: 1200px; padding: var(--spacing-3xl) var(--spacing-lg);">
@@ -243,8 +286,8 @@
 
                         <!-- Descrição Completa -->
                         ${project.fullDescription ? `
-                            <div class="project-body" style="color: var(--color-text-secondary); line-height: 1.8; font-size: var(--font-size-lg); margin-bottom: var(--spacing-3xl);">
-                                ${project.fullDescription}
+                            <div class="project-body markdown-content" style="color: var(--color-text-secondary); line-height: 1.8; font-size: var(--font-size-lg); margin-bottom: var(--spacing-3xl);">
+                                ${marked.parse(project.fullDescription)}
                             </div>
                         ` : ''}
 
@@ -317,6 +360,7 @@
             loadProject();
         }
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js"></script>
     <script src="js/main.js"></script>
     <script src="js/glitch-text.js"></script>
 </body>
