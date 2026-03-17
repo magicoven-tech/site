@@ -1,6 +1,26 @@
 {
   "projects": [
     {
+      "id": "1773712148362",
+      "title": "TEST PROJECT 2",
+      "slug": "test-project-2",
+      "category": "DEV",
+      "description": "Desc for project 2",
+      "fullDescription": "<p>Descrição completa em breve...</p>",
+      "client": "Cliente",
+      "year": "2026",
+      "services": [],
+      "technologies": [],
+      "image": "",
+      "imageGradient": "linear-gradient(135deg, #27FF2B 0%, #1ed923 100%)",
+      "featured": false,
+      "published": true,
+      "gallery": [],
+      "url": "",
+      "tags": [],
+      "number": "06"
+    },
+    {
       "id": "1773712049218",
       "title": "TEST PROJECT 1",
       "slug": "test-project-1",
