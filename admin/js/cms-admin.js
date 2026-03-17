@@ -10,6 +10,10 @@ const AdminCMS = {
         blog: null,
         projects: null
     },
+    selectedItems: {
+        blog: new Set(),
+        projects: new Set()
+    },
 
     /**
      * Inicializa o painel admin
@@ -105,8 +109,13 @@ const AdminCMS = {
             return;
         }
 
-        container.innerHTML = posts.map(post => `
-            <div class="item-card">
+        container.innerHTML = posts.map(post => {
+            const isSelected = this.selectedItems.blog.has(post.id);
+            return `
+            <div class="item-card ${isSelected ? 'selected' : ''}">
+                <div class="item-checkbox">
+                    <input type="checkbox" onchange="AdminCMS.toggleSelection('blog', '${post.id}')" ${isSelected ? 'checked' : ''}>
+                </div>
                 <div class="item-info">
                     <h3>
                         <span class="status-indicator status-${post.published ? 'published' : 'draft'}"></span>
@@ -134,7 +143,7 @@ const AdminCMS = {
                     </button>
                 </div>
             </div>
-        `).join('');
+        `}).join('');
     },
 
     /**
@@ -148,8 +157,13 @@ const AdminCMS = {
             return;
         }
 
-        container.innerHTML = projects.map(project => `
-            <div class="item-card">
+        container.innerHTML = projects.map(project => {
+            const isSelected = this.selectedItems.projects.has(project.id);
+            return `
+            <div class="item-card ${isSelected ? 'selected' : ''}">
+                <div class="item-checkbox">
+                    <input type="checkbox" onchange="AdminCMS.toggleSelection('projects', '${project.id}')" ${isSelected ? 'checked' : ''}>
+                </div>
                 <div class="item-info">
                     <h3>
                         <span class="status-indicator status-${project.published ? 'published' : 'draft'}"></span>
@@ -177,7 +191,7 @@ const AdminCMS = {
                     </button>
                 </div>
             </div>
-        `).join('');
+        `}).join('');
     },
 
     /**
@@ -1054,6 +1068,95 @@ const AdminCMS = {
         } catch (error) {
             console.error('Erro ao excluir item:', error);
             alert('❌ Erro ao excluir item. Verifique se o servidor está rodando.');
+        }
+    },
+
+    /**
+     * Alterna seleção para excluir em lote
+     */
+    toggleSelection(type, id) {
+        if (this.selectedItems[type].has(id)) {
+            this.selectedItems[type].delete(id);
+        } else {
+            this.selectedItems[type].add(id);
+        }
+        this.updateBatchUI(type);
+        
+        if(type === 'blog') {
+            this.renderBlogList(this.currentData.blog);
+        } else {
+            this.renderProjectsList(this.currentData.projects);
+        }
+    },
+
+    /**
+     * Limpa seleção
+     */
+    clearSelection(type) {
+        this.selectedItems[type].clear();
+        this.updateBatchUI(type);
+        
+        if(type === 'blog' && this.currentData.blog) {
+            this.renderBlogList(this.currentData.blog);
+        } else if (type === 'projects' && this.currentData.projects) {
+            this.renderProjectsList(this.currentData.projects);
+        }
+    },
+
+    /**
+     * Atualiza UI de lote
+     */
+    updateBatchUI(type) {
+        const count = this.selectedItems[type].size;
+        const bar = document.getElementById(`${type}-batch-actions`);
+        const countSpan = document.getElementById(`${type}-selected-count`);
+        
+        if (bar && countSpan) {
+            countSpan.textContent = count;
+            if (count > 0) {
+                bar.classList.remove('hidden');
+            } else {
+                bar.classList.add('hidden');
+            }
+        }
+    },
+
+    /**
+     * Exclui itens selecionados em lote
+     */
+    async batchDelete(type) {
+        const ids = Array.from(this.selectedItems[type]);
+        if (ids.length === 0) return;
+
+        if (!confirm(`Tem certeza que deseja excluir os ${ids.length} itens selecionados?`)) {
+            return;
+        }
+
+        try {
+            const response = await apiRequest(`/api/${type}/batch-delete`, {
+                method: 'POST',
+                body: JSON.stringify({ ids })
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                alert(`✅ ${data.deletedCount} itens excluídos com sucesso!`);
+                this.selectedItems[type].clear();
+                this.updateBatchUI(type);
+                
+                // Recarrega dados
+                if (type === 'blog') {
+                    await this.loadBlogPosts();
+                } else {
+                    await this.loadProjects();
+                }
+            } else {
+                alert('❌ Erro ao excluir itens: ' + (data.error || 'Erro desconhecido'));
+            }
+        } catch (error) {
+            console.error('Erro ao excluir itens em lote:', error);
+            alert('❌ Erro ao excluir itens em lote. Verifique se o servidor está rodando.');
         }
     }
 };

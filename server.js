@@ -450,6 +450,36 @@ app.delete('/api/blog/:id', requireAuth, async (req, res) => {
     }
 });
 
+// Deletar posts em lote (protegido)
+app.post('/api/blog/batch-delete', requireAuth, async (req, res) => {
+    const { ids } = req.body;
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+        return res.status(400).json({ error: 'Nenhum ID fornecido' });
+    }
+
+    try {
+        const posts = await getAllPosts();
+        let deletedCount = 0;
+
+        for (const id of ids) {
+            const post = posts.find(p => p.id === id || p.slug === id);
+            if (post) {
+                await fs.unlink(path.join(POSTS_DIR, `${post.slug}.md`));
+                deletedCount++;
+            }
+        }
+
+        if (deletedCount > 0) {
+            gitSync(`cms(blog): remover ${deletedCount} posts em lote`);
+        }
+
+        res.json({ success: true, deletedCount });
+    } catch (error) {
+        console.error('Erro no delete em lote de posts:', error);
+        res.status(500).json({ error: 'Erro ao deletar posts' });
+    }
+});
+
 // ============================================
 // ROTAS - Projetos
 // ============================================
@@ -557,6 +587,34 @@ app.delete('/api/projects/:id', requireAuth, async (req, res) => {
     gitSync(`cms(projects): remover projeto "${projectName}"`);
 
     res.json({ success: true });
+});
+
+// Deletar projetos em lote (protegido)
+app.post('/api/projects/batch-delete', requireAuth, async (req, res) => {
+    const { ids } = req.body;
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+        return res.status(400).json({ error: 'Nenhum ID fornecido' });
+    }
+
+    try {
+        const data = await readJSON(PROJECTS_FILE);
+        if (!data) return res.status(500).json({ error: 'Erro ao carregar projetos' });
+
+        const initialLength = data.projects.length;
+        data.projects = data.projects.filter(p => !ids.includes(p.id));
+        const deletedCount = initialLength - data.projects.length;
+
+        if (deletedCount > 0) {
+            const success = await writeJSON(PROJECTS_FILE, data);
+            if (!success) return res.status(500).json({ error: 'Erro ao deletar projetos' });
+            gitSync(`cms(projects): remover ${deletedCount} projetos em lote`);
+        }
+
+        res.json({ success: true, deletedCount });
+    } catch (error) {
+        console.error('Erro no delete em lote de projetos:', error);
+        res.status(500).json({ error: 'Erro ao deletar projetos' });
+    }
 });
 
 // ============================================
