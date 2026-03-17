@@ -107,6 +107,29 @@
       accent-color: var(--color-accent-primary);
     }
 
+    .select-all-container {
+      display: flex;
+      align-items: center;
+      padding: var(--spacing-sm) var(--spacing-lg);
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: var(--radius-sm);
+      margin-bottom: var(--spacing-md);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    .select-all-container label {
+      cursor: pointer;
+      user-select: none;
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-secondary);
+      transition: color var(--transition-base);
+    }
+    
+    .select-all-container:hover label {
+      color: var(--color-text-primary);
+    }
+
     .batch-actions-bar {
       display: flex;
       align-items: center;
@@ -705,6 +728,13 @@
         </div>
       </div>
 
+      <div class="select-all-container" id="blog-select-all-container" style="display: none;">
+        <div class="item-checkbox">
+          <input type="checkbox" id="blog-select-all" onchange="AdminCMS.toggleSelectAll('blog', this.checked)">
+        </div>
+        <label for="blog-select-all">Selecionar Todos os Artigos</label>
+      </div>
+
       <div id="blog-list" class="items-grid">
         <!-- Posts serão carregados aqui -->
       </div>
@@ -835,6 +865,13 @@
           <button class="btn btn-outline" onclick="AdminCMS.clearSelection('projects')">Cancelar</button>
           <button class="btn btn-primary" style="background-color: #ff3b30; color: white; border-color: #ff3b30;" onclick="AdminCMS.batchDelete('projects')">🗑️ Excluir Selecionados</button>
         </div>
+      </div>
+
+      <div class="select-all-container" id="projects-select-all-container" style="display: none;">
+        <div class="item-checkbox">
+          <input type="checkbox" id="projects-select-all" onchange="AdminCMS.toggleSelectAll('projects', this.checked)">
+        </div>
+        <label for="projects-select-all">Selecionar Todos os Projetos</label>
       </div>
 
       <div id="projects-list" class="items-grid">

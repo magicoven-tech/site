@@ -105,8 +105,17 @@ const AdminCMS = {
         const container = document.getElementById('blog-list');
 
         if (!posts || posts.length === 0) {
+            document.getElementById('blog-select-all-container').style.display = 'none';
             this.renderEmptyState('blog-list', '📝', 'Nenhum post cadastrado ainda');
             return;
+        }
+
+        document.getElementById('blog-select-all-container').style.display = 'flex';
+
+        // Atualiza checkbox de selecionar todos
+        const selectAllCheckbox = document.getElementById('blog-select-all');
+        if (selectAllCheckbox) {
+            selectAllCheckbox.checked = this.selectedItems.blog.size === posts.length && posts.length > 0;
         }
 
         container.innerHTML = posts.map(post => {
@@ -153,8 +162,17 @@ const AdminCMS = {
         const container = document.getElementById('projects-list');
 
         if (!projects || projects.length === 0) {
+            document.getElementById('projects-select-all-container').style.display = 'none';
             this.renderEmptyState('projects-list', '🎨', 'Nenhum projeto cadastrado ainda');
             return;
+        }
+
+        document.getElementById('projects-select-all-container').style.display = 'flex';
+
+        // Atualiza checkbox de selecionar todos
+        const selectAllCheckbox = document.getElementById('projects-select-all');
+        if (selectAllCheckbox) {
+            selectAllCheckbox.checked = this.selectedItems.projects.size === projects.length && projects.length > 0;
         }
 
         container.innerHTML = projects.map(project => {
@@ -1082,6 +1100,30 @@ const AdminCMS = {
         }
         this.updateBatchUI(type);
         
+        if(type === 'blog') {
+            this.renderBlogList(this.currentData.blog);
+        } else {
+            this.renderProjectsList(this.currentData.projects);
+        }
+    },
+
+    /**
+     * Seleciona ou remove seleção de todos os itens
+     */
+    toggleSelectAll(type, isChecked) {
+        if (isChecked) {
+            // Seleciona todos
+            const items = this.currentData[type] || [];
+            items.forEach(item => {
+                this.selectedItems[type].add(item.id);
+            });
+        } else {
+            // Limpa seleção
+            this.selectedItems[type].clear();
+        }
+
+        this.updateBatchUI(type);
+
         if(type === 'blog') {
             this.renderBlogList(this.currentData.blog);
         } else {

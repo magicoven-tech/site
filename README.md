@@ -68,6 +68,12 @@ Usuário: admin
 Senha: admin123
 ```
 
+### Funcionalidades do CMS
+- **Gerenciamento de Conteúdo**: Criação, edição e exclusão de postagens de blog e projetos.
+- **Exclusão em Lote**: Interface com checkboxes que permite selecionar múltiplos itens para exclusão simultânea.
+- **Seleção Global**: Opção "Selecionar Tudo" para marcar ou desmarcar todos os itens da lista de uma vez, agilizando limpezas de catálogo.
+- **Otimização GitSync**: Exclusões em lote geram apenas um commit e push no GitHub, otimizando o fluxo de implantação e evitando múltiplas builds no Render.
+
 ---
 
 ## � Referências & Créditos
