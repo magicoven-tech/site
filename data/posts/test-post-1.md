@@ -7,7 +7,9 @@ excerpt: Summary for test post 1
 author: Magic Oven
 tags: []
 featured: false
-published: true
+published: false
 date: '2026-03-17'
+content: |
+  <p>Conteúdo em breve...</p>
 ---
 <p>Conteúdo em breve...</p>
