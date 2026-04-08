@@ -1,6 +1,26 @@
 {
   "projects": [
     {
+      "id": "1775622087566",
+      "title": "PROJETO",
+      "slug": "projeto",
+      "category": "teste",
+      "description": "Testando projetos",
+      "fullDescription": "Testando projetos 1234\n![é vc?](/uploads/image-1775622028645-104377432.jpg)\n",
+      "client": "nozes",
+      "year": "2026",
+      "services": [],
+      "technologies": [],
+      "image": "/uploads/image-1775622062596-185292612.webp",
+      "imageGradient": "linear-gradient(135deg, #27FF2B 0%, #1ed923 100%)",
+      "featured": true,
+      "published": true,
+      "gallery": [],
+      "url": "",
+      "tags": [],
+      "number": "02"
+    },
+    {
       "id": "1773714533504",
       "title": "ALGUÉM ALCIONE OS BOMBEIROS",
       "slug": "alguem-alcione-os-bombeiros",
