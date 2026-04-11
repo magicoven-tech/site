@@ -102,7 +102,7 @@
     --z-elevated: 10;
     --z-nav: 100;
     --z-modal: 1000;
-    /* --z-tooltip: 10000; */
+    --z-tooltip: 10000;
 }
 
 /* ============================================
@@ -145,27 +145,6 @@ body {
         padding-bottom: env(safe-area-inset-bottom);
     }
 }
-
-/* ============================================
-   VIGNETTE FRAME EFFECT
-   Inspired by ejtech.studio
-   ============================================ */
-/* .vignette-frame {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    pointer-events: none;
-    z-index: var(--z-tooltip);
-
-    /* Green glow vignette - Cyberpunk style */
-box-shadow: inset 0 0 100px rgba(39, 255, 43, 0.15),
-inset 0 0 200px rgba(39, 255, 43, 0.08),
-inset 0 0 300px rgba(39, 255, 43, 0.04);
-}
-
-*/
 
 /* ============================================
    NAVIGATION
