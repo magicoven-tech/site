@@ -56,8 +56,38 @@
 
     <!-- Hero Section -->
     <section class="hero" id="hero-section">
-        <div id="hero-bg" data-shape="square" data-pixel-size="4" data-ink="--color-dithering"></div>
-        <div class="hero-content">
+        <!-- 1. Container onde o 3D vai viver -->
+        <script>
+            window.addEventListener('error', function(e) {
+                console.warn('CAUGHT:', e.message);
+                document.body.insertAdjacentHTML('afterbegin', '<div style="position:fixed; z-index:99999; background:red; color:white; padding:10px; top:0; left:0;">' + e.message + '</div>');
+            });
+            window.addEventListener('unhandledrejection', function(e) {
+                console.warn('REJECTION:', e.reason);
+                document.body.insertAdjacentHTML('afterbegin', '<div style="position:fixed; z-index:99999; background:purple; color:white; padding:10px; top:40px; left:0;">Promise: ' + e.reason + '</div>');
+            });
+        </script>
+        <div id="ascii-3d-root" style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:0;"></div>
+
+        <!-- 2. CSS -->
+        <link rel="stylesheet" href="/ascii-viewer/ascii-viewer.css" />
+
+        <!-- 3. Bundle JS (auto-monta em #ascii-3d-root) -->
+        <script>
+            window.process = { env: { NODE_ENV: 'production' } };
+            window.__ASCII_VIEWER_BASE__ = '/ascii-viewer';
+        </script>
+        <script src="/ascii-viewer/ascii-viewer.js"></script>
+        <script>
+            // Força a montagem manual se não montou
+            setTimeout(() => {
+                if (window.AsciiViewer && !document.querySelector('#ascii-3d-root').hasChildNodes()) {
+                    window.AsciiViewer.mount('ascii-3d-root');
+                }
+            }, 500);
+        </script>
+
+        <div class="hero-content" style="pointer-events: none;">
             <!-- <h1 class="hero-title">
                 <span class="hero-title-line">CRIANDO</span>
                 <span class="hero-title-line">EXPERIÊNCIAS</span>
