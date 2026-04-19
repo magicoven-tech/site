@@ -28,7 +28,6 @@ content: >
   kalimat-kalimat dari Lorem Ipsum, dan seiring munculnya perangkat lunak
   Desktop Publishing seperti Aldus PageMaker juga memiliki versi Lorem Ipsum.
 
-    
 
   ## Mengapa kita menggunakannya?
 
@@ -73,16 +72,15 @@ content: >
 
   ## trem
 
-    
 
-  ````
+  ```
 
-  ```Bashcd /media/magicoven/storage/  # ou a pasta de sua preferênciagit clone
+  Bash cd /media/magicoven/storage/  # ou a pasta de sua preferênciagit clone
   https://github.com/ggerganov/llama.cppcd llama.cppmkdir buildcd build#
   compilando focado em CPU (desativando Vulkan para evitar conflitos)cmake ..
-  -DGGML_VULKAN=OFFcmake --build . --config Release -j$(nproc)```
+  -DGGML_VULKAN=OFFcmake --build . --config Release -j$(nproc)
 
-  ````
+  ```
 ---
 ## Apakah Lorem Ipsum itu?
 
@@ -101,5 +99,5 @@ Bagian standar dari teks Lorem Ipsum yang digunakan sejak tahun 1500an kini di r
 ## trem
 
 ```
-Bash cd /media/magicoven/storage/  # ou a pasta de sua preferênciagit clone https://github.com/ggerganov/llama.cppcd llama.cppmkdir buildcd build# compilando focado em CPU (desativando Vulkan para evitar conflitos)cmake .. -DGGML_VULKAN=OFFcmake --build . --config Release -j$(nproc)
+Bash cd /media/magicoven/storage/  # ou a pasta de sua preferênciagit clone https://github.com/ggerganov/llama.cppcd llama.cppmkdir buildcd build# compilando focado em CPU (desativando Vulkan para evitar conflitos)cmake .. -DGGML_VULKAN=OFFcmake --build . --config Release -j$(npro
 ```

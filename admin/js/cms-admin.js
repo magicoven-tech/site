@@ -34,6 +34,17 @@ const AdminCMS = {
             codeBlockStyle: 'fenced'
         });
 
+        // REGRA CUSTOM: Preservar blocos de código com quebras de linha
+        this.turndownService.addRule('codeBlock', {
+            filter: 'pre',
+            replacement: function (content, node) {
+                const codeElement = node.querySelector('code');
+                const language = codeElement ? (codeElement.className.match(/language-(\w+)/) || [])[1] : '';
+                const code = codeElement ? codeElement.textContent : node.textContent;
+                return '\n\n```' + (language || '') + '\n' + code.trim() + '\n```\n\n';
+            }
+        });
+
         // Carrega dados
         await this.loadBlogPosts();
         await this.loadProjects();
