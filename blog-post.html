@@ -232,7 +232,7 @@
 
                         <div style="margin-top: var(--spacing-4xl); padding-top: var(--spacing-xl); border-top: 1px solid rgba(255, 255, 255, 0.1);">
                             <p style="color: var(--color-text-secondary); margin-bottom: var(--spacing-lg);">
-                                Escrito por <strong style="color: var(--color-accent-primary);">${post.author}</strong>
+                                Escrito por <strong style="color: var(--color-accent-primary);">${(!post.author || post.author.toLowerCase() === 'admin' || post.author.toLowerCase() === 'administrador') ? 'Magic Oven' : post.author}</strong>
                             </p>
 
                             ${post.tags && post.tags.length > 0 ? `
