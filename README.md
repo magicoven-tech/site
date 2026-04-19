@@ -71,7 +71,11 @@ Senha inicial: admin123
 
 - **Armazenamento em Markdown Estático**: Posts, projetos e mensagens não são mais salvos em JSONs monolíticos. Agora cada publicação e cada contato recebido é um arquivo `.md` individual com Frontmatter (`gray-matter`).
 - **Gestão de Mensagens Centralizada**: Aba dedicada no CMS para ler, marcar como lida ou excluir mensagens de contato, substituindo a necessidade de serviços externos (Formspree).
+- **Interface "Zero-Dialog"**: Substituição completa de `alert()`, `confirm()` e `prompt()` nativos por modais customizados e estilizados, garantindo uma experiência visual coesa e profissional.
+- **Editor de Código Avançado**: UX inspirada no Medium para blocos de código com seleção de linguagem inline, suporte a Tab e atalhos de saída inteligente (**Double-Enter** ou **Escape**).
+- **Embeds Inteligentes**: Conversão automática de URLs do YouTube e Vimeo para o formato de embed, garantindo que vídeos sejam exibidos corretamente no editor e no site.
 - **Compressão Inteligente de Imagens**: Sistema integrado que detecta uploads acima de 5MB e realiza compressão automática em **4K (Ref. 4096px)** no lado do cliente.
+
 - **Otimização GitSync**: Sincronização automática com GitHub para persistência de dados no Render, salvando os arquivos Markdown e imagens diretamente no repositório.
 
 ---

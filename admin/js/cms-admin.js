@@ -28,6 +28,48 @@ const AdminCMS = {
             return;
         }
 
+        // Inicializa Turndown
+        this.turndownService = new TurndownService({
+            headingStyle: 'atx',
+            codeBlockStyle: 'fenced'
+        });
+
+        // REGRA CUSTOM: Preservar blocos de código com quebras de linha
+        this.turndownService.addRule('codeBlock', {
+            filter: 'pre',
+            replacement: function (content, node) {
+                // 1. Tenta pegar linguagem da linha de cabeçalho (.code-lang-line)
+                const langLine = node.querySelector('.code-lang-line');
+                let language = '';
+                if (langLine) {
+                    language = langLine.getAttribute('data-lang') || langLine.innerText.trim() || '';
+                }
+
+                // 2. Fallback: tenta pegar pelo class do <code>
+                if (!language) {
+                    const firstCode = node.querySelector('code');
+                    language = firstCode ? (firstCode.className.match(/language-(\w+)/) || [])[1] : '';
+                }
+
+                // Normaliza: remove linguagens genéricas
+                if (language === 'text') language = '';
+
+                // Pega o conteúdo do <code>, convertendo <br> em \n
+                const codeEl = node.querySelector('code');
+                let code = (codeEl ? codeEl.innerHTML : node.innerHTML)
+                    .replace(/<br\s*\/?>/gi, '\n')
+                    .replace(/<\/p>/gi, '\n')
+                    .replace(/<\/div>/gi, '\n')
+                    .replace(/<[^>]+>/g, '');
+
+                // Decodifica entidades HTML
+                code = code.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&').replace(/&quot;/g, '"');
+
+                return '\n\n```' + (language || '') + '\n' + code.trim() + '\n```\n\n';
+            }
+        });
+
+
         // Carrega dados
         await this.loadBlogPosts();
         await this.loadProjects();
@@ -415,6 +457,10 @@ const AdminCMS = {
         // Menu de Imagem (Cursor)
         this.setupImageMenu('blog-content');
         this.setupImageMenu('project-full-description');
+
+        // Paste Handling
+        this.setupPasteHandling('blog-content');
+        this.setupPasteHandling('project-full-description');
     },
 
     /**
@@ -461,99 +507,54 @@ const AdminCMS = {
      */
     handleImageCursor(e, textarea, menu) {
         this.activeTextarea = textarea;
-        // Pequeno delay
-        setTimeout(() => {
-            const cursor = textarea.selectionStart;
-            const text = textarea.value;
 
-            // Regex para capturar imagem Markdown: ![alt](url)
-            // Precisamos encontrar a imagem que contém o cursor
-            const regex = /!\[(.*?)\]\((.*?)\)/g;
-            let match;
-            let currentImage = null;
+        const target = e.target;
+        if (target.tagName === 'IMG') {
+            this.activeImageElement = target;
 
-            while ((match = regex.exec(text)) !== null) {
-                const start = match.index;
-                const end = start + match[0].length;
+            // Posicionar Menu em cima da imagem
+            const rect = target.getBoundingClientRect();
+            let top = rect.bottom + 10;
+            let left = rect.left + (rect.width / 2);
 
-                if (cursor >= start && cursor <= end) {
-                    currentImage = {
-                        start: start,
-                        end: end,
-                        details: match // [full, alt, url]
-                    };
-                    break;
-                }
-            }
+            menu.style.top = `${top + window.scrollY}px`;
+            menu.style.left = `${left + window.scrollX}px`;
+            menu.style.transform = 'translate(-50%, 0)';
 
-            if (currentImage) {
-                // Cursor está em uma imagem
-                this.currentImageRange = currentImage; // Salvar referência
-
-                // Posicionar Menu
-                let top, left;
-
-                if (e.type === 'mouseup' || e.type === 'click') {
-                    top = e.clientY + 20; // Abaixo do cursor
-                    left = e.clientX;
-                } else {
-                    // Fallback
-                    const rect = textarea.getBoundingClientRect();
-                    top = rect.top + (rect.height / 2);
-                    left = rect.left + (rect.width / 2);
-                }
-
-                // Ajustes
-                if (left < 0) left = 10;
-
-                menu.style.top = `${top + window.scrollY}px`;
-                menu.style.left = `${left + window.scrollX}px`;
-                menu.style.transform = 'translate(-50%, 0)';
-
-                // Esconder o menu de formatação de texto se estiver aberto
-                document.getElementById('formatting-menu').classList.remove('active');
-
-                menu.classList.add('active');
-            } else {
-                menu.classList.remove('active');
-                this.currentImageRange = null;
-            }
-        }, 10);
+            // Esconder o menu de formatação de texto se estiver aberto
+            document.getElementById('formatting-menu').classList.remove('active');
+            menu.classList.add('active');
+        } else {
+            menu.classList.remove('active');
+            this.activeImageElement = null;
+        }
     },
 
     /**
      * Aplica o redimensionamento (hash) à imagem selecionada
      */
     resizeImage(size, textarea) {
-        if (!this.currentImageRange) return;
+        if (!this.activeImageElement) return;
 
-        const { start, end, details } = this.currentImageRange;
-        const [fullMatch, alt, url] = details;
-
-        let newUrl = url;
+        const img = this.activeImageElement;
+        let url = img.src;
 
         // Remover hashes existentes
-        newUrl = newUrl.replace(/#medium$/, '').replace(/#full$/, '');
+        url = url.replace(/#medium$/, '').replace(/#full$/, '');
 
-        // Adicionar novo hash se não for standard
+        // Limpar classes existentes
+        img.classList.remove('image-medium', 'image-full');
+
+        // Adicionar novo hash e classe
         if (size === 'medium') {
-            newUrl += '#medium';
+            url += '#medium';
+            img.classList.add('image-medium');
         } else if (size === 'full') {
-            newUrl += '#full';
+            url += '#full';
+            img.classList.add('image-full');
         }
 
-        const newMarkdown = `![${alt}](${newUrl})`;
-
-        // Substituir texto
-        textarea.setRangeText(newMarkdown, start, end, 'select');
-
-        // Atualizar referência currentImageRange para o novo tamanho
-        // para que o menu continue funcionando se o usuário clicar de novo
-        this.currentImageRange = {
-            start: start,
-            end: start + newMarkdown.length,
-            details: [newMarkdown, alt, newUrl]
-        };
+        img.src = url;
     },
 
     /**
@@ -602,90 +603,71 @@ const AdminCMS = {
         this.activeTextarea = textarea;
         // Pequeno delay para garantir que a seleção foi atualizada
         setTimeout(() => {
-            const start = textarea.selectionStart;
-            const end = textarea.selectionEnd;
+            const selection = window.getSelection();
+            const selectedText = selection.toString().trim();
 
-            if (start !== end) {
+            if (selectedText.length > 0) {
                 // Há texto selecionado
-                // Calcular posição
-                // Como textarea não dá coordenadas X/Y do cursor facilmente,
-                // vamos posicionar próximo ao mouse (mouseup) ou centralizado (fallback)
+                const range = selection.getRangeAt(0);
 
-                let top, left;
-
-                if (e.type === 'mouseup') {
-                    top = e.clientY - 50;
-                    left = e.clientX;
-                } else {
-                    // Fallback para seleção via teclado: centralizado na textarea (aproximado)
-                    const rect = textarea.getBoundingClientRect();
-                    top = rect.top + (rect.height / 2); // Apenas um fallback visual
-                    left = rect.left + (rect.width / 2);
+                // Garantir que a seleção está dentro do editor
+                if (!textarea.contains(range.commonAncestorContainer)) {
+                    menu.classList.remove('active');
+                    return;
                 }
 
+                const rect = range.getBoundingClientRect();
+
+                let top = rect.top - 60;
+                let left = rect.left + (rect.width / 2);
+
                 // Ajustes de limites da tela
-                if (left < 0) left = 10;
-                if (top < 0) top = 10;
+                if (left < 10) left = 10;
+                if (top < 10) top = 10;
 
                 menu.style.top = `${top + window.scrollY}px`;
                 menu.style.left = `${left + window.scrollX}px`;
-
-                // Centralizar o menu no ponto X
                 menu.style.transform = 'translate(-50%, 0)';
 
                 menu.classList.add('active');
             } else {
                 menu.classList.remove('active');
             }
-        }, 10);
+        }, 50); // Aumentar levemente o delay para estabilidade
     },
 
     /**
      * Aplica a formatação selecionada ao texto
      */
-    applyFormat(format, textarea) {
-        const start = textarea.selectionStart;
-        const end = textarea.selectionEnd;
-        const selectedText = textarea.value.substring(start, end);
-        let replacement = '';
-        let cursorOffset = 0;
-
+    async applyFormat(format, textarea) {
+        // No contenteditable, document.execCommand usa a seleção atual automaticamente
         switch (format) {
             case 'bold':
-                replacement = `**${selectedText}**`;
-                cursorOffset = 2; // Move cursor para dentro se não houver texto selecionado (futuro)
+                document.execCommand('bold', false, null);
                 break;
             case 'italic':
-                replacement = `*${selectedText}*`;
+                document.execCommand('italic', false, null);
                 break;
-            case 'link':
-                const url = prompt('URL do link:', 'https://');
-                if (url) {
-                    replacement = `[${selectedText}](${url})`;
-                } else {
-                    return; // Cancelado
+            case 'link': {
+                const url = await this.customPrompt('Inserir Link', 'Cole a URL completa do link:', 'https://', 'https://');
+                if (url && url.trim()) {
+                    document.execCommand('createLink', false, url.trim());
                 }
                 break;
+            }
             case 'h2':
-                // Remove # existetes se houver
-                const cleanH2 = selectedText.replace(/^#+\s*/, '');
-                replacement = `\n## ${cleanH2}`;
+                document.execCommand('formatBlock', false, 'h2');
                 break;
             case 'h3':
-                const cleanH3 = selectedText.replace(/^#+\s*/, '');
-                replacement = `\n### ${cleanH3}`;
+                document.execCommand('formatBlock', false, 'h3');
                 break;
             case 'quote':
-                const cleanQuote = selectedText.replace(/^>\s*/, '');
-                replacement = `\n> ${cleanQuote}`;
+                document.execCommand('formatBlock', false, 'blockquote');
                 break;
         }
 
-        // Aplicar substituição
-        textarea.setRangeText(replacement, start, end, 'select');
-
-        // Focar de volta e ajustar cursor se necessário
-        textarea.focus();
+        // Garantir que o editor mantém o foco
+        if (textarea) textarea.focus();
     },
 
     /**
@@ -711,6 +693,131 @@ const AdminCMS = {
             toggleBtn.textContent = toolbar.classList.contains('active') ? '×' : '+';
         });
 
+        // Sync repositioning
+        const updatePos = () => this.syncToolbarPosition(textareaId, toolbar);
+        textarea.addEventListener('click', updatePos);
+        textarea.addEventListener('keyup', updatePos);
+        textarea.addEventListener('focus', updatePos);
+        textarea.addEventListener('input', updatePos);
+
+        // Handler para teclas especiais dentro de blocos de código
+        textarea.addEventListener('keydown', (e) => {
+            const selection = window.getSelection();
+            if (!selection.rangeCount) return;
+
+            const range = selection.getRangeAt(0);
+
+            // ──────────────────────────────────────────────────────────
+            // Backspace FORA do pre: deletar o <pre> anterior ao cursor
+            // ──────────────────────────────────────────────────────────
+            if (e.key === 'Backspace') {
+                const anchorNode = range.startContainer;
+                const offset = range.startOffset;
+                let block = anchorNode.nodeType === 3 ? anchorNode.parentNode : anchorNode;
+                while (block && block.parentNode !== textarea && block !== textarea) {
+                    block = block.parentNode;
+                }
+                if (block && offset === 0 && range.collapsed) {
+                    const prev = block.previousElementSibling;
+                    if (prev && prev.tagName === 'PRE') {
+                        e.preventDefault();
+                        prev.remove();
+                        return;
+                    }
+                }
+            }
+
+            const pre = range.startContainer.nodeType === 3
+                ? range.startContainer.parentNode.closest('pre')
+                : (range.startContainer.closest ? range.startContainer.closest('pre') : null);
+
+            if (pre) {
+                if (e.key === 'Enter') {
+                    const langLine = pre.querySelector('.code-lang-line');
+                    const codeEl = pre.querySelector('code');
+
+                    // Se o cursor está na linha de linguagem, confirmar e mover para o code
+                    if (langLine && langLine.contains(range.startContainer)) {
+                        e.preventDefault();
+                        const lang = langLine.innerText.trim() || 'text';
+                        langLine.setAttribute('data-lang', lang);
+                        langLine.textContent = lang;
+                        langLine.classList.add('lang-confirmed');
+                        if (codeEl) {
+                            codeEl.className = `language-${lang}`;
+                            const newRange = document.createRange();
+                            newRange.setStart(codeEl, 0);
+                            newRange.collapse(true);
+                            selection.removeAllRanges();
+                            selection.addRange(newRange);
+                        }
+                        return;
+                    }
+
+                    // BREAKOUT: Se apertar Enter em uma linha vazia no final do bloco <code>
+                    // (ou se apertar Enter duas vezes no final)
+                    const textBefore = range.startContainer.textContent.substring(0, range.startOffset);
+                    const textAfter = range.startContainer.textContent.substring(range.startOffset);
+                    
+                    // Se a linha atual está vazia (ou contém apenas o \n de um <br>)
+                    const isAtEnd = !textAfter.trim();
+                    const isLineEmpty = !textBefore.trim() && isAtEnd;
+
+                    if (isLineEmpty && isAtEnd) {
+                        e.preventDefault();
+                        // Remove a linha vazia atual se necessário e pula fora
+                        // (Simplificado: apenas insere um parágrafo novo após o pre)
+                        const nextP = document.createElement('p');
+                        nextP.innerHTML = '<br>';
+                        pre.after(nextP);
+                        
+                        const newRange = document.createRange();
+                        newRange.setStart(nextP, 0);
+                        newRange.collapse(true);
+                        selection.removeAllRanges();
+                        selection.addRange(newRange);
+                        nextP.focus();
+                        return;
+                    }
+
+                    // Comportamento padrão de code: insert <br>
+                    e.preventDefault();
+                    document.execCommand('insertHTML', false, '<br>');
+
+                    // Scroll fix
+                    setTimeout(() => {
+                        const sel2 = window.getSelection();
+                        if (!sel2.rangeCount) return;
+                        const r2 = sel2.getRangeAt(0);
+                        const cursorRect = r2.getBoundingClientRect();
+                        const preRect = pre.getBoundingClientRect();
+                        if (cursorRect.bottom > preRect.bottom) {
+                            pre.scrollTop += (cursorRect.bottom - preRect.bottom) + 20;
+                        }
+                    }, 0);
+
+                } else if (e.key === 'Tab') {
+                    e.preventDefault();
+                    document.execCommand('insertText', false, '    ');
+                } else if (e.key === 'Escape') {
+                    // ESCAPE: Pula para o parágrafo seguinte ou cria um
+                    e.preventDefault();
+                    let nextP = pre.nextElementSibling;
+                    if (!nextP || nextP.tagName !== 'P') {
+                        nextP = document.createElement('p');
+                        nextP.innerHTML = '<br>';
+                        pre.after(nextP);
+                    }
+                    const newRange = document.createRange();
+                    newRange.setStart(nextP, 0);
+                    newRange.collapse(true);
+                    selection.removeAllRanges();
+                    selection.addRange(newRange);
+                    nextP.focus();
+                }
+            }
+        });
+
         // Opção de Imagem
         const btnImage = document.getElementById(`${toolbarPrefix}-image`);
         if (btnImage && imageInput) {
@@ -718,41 +825,70 @@ const AdminCMS = {
                 imageInput.click();
             });
 
-            // Prevent multiple binding if the image setup is called twice, though normally an issue on singletons
-            // Given the inputs are unique per textarea this should be fine
             imageInput.addEventListener('change', (e) => {
                 const file = e.target.files[0];
                 if (file) {
                     this.handleImageUpload(file, (url) => {
-                        const markdown = `\n![Legenda da Imagem](${url})\n`;
-                        this.insertAtCursor(textareaId, markdown);
+                        const imgHtml = `<img src="${url}" alt="Imagem">`;
+                        this.insertAtCursor(textareaId, imgHtml);
                         toolbar.classList.remove('active');
                         toggleBtn.textContent = '+';
-                        // Scroll para o fim da inserção se necessário ou foco
                     });
                 }
             });
         }
 
-        // Opção de Vídeo
+        // Opção de Vídeo (Adaptado para HTML)
         const btnVideo = document.getElementById(`${toolbarPrefix}-video`);
         if (btnVideo) {
-            btnVideo.addEventListener('click', () => {
-                const code = `\n<div class="video-container">\n  <iframe src="URL_DO_VIDEO_AQUI" title="Video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>\n</div>\n`;
-                this.insertAtCursor(textareaId, code);
+            btnVideo.addEventListener('click', async () => {
+                // Salva a posição do cursor ANTES de abrir o modal (modal rouba o foco)
+                this.saveSelection();
                 toolbar.classList.remove('active');
                 toggleBtn.textContent = '+';
+
+                const rawUrl = await this.customPrompt(
+                    'Inserir Vídeo',
+                    'Cole a URL do YouTube ou Vimeo (a conversão para embed é automática):',
+                    'https://www.youtube.com/watch?v=...'
+                );
+
+                if (rawUrl && rawUrl.trim()) {
+                    const embedUrl = this.toEmbedUrl(rawUrl);
+                    const html = `<div class="video-container"><iframe src="${embedUrl}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div><p><br></p>`;
+                    this.insertAtCursor(textareaId, html);
+                } else {
+                    // Se cancelou, limpa a seleção salva para não interferir em inserções futuras
+                    this._savedRange = null;
+                }
             });
         }
 
-        // Opção de Código
+        // Opção de Código — novo UX inline: 1ª linha = linguagem, Enter = inicio do código
         const btnCode = document.getElementById(`${toolbarPrefix}-code`);
         if (btnCode) {
             btnCode.addEventListener('click', () => {
-                const code = `\n\`\`\`javascript\n// Seu código aqui\n\`\`\`\n`;
-                this.insertAtCursor(textareaId, code);
+                // Bloco com linha de linguagem editável + <code> para o conteúdo
+                const html = `<pre class="code-editor-block"><span class="code-lang-line" contenteditable="true" data-placeholder="linguagem (ex: javascript)"></span><code class="language-text"><br></code></pre><p><br></p>`;
+                this.insertAtCursor(textareaId, html);
                 toolbar.classList.remove('active');
                 toggleBtn.textContent = '+';
+
+                // Mover cursor para a linha de linguagem
+                setTimeout(() => {
+                    const editor = document.getElementById(textareaId);
+                    const langLines = editor.querySelectorAll('.code-lang-line:not([data-lang])');
+                    const lastLangLine = langLines[langLines.length - 1];
+                    if (lastLangLine) {
+                        lastLangLine.focus();
+                        const r = document.createRange();
+                        r.setStart(lastLangLine, 0);
+                        r.collapse(true);
+                        const sel = window.getSelection();
+                        sel.removeAllRanges();
+                        sel.addRange(r);
+                    }
+                }, 50);
             });
         }
 
@@ -760,7 +896,7 @@ const AdminCMS = {
         const btnDivider = document.getElementById(`${toolbarPrefix}-divider`);
         if (btnDivider) {
             btnDivider.addEventListener('click', () => {
-                this.insertAtCursor(textareaId, '\n---\n');
+                this.insertAtCursor(textareaId, '<hr><p><br></p>');
                 toolbar.classList.remove('active');
                 toggleBtn.textContent = '+';
             });
@@ -769,8 +905,15 @@ const AdminCMS = {
         // Opção de Embed/Link
         const btnEmbed = document.getElementById(`${toolbarPrefix}-embed`);
         if (btnEmbed) {
-            btnEmbed.addEventListener('click', () => {
-                this.insertAtCursor(textareaId, '\n[Texto do Link](https://exemplo.com)\n');
+            btnEmbed.addEventListener('click', async () => {
+                this.saveSelection();
+                const url = await this.customPrompt('Inserir Link', 'Cole a URL completa:', 'https://');
+                if (url && url.trim()) {
+                    const cleanUrl = url.trim();
+                    this.insertAtCursor(textareaId, `<a href="${cleanUrl}" target="_blank">${cleanUrl}</a>`);
+                } else {
+                    this._savedRange = null;
+                }
                 toolbar.classList.remove('active');
                 toggleBtn.textContent = '+';
             });
@@ -778,22 +921,127 @@ const AdminCMS = {
     },
 
     /**
-     * Insere texto na posição do cursor em um textarea
+     * Insere HTML na posição do cursor em um contenteditable
      */
-    insertAtCursor(fieldId, text) {
-        const textarea = document.getElementById(fieldId);
-        if (!textarea) return;
+    insertAtCursor(fieldId, html) {
+        const editor = document.getElementById(fieldId);
+        if (!editor) return;
 
-        const startPos = textarea.selectionStart;
-        const endPos = textarea.selectionEnd;
-        const scrollTop = textarea.scrollTop;
+        editor.focus();
 
-        textarea.value = textarea.value.substring(0, startPos) + text + textarea.value.substring(endPos, textarea.value.length);
+        // Restaura a seleção se houver uma salva (útil após modais)
+        this.restoreSelection();
 
-        textarea.focus();
-        textarea.selectionStart = startPos + text.length;
-        textarea.selectionEnd = startPos + text.length;
-        textarea.scrollTop = scrollTop;
+        // Se houver seleção, substitui. Se não, insere no cursor.
+        document.execCommand('insertHTML', false, html);
+        
+        // Limpa após usar
+        this._savedRange = null;
+    },
+
+    saveSelection() {
+        const sel = window.getSelection();
+        if (sel.getRangeAt && sel.rangeCount) {
+            this._savedRange = sel.getRangeAt(0).cloneRange();
+        }
+    },
+
+    restoreSelection() {
+        if (this._savedRange) {
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(this._savedRange);
+        }
+    },
+
+    /**
+     * Converte URLs do YouTube/Vimeo para formato de embed
+     */
+    toEmbedUrl(url) {
+        if (!url) return '';
+        
+        // YouTube: watch?v= ou youtu.be/
+        const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/);
+        if (ytMatch) return `https://www.youtube.com/embed/${ytMatch[1]}`;
+
+        // Vimeo: vimeo.com/VIDEO_ID
+        const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
+        if (vimeoMatch) return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+
+        return url; // Retorna original se não for match
+    },
+
+    /**
+     * Configura limpeza de conteúdo colado
+     */
+    setupPasteHandling(fieldId) {
+        const editor = document.getElementById(fieldId);
+        if (!editor) return;
+
+        editor.addEventListener('paste', (e) => {
+            e.preventDefault();
+            const text = e.clipboardData.getData('text/plain');
+            document.execCommand('insertText', false, text);
+        });
+    },
+
+    /**
+     * Sincroniza a posição do toolbar com o parágrafo atual
+     */
+    syncToolbarPosition(editorId, toolbar) {
+        const editor = document.getElementById(editorId);
+        if (!editor || !toolbar) return;
+
+        // Usamos requestAnimationFrame ou um pequeno delay para garantir que o DOM atualizou após o clique/keyup
+        requestAnimationFrame(() => {
+            const selection = window.getSelection();
+            if (!selection.rangeCount) return;
+
+            let node = selection.anchorNode;
+            if (!node) return;
+
+            // Encontrar o elemento pai que seja um bloco direto do editor
+            let block = node.nodeType === 3 ? node.parentNode : node;
+
+            while (block && block.parentNode !== editor && block !== editor) {
+                block = block.parentNode;
+            }
+
+            if (block && block.parentNode === editor) {
+                // Posicionar verticalmente
+                // Usamos getBoundingClientRect relativo ao editor para maior precisão
+                const editorRect = editor.getBoundingClientRect();
+                const blockRect = block.getBoundingClientRect();
+                const relativeTop = blockRect.top - editorRect.top;
+                
+                toolbar.style.top = `${relativeTop}px`;
+
+                // Visibilidade baseada em conteúdo (estilo Medium)
+                // Um bloco é considerado vazio se não tem texto ou se tem apenas um <br>
+                const text = block.innerText.replace(/\n/g, '').trim();
+                const hasImages = block.querySelector('img') !== null;
+                const hasIframe = block.querySelector('iframe') !== null;
+                
+                const isEmpty = text === "" && !hasImages && !hasIframe && 
+                               (block.childNodes.length === 0 || 
+                                (block.childNodes.length === 1 && (block.childNodes[0].tagName === 'BR' || block.childNodes[0].nodeType === 3)));
+
+                if (isEmpty) {
+                    toolbar.classList.add('visible');
+                } else {
+                    toolbar.classList.remove('visible');
+                    toolbar.classList.remove('active');
+                    const toggleBtn = document.getElementById(`${editorId === 'blog-content' ? 'toolbar' : 'project-toolbar'}-toggle`);
+                    if (toggleBtn) toggleBtn.textContent = '+';
+                }
+            } else if (block === editor && editor.innerText.trim() === "") {
+                // Caso o editor esteja totalmente vazio
+                toolbar.style.top = `0px`;
+                toolbar.classList.add('visible');
+            } else {
+                toolbar.classList.remove('visible');
+            }
+        });
     },
 
     /**
@@ -890,7 +1138,7 @@ const AdminCMS = {
 
                 fileToUpload = await imageCompression(file, options);
                 console.log(`[CMS] Compressão concluída: ${(fileToUpload.size / 1024 / 1024).toFixed(2)}MB`);
-                
+
             } catch (error) {
                 console.error('Erro na compressão:', error);
                 // Se falhar a compressão, avisa o usuário mas tenta subir o original (o servidor deve barrar se for > 5MB)
@@ -990,7 +1238,8 @@ const AdminCMS = {
         const title = document.getElementById('blog-title').value;
         const category = document.getElementById('blog-category').value;
         const excerpt = document.getElementById('blog-excerpt').value;
-        const content = document.getElementById('blog-content').value;
+        const contentHtml = document.getElementById('blog-content').innerHTML;
+        const contentMarkdown = this.turndownService.turndown(contentHtml);
         const tags = document.getElementById('blog-tags').value.split(',').map(t => t.trim()).filter(t => t);
         const featured = document.getElementById('blog-featured').checked;
         const published = document.getElementById('blog-published').checked;
@@ -1000,7 +1249,7 @@ const AdminCMS = {
             slug: this.createSlug(title),
             category: category.toUpperCase(),
             excerpt,
-            content: content || '<p>Conteúdo em breve...</p>',
+            content: contentMarkdown || 'Conteúdo em breve...',
             author: 'Magic Oven',
             tags,
             featured,
@@ -1067,7 +1316,7 @@ const AdminCMS = {
         const title = document.getElementById('project-title').value;
         const category = document.getElementById('project-category').value;
         const description = document.getElementById('project-description').value;
-        const fullDescription = document.getElementById('project-full-description').value;
+        // const fullDescription = document.getElementById('project-full-description').value; // Removido
         const client = document.getElementById('project-client').value;
         const year = document.getElementById('project-year').value;
         const gradient = document.getElementById('project-gradient').value;
@@ -1080,7 +1329,7 @@ const AdminCMS = {
             slug: this.createSlug(title),
             category,
             description,
-            fullDescription: fullDescription || '<p>Descrição completa em breve...</p>',
+            fullDescription: this.turndownService.turndown(document.getElementById('project-full-description').innerHTML) || 'Descrição completa em breve...',
             client: client || 'Cliente',
             year: year || new Date().getFullYear().toString(),
             services: [],
@@ -1196,7 +1445,10 @@ const AdminCMS = {
             document.getElementById('blog-title').value = item.title;
             document.getElementById('blog-category').value = item.category;
             document.getElementById('blog-excerpt').value = item.excerpt;
-            document.getElementById('blog-content').value = item.content || '';
+
+            // Markdown to HTML
+            document.getElementById('blog-content').innerHTML = marked.parse(item.content || '');
+
             document.getElementById('blog-tags').value = item.tags ? item.tags.join(', ') : '';
             document.getElementById('blog-featured').checked = item.featured;
             document.getElementById('blog-published').checked = item.published;
@@ -1208,7 +1460,10 @@ const AdminCMS = {
             document.getElementById('project-title').value = item.title;
             document.getElementById('project-category').value = item.category;
             document.getElementById('project-description').value = item.description;
-            document.getElementById('project-full-description').value = item.fullDescription || '';
+
+            // Markdown to HTML
+            document.getElementById('project-full-description').innerHTML = marked.parse(item.fullDescription || '');
+
             document.getElementById('project-client').value = item.client || '';
             document.getElementById('project-year').value = item.year || '';
             document.getElementById('project-gradient').value = item.imageGradient || '';
@@ -1273,8 +1528,8 @@ const AdminCMS = {
             this.selectedItems[type].add(id);
         }
         this.updateBatchUI(type);
-        
-        if(type === 'blog') {
+
+        if (type === 'blog') {
             this.renderBlogList(this.currentData.blog);
         } else if (type === 'projects') {
             this.renderProjectsList(this.currentData.projects);
@@ -1300,7 +1555,7 @@ const AdminCMS = {
 
         this.updateBatchUI(type);
 
-        if(type === 'blog') {
+        if (type === 'blog') {
             this.renderBlogList(this.currentData.blog);
         } else if (type === 'projects') {
             this.renderProjectsList(this.currentData.projects);
@@ -1315,8 +1570,8 @@ const AdminCMS = {
     clearSelection(type) {
         this.selectedItems[type].clear();
         this.updateBatchUI(type);
-        
-        if(type === 'blog' && this.currentData.blog) {
+
+        if (type === 'blog' && this.currentData.blog) {
             this.renderBlogList(this.currentData.blog);
         } else if (type === 'projects' && this.currentData.projects) {
             this.renderProjectsList(this.currentData.projects);
@@ -1332,7 +1587,7 @@ const AdminCMS = {
         const count = this.selectedItems[type].size;
         const bar = document.getElementById(`${type}-batch-actions`);
         const countSpan = document.getElementById(`${type}-selected-count`);
-        
+
         if (bar && countSpan) {
             countSpan.textContent = count;
             if (count > 0) {
@@ -1367,7 +1622,7 @@ const AdminCMS = {
                 this.customAlert('Sucesso', `${data.deletedCount} itens excluídos com sucesso!`);
                 this.selectedItems[type].clear();
                 this.updateBatchUI(type);
-                
+
                 // Recarrega dados
                 if (type === 'blog') {
                     await this.loadBlogPosts();
@@ -1386,11 +1641,13 @@ const AdminCMS = {
     },
 
     setupModals() {
-                this.customAlert = (title, msg) => {
+        // ── customAlert ──────────────────────────────────────────────────────────
+        this.customAlert = (title, msg) => {
             return new Promise(resolve => {
                 const titleEl = document.getElementById('alert-modal-title');
-                if(!titleEl) {
-                    alert((title ? title + " - " : "") + msg);
+                if (!titleEl) {
+                    // Fallback silencioso — nunca deve acontecer
+                    console.error('[CMS Alert]', title, msg);
                     resolve();
                     return;
                 }
@@ -1411,23 +1668,80 @@ const AdminCMS = {
             });
         };
 
+        // ── customConfirm ─────────────────────────────────────────────────────────
         this.customConfirm = (title, msg) => {
             return new Promise(resolve => {
                 document.getElementById('confirm-modal-title').textContent = title;
                 document.getElementById('confirm-modal-msg').textContent = msg;
                 const modal = document.getElementById('confirm-modal');
                 modal.style.display = 'flex';
-                
+
                 const okBtn = document.getElementById('confirm-modal-ok');
                 const cancelBtn = document.getElementById('confirm-modal-cancel');
-                
+
                 const cleanup = () => {
                     okBtn.onclick = null;
                     cancelBtn.onclick = null;
                     modal.style.display = 'none';
+                };
+                okBtn.onclick = () => { cleanup(); resolve(true); };
+                cancelBtn.onclick = () => { cleanup(); resolve(false); };
+            });
+        };
+
+        // ── customPrompt ──────────────────────────────────────────────────────────
+        // Substitui window.prompt() em todo o CMS
+        this.customPrompt = (title, msg, placeholder = '', defaultVal = '') => {
+            return new Promise(resolve => {
+                const modal = document.getElementById('input-modal');
+                const titleEl = document.getElementById('input-modal-title');
+                const msgEl = document.getElementById('input-modal-msg');
+                const inputEl = document.getElementById('input-modal-input');
+                const okBtn = document.getElementById('input-modal-ok');
+                const cancelBtn = document.getElementById('input-modal-cancel');
+
+                if (!modal) {
+                    // Fallback para ambientes sem o modal
+                    const val = window.prompt((msg || title), defaultVal);
+                    resolve(val);
+                    return;
                 }
-                okBtn.onclick = () => { cleanup(); resolve(true); }
-                cancelBtn.onclick = () => { cleanup(); resolve(false); }
+
+                titleEl.textContent = title;
+                msgEl.textContent = msg || '';
+                inputEl.placeholder = placeholder;
+                inputEl.value = defaultVal;
+                modal.style.display = 'flex';
+
+                // Foca no input
+                setTimeout(() => inputEl.focus(), 50);
+
+                const cleanup = () => {
+                    modal.style.display = 'none';
+                    okBtn.onclick = null;
+                    cancelBtn.onclick = null;
+                    inputEl.onkeydown = null;
+                };
+
+                const confirm = () => {
+                    const val = inputEl.value.trim();
+                    cleanup();
+                    resolve(val || null);
+                };
+
+                const cancel = () => {
+                    cleanup();
+                    resolve(null);
+                };
+
+                okBtn.onclick = confirm;
+                cancelBtn.onclick = cancel;
+
+                // Enter confirma, Escape cancela
+                inputEl.onkeydown = (e) => {
+                    if (e.key === 'Enter') { e.preventDefault(); confirm(); }
+                    if (e.key === 'Escape') { e.preventDefault(); cancel(); }
+                };
             });
         };
     },
@@ -1447,7 +1761,7 @@ const AdminCMS = {
                 document.getElementById('admin-user-selector').style.display = 'block';
                 const usersResp = await apiRequest('/api/users');
                 const users = await usersResp.json();
-                
+
                 userSelect.innerHTML = users.map(u => `<option value="${u.username}">${u.name} (${u.username})</option>`).join('');
             }
 
@@ -1455,12 +1769,12 @@ const AdminCMS = {
                 e.preventDefault();
                 const email = document.getElementById('profile-email').value;
                 const newPassword = document.getElementById('profile-password').value;
-                
-                const body = {};
-                if(email) body.email = email;
-                if(newPassword) body.newPassword = newPassword;
 
-                if(!body.email && !body.newPassword) {
+                const body = {};
+                if (email) body.email = email;
+                if (newPassword) body.newPassword = newPassword;
+
+                if (!body.email && !body.newPassword) {
                     messageEl.textContent = 'Preencha algum campo para alterar.';
                     messageEl.style.color = 'var(--color-error)';
                     messageEl.style.display = 'block';
@@ -1489,14 +1803,14 @@ const AdminCMS = {
                         messageEl.style.color = 'var(--color-error)';
                         messageEl.style.display = 'block';
                     }
-                } catch(e) {
+                } catch (e) {
                     messageEl.textContent = '❌ Erro de conexão.';
                     messageEl.style.color = 'var(--color-error)';
                     messageEl.style.display = 'block';
                 }
             });
 
-        } catch(e) {
+        } catch (e) {
             console.error('Erro ao configurar perfil:', e);
         }
     }
@@ -1543,10 +1857,12 @@ function showCreateForm() {
     if (AdminCMS.currentTab === 'blog') {
         document.getElementById('blog-form').style.display = 'block';
         document.getElementById('blogPostForm').reset();
+        document.getElementById('blog-content').innerHTML = ''; // Clear contenteditable
         document.getElementById('blog-form').scrollIntoView({ behavior: 'smooth' });
     } else if (AdminCMS.currentTab === 'projects') {
         document.getElementById('project-form').style.display = 'block';
         document.getElementById('projectForm').reset();
+        document.getElementById('project-full-description').innerHTML = ''; // Clear contenteditable
         document.getElementById('project-form').scrollIntoView({ behavior: 'smooth' });
     }
 }
@@ -1559,6 +1875,12 @@ function cancelForm() {
     document.getElementById('project-form').style.display = 'none';
     AdminCMS.editingId = null;
     AdminCMS.clearImagePreview();
+
+    // Clear editors
+    const blogEditor = document.getElementById('blog-content');
+    const projectEditor = document.getElementById('project-full-description');
+    if (blogEditor) blogEditor.innerHTML = '';
+    if (projectEditor) projectEditor.innerHTML = '';
 }
 
 // Inicializa quando o DOM estiver pronto

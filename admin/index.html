@@ -118,8 +118,7 @@
               </div>
             </div>
 
-            <textarea id="blog-content"
-              style="min-height: 400px; font-family: 'Space Grotesk', sans-serif; line-height: 1.6;"></textarea>
+            <div id="blog-content" class="medium-editor" contenteditable="true" data-placeholder="Comece a escrever sua história..."></div>
             <input type="file" id="blog-image-input" accept="image/*" style="display: none;">
           </div>
 
@@ -231,8 +230,7 @@
               </div>
             </div>
 
-            <textarea id="project-full-description"
-              style="min-height: 200px; font-family: 'Space Grotesk', sans-serif; line-height: 1.6;"></textarea>
+            <div id="project-full-description" class="medium-editor" contenteditable="true" data-placeholder="Descreva os detalhes do projeto..."></div>
             <input type="file" id="project-full-description-image-input" accept="image/*" style="display: none;">
           </div>
 
@@ -420,6 +418,8 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
+  <script src="https://unpkg.com/turndown/dist/turndown.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js"></script>
   <script src="../js/config.js?v=1.2"></script>
   <script src="js/cms-admin.js?v=1.2"></script>
   <script src="../js/glitch-text.js?v=1.2"></script>
@@ -434,6 +434,41 @@
           </div>
       </div>
   </div>
+
+  <!-- Modal de Input Customizado (substitui prompt()) -->
+  <div id="input-modal" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px); z-index: 9999; justify-content: center; align-items: center;">
+      <div class="modal-content" style="background: var(--color-surface); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: var(--radius-lg); padding: var(--spacing-xl); max-width: 480px; width: 90%; box-shadow: 0 20px 40px rgba(0,0,0,0.5);">
+          <h3 id="input-modal-title" style="margin-top: 0; color: var(--color-accent-primary);">Inserir valor</h3>
+          <p id="input-modal-msg" style="color: var(--color-text-secondary); margin-bottom: var(--spacing-md); font-size: var(--font-size-sm); line-height: 1.5;"></p>
+          <input
+            type="text"
+            id="input-modal-input"
+            autocomplete="off"
+            style="
+              width: 100%;
+              box-sizing: border-box;
+              margin-bottom: var(--spacing-lg);
+              padding: var(--spacing-sm) var(--spacing-md);
+              background: rgba(255,255,255,0.04);
+              border: 1px solid rgba(255, 255, 255, 0.12);
+              border-radius: var(--radius-sm);
+              color: var(--color-text-primary);
+              font-family: var(--font-primary);
+              font-size: var(--font-size-base);
+              transition: border-color 0.2s ease, box-shadow 0.2s ease;
+              outline: none;
+            "
+            onfocus="this.style.borderColor='var(--color-accent-primary)';this.style.boxShadow='0 0 0 3px rgba(39,255,43,0.1)';"
+            onblur="this.style.borderColor='rgba(255,255,255,0.12)';this.style.boxShadow='none';"
+          >
+          <div style="display: flex; justify-content: flex-end; gap: var(--spacing-sm);">
+              <button id="input-modal-cancel" class="btn btn-outline" style="min-width: 100px;">Cancelar</button>
+              <button id="input-modal-ok" class="btn btn-primary" style="min-width: 100px;">OK</button>
+          </div>
+      </div>
+  </div>
+
+
 
 </body>
 

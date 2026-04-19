@@ -1363,6 +1363,8 @@ section {
     overflow-x: auto;
     margin-bottom: var(--spacing-lg);
     border: 1px solid rgba(255, 255, 255, 0.1);
+    white-space: pre-wrap; /* Added to respect line breaks */
+    word-break: break-all;
 }
 
 .post-body pre code {

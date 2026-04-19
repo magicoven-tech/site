@@ -553,7 +553,11 @@ app.post('/api/blog', requireAuth, async (req, res) => {
         // Garante que o diretório exista antes de salvar
         await fs.mkdir(POSTS_DIR, { recursive: true });
 
-        const fileContent = matter.stringify(content || '', newPost);
+        // Remove o conteúdo do objeto de metadados para evitar duplicidade e folding no frontmatter
+        const meta = { ...newPost };
+        delete meta.content;
+
+        const fileContent = matter.stringify(content || '', meta);
 
         await fs.writeFile(path.join(POSTS_DIR, `${finalSlug}.md`), fileContent);
         console.log(`✅ Post criado: ${finalSlug}`);
@@ -596,7 +600,11 @@ app.put('/api/blog/:id', requireAuth, async (req, res) => {
         // Garante que o diretório exista antes de salvar
         await fs.mkdir(POSTS_DIR, { recursive: true });
 
-        const fileContent = matter.stringify(content || '', updatedPost);
+        // Remove o conteúdo do objeto de metadados para evitar duplicidade e folding no frontmatter
+        const meta = { ...updatedPost };
+        delete meta.content;
+
+        const fileContent = matter.stringify(content || '', meta);
         // Usa o slug original para garantir que subscreve o arquivo certo
         await fs.writeFile(path.join(POSTS_DIR, `${existingPost.slug}.md`), fileContent);
 
@@ -734,7 +742,12 @@ app.post('/api/projects', requireAuth, async (req, res) => {
 
     try {
         await fs.mkdir(PROJECTS_DIR, { recursive: true });
-        const fileContent = matter.stringify(fullDescription || '', newProject);
+        
+        // Remove o conteúdo do objeto de metadados para evitar duplicidade e folding no frontmatter
+        const meta = { ...newProject };
+        delete meta.fullDescription;
+
+        const fileContent = matter.stringify(fullDescription || '', meta);
         await fs.writeFile(path.join(PROJECTS_DIR, `${finalSlug}.md`), fileContent);
         
         console.log(`✅ Projeto criado: ${finalSlug}`);
@@ -766,7 +779,12 @@ app.put('/api/projects/:id', requireAuth, async (req, res) => {
 
     try {
         await fs.mkdir(PROJECTS_DIR, { recursive: true });
-        const fileContent = matter.stringify(fullDescription || '', updatedProject);
+        
+        // Remove o conteúdo do objeto de metadados para evitar duplicidade e folding no frontmatter
+        const meta = { ...updatedProject };
+        delete meta.fullDescription;
+
+        const fileContent = matter.stringify(fullDescription || '', meta);
         await fs.writeFile(path.join(PROJECTS_DIR, `${existingProject.slug}.md`), fileContent);
 
         console.log(`✅ Projeto atualizado: ${existingProject.slug}`);
