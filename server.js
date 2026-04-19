@@ -69,7 +69,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({
     storage: storage,
-    limits: { fileSize: 5.5 * 1024 * 1024 }, // Pequena margem acima de 5MB para evitar erros de arredondamento
+    limits: { fileSize: 10 * 1024 * 1024 }, // Aumentado para 10MB para garantir que imagens 4K comprimidas passem sem erros
     fileFilter: function (req, file, cb) {
         const filetypes = /jpeg|jpg|png|webp|gif/;
         const mimetype = filetypes.test(file.mimetype);
@@ -443,10 +443,17 @@ app.post('/api/upload', requireAuth, upload.single('image'), (req, res) => {
         return res.status(400).json({ error: 'Nenhum arquivo enviado' });
     }
 
+    console.log(`[Upload] Arquivo recebido: ${req.file.filename} (${req.file.size} bytes)`);
+
     // Retorna a URL pública da imagem
     const imageUrl = `/uploads/${req.file.filename}`;
+
+    // Sincroniza com GitHub para persistência no Render
+    gitSync(`cms(upload): nova imagem "${req.file.filename}"`);
+
     res.json({ url: imageUrl });
 });
+
 
 
 // Logout

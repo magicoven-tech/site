@@ -1181,7 +1181,14 @@ const AdminCMS = {
                     finalUrl = String(data);
                 }
 
-                if (onSuccess) onSuccess(finalUrl);
+                if (onSuccess) {
+                    // Se a URL for relativa e tivermos um baseURL configurado (Produção), 
+                    // precisamos garantir que a URL da imagem aponte para o backend.
+                    if (finalUrl.startsWith('/uploads') && window.API_CONFIG && window.API_CONFIG.baseURL) {
+                        finalUrl = window.API_CONFIG.baseURL + finalUrl;
+                    }
+                    onSuccess(finalUrl);
+                }
             } else {
                 this.customAlert('Aviso', 'Erro ao fazer upload: ' + (data.error || data.message || 'Erro desconhecido'));
             }
