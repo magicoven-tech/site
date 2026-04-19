@@ -52,9 +52,14 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Configuração do Multer para uploads de imagem
+const UPLOADS_DIR = path.join(__dirname, 'uploads');
+
+// Garante que a pasta de uploads exista
+fs.mkdir(UPLOADS_DIR, { recursive: true }).catch(console.error);
+
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'uploads/');
+        cb(null, UPLOADS_DIR);
     },
     filename: function (req, file, cb) {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
@@ -840,9 +845,17 @@ async function initializeUsers() {
 }
 
 
-// Servir arquivos estáticos (Fallback para SPA/Arquivos)
-// Colocado após as APIs para garantir que rotas da API tenham prioridade
+// Servir arquivos estáticos (CMS e Frontend)
 app.use(express.static(path.join(__dirname)));
+
+// Middleware de tratamento de erro global (deve ser o último)
+app.use((err, req, res, next) => {
+    console.error(`❌ Erro detectado: ${err.message}`);
+    res.status(500).json({
+        error: 'Erro interno do servidor',
+        message: err.message
+    });
+});
 
 // Iniciar servidor
 app.listen(PORT, async () => {
