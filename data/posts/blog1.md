@@ -55,7 +55,7 @@ author: Bruno Nepomuceno
 tags:
   - Blog1
 featured: false
-published: false
+published: true
 author_username: brunonepomuceno
 date: '2026-04-19'
 content: >
