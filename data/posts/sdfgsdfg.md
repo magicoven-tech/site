@@ -78,10 +78,16 @@ content: >
   Bash cd /media/magicoven/storage/  # ou a pasta de sua preferênciagit clone
   https://github.com/ggerganov/llama.cppcd llama.cppmkdir buildcd build#
   compilando focado em CPU (desativando Vulkan para evitar conflitos)cmake ..
-  -DGGML_VULKAN=OFFcmake --build . --config Release -j$(nproc)
+  -DGGML_VULKAN=OFFcmake --build . --config Release -j$(npro
 
   ```
 ---
+```javascript
+// Seu código javascript aqui
+```
+
+  
+
 ## Apakah Lorem Ipsum itu?
 
 Lorem Ipsum adalah contoh teks atau dummy dalam industri percetakan dan penataan huruf atau typesetting. Lorem Ipsum telah menjadi standar contoh teks sejak tahun 1500an, saat seorang tukang cetak yang tidak dikenal mengambil sebuah kumpulan teks dan mengacaknya untuk menjadi sebuah buku contoh huruf. Ia tidak hanya bertahan selama 5 abad, tapi juga telah beralih ke penataan huruf elektronik, tanpa ada perubahan apapun. Ia mulai dipopulerkan pada tahun 1960 dengan diluncurkannya lembaran-lembaran Letraset yang menggunakan kalimat-kalimat dari Lorem Ipsum, dan seiring munculnya perangkat lunak Desktop Publishing seperti Aldus PageMaker juga memiliki versi Lorem Ipsum.
@@ -98,6 +104,14 @@ Bagian standar dari teks Lorem Ipsum yang digunakan sejak tahun 1500an kini di r
 
 ## trem
 
+  
+
+```bash
+Bash cd /media/magicoven/storage/  # ou a pasta de sua preferênciagit clone https://github.com/ggerganov/llama.cppcd llama.cppmkdir buildcd build# compilando focado em CPU (desativando Vulkan para evitar conflitos)cmake .. -DGGML_VULKAN=OFFcmake --build . --config Release -j$(npr
 ```
-Bash cd /media/magicoven/storage/  # ou a pasta de sua preferênciagit clone https://github.com/ggerganov/llama.cppcd llama.cppmkdir buildcd build# compilando focado em CPU (desativando Vulkan para evitar conflitos)cmake .. -DGGML_VULKAN=OFFcmake --build . --config Release -j$(npro
+
+  
+
+```javascript
+function {}
 ```
