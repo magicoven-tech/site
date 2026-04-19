@@ -744,7 +744,8 @@ const AdminCMS = {
 
                 const options = {
                     maxSizeMB: MAX_SIZE_MB,
-                    maxWidthOrHeight: 1920,
+                    maxWidthOrHeight: 4096, // Aumentado para 4K para manter mais detalhes
+                    initialQuality: 0.9,     // Começa com qualidade muito alta
                     useWebWorker: true,
                     onProgress: (progress) => {
                         if (dropzoneText) dropzoneText.textContent = `Comprimindo (${progress}%)`;
