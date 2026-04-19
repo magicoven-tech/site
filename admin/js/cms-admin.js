@@ -778,13 +778,22 @@ const AdminCMS = {
         const btnVideo = document.getElementById(`${toolbarPrefix}-video`);
         if (btnVideo) {
             btnVideo.addEventListener('click', async () => {
-                const url = await this.customPrompt('Inserir Vídeo', 'Cole a URL de embed do vídeo (YouTube, Vimeo, etc.):', 'https://www.youtube.com/embed/...');
-                if (url && url.trim()) {
-                    const html = `<div class="video-container"><iframe src="${url.trim()}" frameborder="0" allowfullscreen></iframe></div><p><br></p>`;
-                    this.insertAtCursor(textareaId, html);
-                }
+                // Salva a posição do cursor ANTES de abrir o modal (modal rouba o foco)
+                this.saveSelection();
                 toolbar.classList.remove('active');
                 toggleBtn.textContent = '+';
+
+                const rawUrl = await this.customPrompt(
+                    'Inserir Vídeo',
+                    'Cole a URL do YouTube ou Vimeo — a conversão para embed é automática:',
+                    'https://www.youtube.com/watch?v=...'
+                );
+
+                if (rawUrl && rawUrl.trim()) {
+                    const embedUrl = this.toEmbedUrl(rawUrl);
+                    const html = `<div class="video-container"><iframe src="${embedUrl}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div><p><br></p>`;
+                    this.insertAtCursor(textareaId, html);
+                }
             });
         }
 
@@ -830,28 +839,68 @@ const AdminCMS = {
         const btnEmbed = document.getElementById(`${toolbarPrefix}-embed`);
         if (btnEmbed) {
             btnEmbed.addEventListener('click', async () => {
+                // Salva posição do cursor antes do modal
+                this.saveSelection();
+                toolbar.classList.remove('active');
+                toggleBtn.textContent = '+';
+
                 const url = await this.customPrompt('Inserir Link', 'Cole a URL completa:', 'https://');
                 if (url && url.trim()) {
                     const cleanUrl = url.trim();
                     this.insertAtCursor(textareaId, `<a href="${cleanUrl}" target="_blank">${cleanUrl}</a>`);
                 }
-                toolbar.classList.remove('active');
-                toggleBtn.textContent = '+';
             });
         }
     },
 
     /**
      * Insere HTML na posição do cursor em um contenteditable
+     * Usa savedRange se a seleção foi perdida (ex: após modal)
      */
     insertAtCursor(fieldId, html) {
         const editor = document.getElementById(fieldId);
         if (!editor) return;
 
         editor.focus();
-        
-        // Se houver seleção, substitui. Se não, insere no cursor.
+
+        // Se temos um range salvo (seleção guardada antes do modal), restaura
+        if (this._savedRange) {
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(this._savedRange);
+            this._savedRange = null;
+        }
+
         document.execCommand('insertHTML', false, html);
+    },
+
+    /**
+     * Salva a posição atual do cursor (antes de abrir um modal async)
+     */
+    saveSelection() {
+        const sel = window.getSelection();
+        if (sel.rangeCount > 0) {
+            this._savedRange = sel.getRangeAt(0).cloneRange();
+        }
+    },
+
+    /**
+     * Converte URLs do YouTube/Vimeo para formato embed
+     */
+    toEmbedUrl(url) {
+        if (!url) return url;
+        url = url.trim();
+
+        // YouTube: watch?v= ou youtu.be/
+        const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/);
+        if (ytMatch) return `https://www.youtube.com/embed/${ytMatch[1]}`;
+
+        // Vimeo: vimeo.com/VIDEO_ID
+        const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
+        if (vimeoMatch) return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+
+        // Já é um embed URL válido — retorna sem modificação
+        return url;
     },
 
     /**
