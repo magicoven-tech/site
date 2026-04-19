@@ -34,7 +34,9 @@ content: >
   No entanto, para rodar IAs modernas, ele tem "alguns" desafios:
 
 
-  ![Mac Pro 2009](/uploads/image-1776597198926-990458975.png)
+
+  ![Mac Pro 2009](/uploads/image-1776597401704-904547719.png)
+
 
 
   - Processadores: 2x Intel Xeon E5620 (8 núcleos/16 threads). Potente na época,
@@ -319,7 +321,9 @@ Para entender o desafio, imagine rodar modelos de linguagem modernos em uma máq
 No entanto, para rodar IAs modernas, ele tem "alguns" desafios:
 
 
-![Mac Pro 2009](/uploads/image-1776597401704-904547719.png)
+
+![Mac Pro 2009](/uploads/image-1776597505237-586525982.png)
+
 
 
 - Processadores: 2x Intel Xeon E5620 (8 núcleos/16 threads). Potente na época, mas sem as instruções de IA de hoje.
