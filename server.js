@@ -370,21 +370,25 @@ app.post('/api/auth/reset-password', async (req, res) => {
     const { email, code, newPassword } = req.body;
     if (!email || !code || !newPassword || newPassword.length < 6) return res.status(400).json({ error: 'Dados inválidos' });
 
-    const tokenData = resetTokens.get(email);
+    const usersData = await readJSON(USERS_FILE);
+    const user = usersData.users.find(u => u.email === email || u.username === email);
+    
+    if (!user) {
+        return res.status(404).json({ error: 'Usuário não encontrado' });
+    }
+
+    const tokenData = resetTokens.get(user.email);
     if (!tokenData || tokenData.code !== code || Date.now() > tokenData.expires) {
         return res.status(401).json({ error: 'Código inválido ou expirado. Entre em contato com o admin.' });
     }
 
-    const usersData = await readJSON(USERS_FILE);
-    const userIndex = usersData.users.findIndex(u => u.email === email);
-    if (userIndex === -1) return res.status(404).json({ error: 'Usuário não encontrado' });
-
+    const userIndex = usersData.users.findIndex(u => u.id === user.id);
     usersData.users[userIndex].password = await bcrypt.hash(newPassword, 10);
     await writeJSON(USERS_FILE, usersData);
-    resetTokens.delete(email);
+    resetTokens.delete(user.email);
 
     await sendEmail(
-        email,
+        user.email,
         "Senha redefinida ✅",
         "Sua senha foi redefinida com sucesso com o código de segurança.",
         "<p>Prezado(a) <strong>" + usersData.users[userIndex].name + "</strong>,</p><p>Sua senha foi redefinida com sucesso.</p>"
