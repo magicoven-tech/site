@@ -1,6 +1,28 @@
 {
   "projects": [
     {
+      "id": "1776572460346",
+      "title": "TESTE6",
+      "slug": "teste6",
+      "category": "teste6",
+      "description": "teste6",
+      "fullDescription": "teste6",
+      "client": "teste6",
+      "year": "2026",
+      "services": [],
+      "technologies": [],
+      "image": "",
+      "imageGradient": "linear-gradient(135deg, #27FF2B 0%, #1ed923 100%)",
+      "featured": false,
+      "published": true,
+      "gallery": [],
+      "url": "",
+      "tags": [],
+      "author": "Bruno Nepomuceno",
+      "author_username": "brunonepomuceno",
+      "number": "04"
+    },
+    {
       "id": "1776572427044",
       "title": "TESTE5",
       "slug": "teste5",
