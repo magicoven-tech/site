@@ -58,11 +58,11 @@
     <section class="hero" id="hero-section">
         <!-- 1. Container onde o 3D vai viver -->
         <script>
-            window.addEventListener('error', function(e) {
+            window.addEventListener('error', function (e) {
                 console.warn('CAUGHT:', e.message);
                 document.body.insertAdjacentHTML('afterbegin', '<div style="position:fixed; z-index:99999; background:red; color:white; padding:10px; top:0; left:0;">' + e.message + '</div>');
             });
-            window.addEventListener('unhandledrejection', function(e) {
+            window.addEventListener('unhandledrejection', function (e) {
                 console.warn('REJECTION:', e.reason);
                 document.body.insertAdjacentHTML('afterbegin', '<div style="position:fixed; z-index:99999; background:purple; color:white; padding:10px; top:40px; left:0;">Promise: ' + e.reason + '</div>');
             });
@@ -136,7 +136,8 @@
 
             <div class="services-grid">
                 <div class="service-item" data-aos="fade-up">
-                    <span class="service-icon">⚡</span>
+                    <!-- <span class="service-icon">⚡</span> -->
+                    <span class="service-icon"><img src="assets/raio.png" alt="" style="width: 200px;"></span>
                     <h3 class="service-title">DESENVOLVIMENTO WEB</h3>
                     <p class="service-description">
                         Sites e aplicações web modernas, rápidas e responsivas que encantam usuários.
@@ -144,7 +145,8 @@
                 </div>
 
                 <div class="service-item" data-aos="fade-up" data-aos-delay="100">
-                    <span class="service-icon">🎨</span>
+                    <!-- <span class="service-icon">🎨</span> -->
+                    <span class="service-icon"><img src="assets/artista.png" alt="" style="width: 144px;"></span>
                     <h3 class="service-title">DESIGN DIGITAL</h3>
                     <p class="service-description">
                         Interfaces intuitivas e visualmente impactantes que contam histórias.
@@ -152,7 +154,8 @@
                 </div>
 
                 <div class="service-item" data-aos="fade-up" data-aos-delay="200">
-                    <span class="service-icon">✨</span>
+                    <!-- <span class="service-icon">✨</span> -->
+                    <span class="service-icon"><img src="assets/estrela.png" alt="" style="width: 144px;"></span>
                     <h3 class="service-title">EXPERIÊNCIAS INTERATIVAS</h3>
                     <p class="service-description">
                         Projetos experimentais que exploram os limites da arte e tecnologia.
@@ -160,7 +163,8 @@
                 </div>
 
                 <div class="service-item" data-aos="fade-up" data-aos-delay="300">
-                    <span class="service-icon">🚀</span>
+                    <!-- <span class="service-icon">🚀</span> -->
+                    <span class="service-icon"><img src="assets/foguete.png" alt="" style="width: 144px;"></span>
                     <h3 class="service-title">CONSULTORIA CRIATIVA</h3>
                     <p class="service-description">
                         Ajudamos marcas a se destacarem no mundo digital com soluções inovadoras.
