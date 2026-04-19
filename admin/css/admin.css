@@ -409,6 +409,19 @@
       pointer-events: none;
     }
 
+    .post-body code.language-auto:empty::before,
+    [contenteditable="true"] code.language-auto:empty::before {
+        content: "Digite a linguagem (ex: javascript, bash)...";
+        color: var(--color-text-secondary);
+        opacity: 0.5;
+        font-style: italic;
+    }
+
+    .post-body pre,
+    [contenteditable="true"] pre {
+        position: relative;
+    }
+
     .dropzone-preview {
       margin-top: var(--spacing-md);
       display: none;

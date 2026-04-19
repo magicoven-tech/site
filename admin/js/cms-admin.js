@@ -693,11 +693,24 @@ const AdminCMS = {
             const pre = range.startContainer.parentElement.closest('pre');
 
             if (pre) {
+                const codeNode = pre.querySelector('code');
+                const isLanguageDraft = codeNode && codeNode.classList.contains('language-auto');
+
                 if (e.key === 'Enter') {
                     e.preventDefault();
                     
-                    // Usar insertHTML com <br> é mais estável para manter a estrutura no contenteditable
-                    document.execCommand('insertHTML', false, '<br>');
+                    if (isLanguageDraft) {
+                        const lang = codeNode.innerText.trim();
+                        codeNode.className = `language-${lang || 'text'}`;
+                        codeNode.innerText = ''; // Limpa o nome da linguagem
+                        // Força um pequeno atraso para que a limpeza do texto seja processada
+                        setTimeout(() => {
+                            document.execCommand('insertHTML', false, '<br>');
+                        }, 0);
+                    } else {
+                        // Usar insertHTML com <br> é mais estável para manter a estrutura no contenteditable
+                        document.execCommand('insertHTML', false, '<br>');
+                    }
                     
                     // Scroll se necessário
                     setTimeout(() => {
@@ -740,8 +753,8 @@ const AdminCMS = {
         // Opção de Vídeo (Adaptado para HTML)
         const btnVideo = document.getElementById(`${toolbarPrefix}-video`);
         if (btnVideo) {
-            btnVideo.addEventListener('click', () => {
-                const url = prompt('URL do vídeo (embed):');
+            btnVideo.addEventListener('click', async () => {
+                const url = await this.customPrompt('Inserir Vídeo', 'Digite a URL do vídeo (embed):');
                 if (url) {
                    const html = `<div class="video-container"><iframe src="${url}" frameborder="0" allowfullscreen></iframe></div>`;
                    this.insertAtCursor(textareaId, html);
@@ -755,8 +768,8 @@ const AdminCMS = {
         const btnCode = document.getElementById(`${toolbarPrefix}-code`);
         if (btnCode) {
             btnCode.addEventListener('click', () => {
-                const lang = prompt('Linguagem do código (ex: javascript, html, css):', 'javascript') || 'javascript';
-                const html = `<pre><code class="language-${lang}">// Seu código ${lang} aqui\n</code></pre><p><br></p>`;
+                // Ao invés de prompt, inserimos um bloco com classe especial
+                const html = `<pre><code class="language-auto"></code></pre><p><br></p>`;
                 this.insertAtCursor(textareaId, html);
                 toolbar.classList.remove('active');
                 toggleBtn.textContent = '+';
@@ -1501,6 +1514,46 @@ const AdminCMS = {
                 }
                 okBtn.onclick = () => { cleanup(); resolve(true); }
                 cancelBtn.onclick = () => { cleanup(); resolve(false); }
+            });
+        };
+
+        this.customPrompt = (title, msg, defaultValue = '') => {
+            return new Promise(resolve => {
+                const modal = document.getElementById('prompt-modal');
+                const titleEl = document.getElementById('prompt-modal-title');
+                const msgEl = document.getElementById('prompt-modal-msg');
+                const inputEl = document.getElementById('prompt-modal-input');
+                const okBtn = document.getElementById('prompt-modal-ok');
+                const cancelBtn = document.getElementById('prompt-modal-cancel');
+
+                if (!modal) {
+                    const result = prompt(msg, defaultValue);
+                    resolve(result);
+                    return;
+                }
+
+                titleEl.textContent = title;
+                msgEl.textContent = msg;
+                inputEl.value = defaultValue;
+                modal.style.display = 'flex';
+                inputEl.focus();
+
+                const cleanup = () => {
+                    okBtn.onclick = null;
+                    cancelBtn.onclick = null;
+                    modal.style.display = 'none';
+                }
+
+                okBtn.onclick = () => {
+                    const val = inputEl.value;
+                    cleanup();
+                    resolve(val);
+                };
+
+                cancelBtn.onclick = () => {
+                    cleanup();
+                    resolve(null);
+                };
             });
         };
     },
