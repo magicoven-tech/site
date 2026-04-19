@@ -14,6 +14,8 @@ const path = require('path');
 const multer = require('multer');
 const matter = require('gray-matter');
 const { exec } = require('child_process');
+const nodemailer = require('nodemailer');
+const crypto = require('crypto');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -76,6 +78,47 @@ app.use((req, res, next) => {
     console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
     next();
 });
+
+// Configuração do Nodemailer
+const transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST || 'smtp.gmail.com',
+    port: process.env.SMTP_PORT || 587,
+    secure: false, // true for 465, false for other ports
+    auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS
+    }
+});
+
+// Emulação de envio se não houver configurações
+async function sendEmail(to, subject, text, html) {
+    if(!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+        console.log('\n=============================================');
+        console.log(`📧 E-MAIL SIMULADO PARA: ${to}`);
+        console.log(`📌 ASSUNTO: ${subject}`);
+        console.log(`💬 MENSAGEM: \n${text}`);
+        console.log('=============================================\n');
+        return true;
+    }
+    
+    try {
+        const info = await transporter.sendMail({
+            from: `"CMS Magic Oven" <${process.env.SMTP_USER}>`,
+            to,
+            subject,
+            text,
+            html
+        });
+        console.log('Email enviado: %s', info.messageId);
+        return true;
+    } catch(err) {
+        console.error('Erro ao enviar email:', err);
+        return false;
+    }
+}
+
+// Armazenamento em memória para tokens de redefinição
+const resetTokens = new Map(); // key: email, value: { code, expires }
 
 // ============================================
 // ROTAS - Health Check
@@ -241,18 +284,134 @@ app.post('/api/auth/login', async (req, res) => {
         return res.status(401).json({ error: 'Credenciais inválidas' });
     }
 
+    const requiresPasswordChange = password === 'admin123';
+
     // Gera token JWT
     const token = generateToken(user);
 
     res.json({
         success: true,
         token: token,
+        requiresPasswordChange: requiresPasswordChange,
         user: {
             id: user.id,
             username: user.username,
-            name: user.name
+            name: user.name,
+            email: user.email
         }
     });
+});
+
+app.post('/api/auth/change-first-password', requireAuth, async (req, res) => {
+    const { newPassword } = req.body;
+    if (!newPassword || newPassword.length < 6) return res.status(400).json({ error: 'Nova senha deve ter pelo menos 6 caracteres' });
+
+    const usersData = await readJSON(USERS_FILE);
+    const userIndex = usersData.users.findIndex(u => u.username === req.user.username);
+    if (userIndex === -1) return res.status(404).json({ error: 'Usuário não encontrado' });
+
+    usersData.users[userIndex].password = await bcrypt.hash(newPassword, 10);
+    await writeJSON(USERS_FILE, usersData);
+    
+    // Envia email avisando mudança
+    await sendEmail(
+        usersData.users[userIndex].email,
+        "Sua senha foi alterada ✅",
+        "Você definiu uma nova senha de segurança com sucesso no CMS Magic Oven.",
+        "<p>Prezado(a) <strong>" + req.user.name + "</strong>,</p><p>Você definiu uma nova senha de segurança com sucesso no CMS Magic Oven.</p>"
+    );
+    res.json({ success: true });
+});
+
+app.post('/api/auth/forgot-password', async (req, res) => {
+    const { usernameOrEmail } = req.body;
+    const usersData = await readJSON(USERS_FILE);
+    const user = usersData.users.find(u => u.username === usernameOrEmail || u.email === usernameOrEmail);
+    
+    if (!user) {
+        // Por segurança, pode não revelar que não encontrou, mas retornaremos erro para a UX pedida
+        return res.status(404).json({ error: 'Usuário ou e-mail não encontrado' });
+    }
+
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    resetTokens.set(user.email, { code, expires: Date.now() + 15 * 60 * 1000, username: user.username });
+
+    const sent = await sendEmail(
+        user.email,
+        "Código de Recuperação - Magic Oven",
+        `Seu código é: ${code}`,
+        `<p>Olá,</p><p>Você solicitou uma alteração de senha. Seu código é:</p><h2>${code}</h2><p>Válido por 15 minutos.</p>`
+    );
+
+    if (sent) res.json({ success: true, message: 'Código enviado para ' + user.email });
+    else res.status(500).json({ error: 'Erro ao enviar email' });
+});
+
+app.post('/api/auth/reset-password', async (req, res) => {
+    const { email, code, newPassword } = req.body;
+    if (!email || !code || !newPassword || newPassword.length < 6) return res.status(400).json({ error: 'Dados inválidos' });
+
+    const tokenData = resetTokens.get(email);
+    if (!tokenData || tokenData.code !== code || Date.now() > tokenData.expires) {
+        return res.status(401).json({ error: 'Código inválido ou expirado. Entre em contato com o admin.' });
+    }
+
+    const usersData = await readJSON(USERS_FILE);
+    const userIndex = usersData.users.findIndex(u => u.email === email);
+    if (userIndex === -1) return res.status(404).json({ error: 'Usuário não encontrado' });
+
+    usersData.users[userIndex].password = await bcrypt.hash(newPassword, 10);
+    await writeJSON(USERS_FILE, usersData);
+    resetTokens.delete(email);
+
+    await sendEmail(
+        email,
+        "Senha redefinida ✅",
+        "Sua senha foi redefinida com sucesso com o código de segurança.",
+        "<p>Prezado(a) <strong>" + usersData.users[userIndex].name + "</strong>,</p><p>Sua senha foi redefinida com sucesso.</p>"
+    );
+
+    res.json({ success: true });
+});
+
+// Editar Perfil próprio
+app.put('/api/auth/profile', requireAuth, async (req, res) => {
+    const { email, newPassword } = req.body;
+    const usersData = await readJSON(USERS_FILE);
+    const userIndex = usersData.users.findIndex(u => u.username === req.user.username);
+    
+    if (email) usersData.users[userIndex].email = email;
+    if (newPassword && newPassword.length >= 6) {
+        usersData.users[userIndex].password = await bcrypt.hash(newPassword, 10);
+    }
+    
+    await writeJSON(USERS_FILE, usersData);
+    res.json({ success: true });
+});
+
+// Admin editar qualquer usuário
+app.get('/api/users', requireAuth, async (req, res) => {
+    if (req.user.username !== 'admin') return res.status(403).json({ error: 'Acesso negado' });
+    const usersData = await readJSON(USERS_FILE);
+    const usersSafe = usersData.users.map(u => ({ id: u.id, username: u.username, name: u.name, email: u.email }));
+    res.json(usersSafe);
+});
+
+app.put('/api/users/:username', requireAuth, async (req, res) => {
+    if (req.user.username !== 'admin') return res.status(403).json({ error: 'Acesso negado' });
+    const { email, newPassword } = req.body;
+    const usersData = await readJSON(USERS_FILE);
+    const userIndex = usersData.users.findIndex(u => u.username === req.params.username);
+    
+    if (userIndex === -1) return res.status(404).json({ error: 'Usuário não encontrado' });
+    
+    if (email) usersData.users[userIndex].email = email;
+    if (newPassword && newPassword.length >= 6) {
+        usersData.users[userIndex].password = await bcrypt.hash(newPassword, 10);
+    }
+    
+    await writeJSON(USERS_FILE, usersData);
+    res.json({ success: true });
 });
 
 // Endpoint para Upload de Imagem (Protegido)
@@ -362,6 +521,8 @@ app.post('/api/blog', requireAuth, async (req, res) => {
         title,
         slug: finalSlug,
         ...otherData,
+        author: req.user ? req.user.name : 'Admin',
+        author_username: req.user ? req.user.username : 'admin',
         date: req.body.date || new Date().toISOString().split('T')[0]
     };
 
@@ -518,6 +679,8 @@ app.post('/api/projects', requireAuth, async (req, res) => {
     const newProject = {
         id: String(Date.now()),
         ...req.body,
+        author: req.user ? req.user.name : 'Admin',
+        author_username: req.user ? req.user.username : 'admin',
         number: '0' + (data.projects.length + 1)
     };
 

@@ -32,6 +32,8 @@ const AdminCMS = {
         this.setupForms();
         this.setupImageUpload();
         this.setupLogout();
+        this.setupModals();
+        await this.setupProfile();
     },
 
     /**
@@ -322,6 +324,7 @@ const AdminCMS = {
      * Verifica se o cursor está dentro de uma imagem Markdown e mostra o menu
      */
     handleImageCursor(e, textarea, menu) {
+        this.activeTextarea = textarea;
         // Pequeno delay
         setTimeout(() => {
             const cursor = textarea.selectionStart;
@@ -460,6 +463,7 @@ const AdminCMS = {
      * Lida com a seleção de texto e posicionamento do menu
      */
     handleTextSelection(e, textarea, menu) {
+        this.activeTextarea = textarea;
         // Pequeno delay para garantir que a seleção foi atualizada
         setTimeout(() => {
             const start = textarea.selectionStart;
@@ -718,7 +722,7 @@ const AdminCMS = {
      */
     async handleImageUpload(file, onSuccess) {
         if (!file.type.startsWith('image/')) {
-            alert('Por favor, selecione apenas arquivos de imagem.');
+            this.customAlert('Aviso', 'Por favor, selecione apenas arquivos de imagem.');
             return;
         }
 
@@ -757,7 +761,7 @@ const AdminCMS = {
                     else if (data.location) finalUrl = data.location; // S3 style
                     else {
                         console.error('Erro: URL não encontrada na resposta do upload', data);
-                        alert('Erro ao processar imagem. Tente novamente.');
+                        this.customAlert('Aviso', 'Erro ao processar imagem. Tente novamente.');
                         return;
                     }
                 } else {
@@ -766,11 +770,11 @@ const AdminCMS = {
 
                 if (onSuccess) onSuccess(finalUrl);
             } else {
-                alert('Erro ao fazer upload: ' + (data.error || 'Erro desconhecido'));
+                this.customAlert('Aviso', 'Erro ao fazer upload: ' + (data.error || 'Erro desconhecido'));
             }
         } catch (error) {
             console.error('Erro no upload:', error);
-            alert('Erro ao fazer upload da imagem.');
+            this.customAlert('Aviso', 'Erro ao fazer upload da imagem.');
         }
     },
 
@@ -861,23 +865,23 @@ const AdminCMS = {
                 console.log('📥 Response data:', data);
             } catch (jsonError) {
                 console.error('❌ Erro ao parsear JSON da resposta:', jsonError);
-                alert('❌ Servidor retornou resposta inválida');
+                this.customAlert('Erro', 'Servidor retornou resposta inválida');
                 return;
             }
 
             if (response.ok && data.success) {
                 console.log('✅ Artigo salvo com sucesso!');
-                alert('✅ Artigo salvo com sucesso!');
+                this.customAlert('Sucesso', 'Artigo salvo com sucesso!');
                 cancelForm(); // Removido 'this.'
                 await this.loadBlogPosts();
             } else {
                 // Mensagens de erro mais específicas
                 console.error('❌ Erro do servidor:', data);
                 if (response.status === 401) {
-                    alert('❌ Sessão expirada. Faça login novamente.');
+                    await this.customAlert('Erro', 'Sessão expirada. Faça login novamente.');
                     window.location.href = '/admin/login.html';
                 } else {
-                    alert('❌ Erro ao salvar artigo: ' + (data.error || 'Erro desconhecido'));
+                    this.customAlert('Erro', 'Erro ao salvar artigo: ' + (data.error || 'Erro desconhecido'));
                 }
             }
         } catch (error) {
@@ -885,7 +889,7 @@ const AdminCMS = {
             console.error('❌ Erro nome:', error.name);
             console.error('❌ Erro mensagem:', error.message);
             console.error('❌ Stack trace:', error.stack);
-            alert('❌ Erro de conexão: ' + error.message + '\n\nVerifique o console (F12) para mais detalhes.');
+            this.customAlert('Erro', 'Erro de conexão: ' + error.message + '\n\nVerifique o console (F12) para mais detalhes.');
         }
     },
 
@@ -938,15 +942,15 @@ const AdminCMS = {
             const data = await response.json();
 
             if (response.ok && data.success) {
-                alert('✅ Projeto salvo com sucesso!');
+                this.customAlert('Sucesso', 'Projeto salvo com sucesso!');
                 cancelForm(); // Removido 'this.'
                 await this.loadProjects();
             } else {
-                alert('❌ Erro ao salvar projeto: ' + (data.error || 'Erro desconhecido'));
+                this.customAlert('Erro', 'Erro ao salvar projeto: ' + (data.error || 'Erro desconhecido'));
             }
         } catch (error) {
             console.error('Erro ao salvar projeto:', error);
-            alert('❌ Erro ao salvar projeto. Verifique se o servidor está rodando.');
+            this.customAlert('Erro', 'Erro ao salvar projeto. Verifique se o servidor está rodando.');
         }
     },
 
@@ -970,7 +974,7 @@ const AdminCMS = {
         const item = dataArray.find(i => i.id === id);
 
         if (!item) {
-            alert('Item não encontrado');
+            this.customAlert('Aviso', 'Item não encontrado');
             return;
         }
 
@@ -998,11 +1002,11 @@ const AdminCMS = {
                     await this.loadProjects();
                 }
             } else {
-                alert('Erro ao alternar publicação');
+                this.customAlert('Aviso', 'Erro ao alternar publicação');
             }
         } catch (error) {
             console.error('Erro ao alternar publicação:', error);
-            alert('Erro ao alternar publicação');
+            this.customAlert('Aviso', 'Erro ao alternar publicação');
         }
     },
 
@@ -1016,7 +1020,7 @@ const AdminCMS = {
         const item = dataArray.find(i => i.id === id);
 
         if (!item) {
-            alert('Item não encontrado');
+            this.customAlert('Aviso', 'Item não encontrado');
             return;
         }
 
@@ -1061,7 +1065,8 @@ const AdminCMS = {
      * Deleta item
      */
     async deleteItem(type, id) {
-        if (!confirm('Tem certeza que deseja excluir este item? Esta ação não pode ser desfeita.')) {
+        const confirmed = await this.customConfirm('Excluir Item', 'Tem certeza que deseja excluir este item? Esta ação não pode ser desfeita.');
+        if (!confirmed) {
             return;
         }
 
@@ -1073,7 +1078,7 @@ const AdminCMS = {
             const data = await response.json();
 
             if (response.ok && data.success) {
-                alert('✅ Item excluído com sucesso!');
+                this.customAlert('Sucesso', 'Item excluído com sucesso!');
                 // Recarrega dados
                 if (type === 'blog') {
                     await this.loadBlogPosts();
@@ -1081,11 +1086,11 @@ const AdminCMS = {
                     await this.loadProjects();
                 }
             } else {
-                alert('❌ Erro ao excluir item: ' + (data.error || 'Erro desconhecido'));
+                this.customAlert('Erro', 'Erro ao excluir item: ' + (data.error || 'Erro desconhecido'));
             }
         } catch (error) {
             console.error('Erro ao excluir item:', error);
-            alert('❌ Erro ao excluir item. Verifique se o servidor está rodando.');
+            this.customAlert('Erro', 'Erro ao excluir item. Verifique se o servidor está rodando.');
         }
     },
 
@@ -1170,7 +1175,8 @@ const AdminCMS = {
         const ids = Array.from(this.selectedItems[type]);
         if (ids.length === 0) return;
 
-        if (!confirm(`Tem certeza que deseja excluir os ${ids.length} itens selecionados?`)) {
+        const confirmed = await this.customConfirm('Excluir Itens', `Tem certeza que deseja excluir os ${ids.length} itens selecionados?`);
+        if (!confirmed) {
             return;
         }
 
@@ -1183,7 +1189,7 @@ const AdminCMS = {
             const data = await response.json();
 
             if (response.ok && data.success) {
-                alert(`✅ ${data.deletedCount} itens excluídos com sucesso!`);
+                this.customAlert('Sucesso', `${data.deletedCount} itens excluídos com sucesso!`);
                 this.selectedItems[type].clear();
                 this.updateBatchUI(type);
                 
@@ -1194,11 +1200,127 @@ const AdminCMS = {
                     await this.loadProjects();
                 }
             } else {
-                alert('❌ Erro ao excluir itens: ' + (data.error || 'Erro desconhecido'));
+                this.customAlert('Erro', 'Erro ao excluir itens: ' + (data.error || 'Erro desconhecido'));
             }
         } catch (error) {
             console.error('Erro ao excluir itens em lote:', error);
-            alert('❌ Erro ao excluir itens em lote. Verifique se o servidor está rodando.');
+            this.customAlert('Erro', 'Erro ao excluir itens em lote. Verifique se o servidor está rodando.');
+        }
+    },
+
+    setupModals() {
+                this.customAlert = (title, msg) => {
+            return new Promise(resolve => {
+                const titleEl = document.getElementById('alert-modal-title');
+                if(!titleEl) {
+                    alert((title ? title + " - " : "") + msg);
+                    resolve();
+                    return;
+                }
+                const msgEl = document.getElementById('alert-modal-msg');
+                const modal = document.getElementById('alert-modal');
+                const okBtn = document.getElementById('alert-modal-ok');
+
+                titleEl.textContent = title;
+                msgEl.textContent = msg;
+                modal.style.display = 'flex';
+
+                const handleClick = () => {
+                    modal.style.display = 'none';
+                    okBtn.removeEventListener('click', handleClick);
+                    resolve();
+                };
+                okBtn.addEventListener('click', handleClick);
+            });
+        };
+
+        this.customConfirm = (title, msg) => {
+            return new Promise(resolve => {
+                document.getElementById('confirm-modal-title').textContent = title;
+                document.getElementById('confirm-modal-msg').textContent = msg;
+                const modal = document.getElementById('confirm-modal');
+                modal.style.display = 'flex';
+                
+                const okBtn = document.getElementById('confirm-modal-ok');
+                const cancelBtn = document.getElementById('confirm-modal-cancel');
+                
+                const cleanup = () => {
+                    okBtn.onclick = null;
+                    cancelBtn.onclick = null;
+                    modal.style.display = 'none';
+                }
+                okBtn.onclick = () => { cleanup(); resolve(true); }
+                cancelBtn.onclick = () => { cleanup(); resolve(false); }
+            });
+        };
+    },
+
+    async setupProfile() {
+        // Obter user atual
+        try {
+            const response = await apiRequest('/api/auth/check');
+            const data = await response.json();
+            const currentUser = data.user;
+
+            const profileForm = document.getElementById('profileForm');
+            const messageEl = document.getElementById('profile-message');
+            const userSelect = document.getElementById('user-select');
+
+            if (currentUser.username === 'admin') {
+                document.getElementById('admin-user-selector').style.display = 'block';
+                const usersResp = await apiRequest('/api/users');
+                const users = await usersResp.json();
+                
+                userSelect.innerHTML = users.map(u => `<option value="${u.username}">${u.name} (${u.username})</option>`).join('');
+            }
+
+            profileForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const email = document.getElementById('profile-email').value;
+                const newPassword = document.getElementById('profile-password').value;
+                
+                const body = {};
+                if(email) body.email = email;
+                if(newPassword) body.newPassword = newPassword;
+
+                if(!body.email && !body.newPassword) {
+                    messageEl.textContent = 'Preencha algum campo para alterar.';
+                    messageEl.style.color = 'var(--color-error)';
+                    messageEl.style.display = 'block';
+                    return;
+                }
+
+                let url = '/api/auth/profile';
+                if (currentUser.username === 'admin' && userSelect.value !== 'admin') {
+                    url = `/api/users/${userSelect.value}`;
+                }
+
+                try {
+                    const res = await apiRequest(url, {
+                        method: 'PUT',
+                        body: JSON.stringify(body)
+                    });
+                    const result = await res.json();
+
+                    if (res.ok && result.success) {
+                        messageEl.textContent = '✅ Perfil atualizado com sucesso!';
+                        messageEl.style.color = '#4CAF50';
+                        messageEl.style.display = 'block';
+                        profileForm.reset();
+                    } else {
+                        messageEl.textContent = '❌ Erro: ' + (result.error || 'Falha ao atualizar');
+                        messageEl.style.color = 'var(--color-error)';
+                        messageEl.style.display = 'block';
+                    }
+                } catch(e) {
+                    messageEl.textContent = '❌ Erro de conexão.';
+                    messageEl.style.color = 'var(--color-error)';
+                    messageEl.style.display = 'block';
+                }
+            });
+
+        } catch(e) {
+            console.error('Erro ao configurar perfil:', e);
         }
     }
 };

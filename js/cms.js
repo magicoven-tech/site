@@ -111,6 +111,10 @@ const CMS = {
                 <p class="blog-excerpt">
                     ${post.excerpt}
                 </p>
+                <div style="margin-bottom: var(--spacing-sm); display: flex; align-items: center; gap: 0.5rem; color: var(--color-text-secondary); font-size: 0.9rem;">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                    <span>Publicado por ${post.author || 'Magic Oven'}</span>
+                </div>
                 <a href="blog-post.html?slug=${post.slug}" class="blog-read-more">LER MAIS →</a>
             </article>
         `;
@@ -143,6 +147,10 @@ const CMS = {
                     <p class="project-description">
                         ${project.description}
                     </p>
+                    <div style="margin-bottom: var(--spacing-sm); display: flex; align-items: center; gap: 0.5rem; color: var(--color-text-secondary); font-size: 0.9rem;">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                        <span>Desenvolvido por ${project.author || 'Magic Oven'}</span>
+                    </div>
                     <a href="project.html?slug=${project.slug}" class="project-link">VER PROJETO →</a>
                 </div>
             </article>

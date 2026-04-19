@@ -57,22 +57,38 @@ Efeito de glitch procedimental aplicado ao logotipo e textos de destaque, simula
 
 ---
 
-## � CMS & Gerenciamento
+## 🛠 CMS & Gerenciamento Professional Edition
 
-O projeto possui um CMS (Content Management System) leve e customizado para gerenciar o blog e o portfólio.
+O projeto possui um CMS (Content Management System) leve e customizado para gerenciar o blog e o portfólio. Recentemente foi transformado em uma ferramenta profissional multiusuário com foco em UX.
 
-### Acesso ao Painel
+### 🔑 Acesso ao Painel
 ```
 URL: http://localhost:3000/admin/login.html
-Usuário: admin
-Senha: admin123
+Usuários padrão: admin, brunonepomuceno, juliasakakibara
+Senha inicial: admin123
 ```
+*No primeiro login, o sistema exigirá uma troca forçada de senha para maior segurança.*
 
-### Funcionalidades do CMS
-- **Gerenciamento de Conteúdo**: Criação, edição e exclusão de postagens de blog e projetos.
-- **Exclusão em Lote**: Interface com checkboxes que permite selecionar múltiplos itens para exclusão simultânea.
-- **Seleção Global**: Opção "Selecionar Tudo" para marcar ou desmarcar todos os itens da lista de uma vez, agilizando limpezas de catálogo.
-- **Otimização GitSync**: Exclusões em lote geram apenas um commit e push no GitHub, otimizando o fluxo de implantação e evitando múltiplas builds no Render.
+### 🚀 Funcionalidades do CMS
+- **Sistema Multi-Usuário e Autoria**: O backend intercepta o token JWT e injeta dinamicamente o *Nome e Username* de quem produziu a publicação, identificando a autoria no site (Blog/Projetos).
+- **Segurança Avançada**: 
+  - Fluxo de **"Esqueci Minha Senha"** com envio de códigos por e-mail (`nodemailer`).
+  - **Password Visibility Toggle**: Ícone de "olho" em todos os campos de senha para facilidade de uso.
+- **Experiência Visual Premium (UX)**:
+  - **Zero Browser Alerts**: Todos os feedbacks do sistema (sucessos, erros e avisos) agora utilizam **Modais Customizados** que seguem o Design System do site.
+  - **Glassmorphism Editor Menus**: Menus de formatação e redimensionamento de imagem totalmente redesenhados com efeitos de desfoque e transparência.
+- **Gestão de Perfil Centralizada**: Aba dedicada para troca de e-mails/senhas, com visão administrativa especial para a conta `admin`.
+- **Otimização GitSync**: Sincronização automática com GitHub para persistência de dados no Render.
+
+---
+
+## 🧪 Qualidade de Código & Arquitetura
+
+O painel de administração foi totalmente refatorado sob os princípios de separação de responsabilidades (SoC):
+- **Modularização**: HTML, CSS e JS agora residem em pastas dedicadas dentro de `/admin/`.
+- **Arquitetura Async**: Todos os alertas e confirmações são baseados em Promises para um fluxo de dados limpo e sem travamentos de thread.
+
+> **Importante:** Antes de novas implementações, consulte nosso guia em [`.test_rules.md`](.test_rules.md) que detalha os procedimentos de **análise estática** e **Testes Estritos**.
 
 ---
 
@@ -84,21 +100,22 @@ Senha: admin123
 
 ---
 
-## �️ Estrutura do Projeto
+## 🏗️ Estrutura do Projeto
 
 ```
 site/
-├── server.js              # Servidor Node.js
-├── data/                  # Armazenamento JSON (Blog/Projetos)
-├── assets/                # Imagens, SVGs e Favicons
+├── server.js              # Servidor Node.js (API & GitSync)
+├── data/                  # Armazenamento JSON (Blog, Projetos e Usuários)
+├── admin/                 # Interface do CMS Professional
+│   ├── css/               # Estilos desacoplados (admin.css, login.css)
+│   ├── js/                # Lógica modular (cms-admin.js, login.js)
+│   ├── index.html         # Dashboard (Gerenciador)
+│   └── login.html         # Tela de Acesso e Recuperação
 ├── css/
-│   └── main.css          # Design System e Layout
+│   └── main.css           # Design System Global
 ├── js/
 │   ├── hero-background.js # Engine Three.js + Shaders
-│   ├── glitch-text.js     # Lógica do efeito de glitch
-│   ├── cms.js             # Consumo dinâmico de dados
 │   └── main.js            # Interações globais
-└── admin/                 # Interface do CMS
 ```
 
 ---

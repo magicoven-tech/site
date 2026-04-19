@@ -1,6 +1,7 @@
 {
   "projects": [
     {
+<<<<<<< Updated upstream
       "id": "1773712148362",
       "title": "TEST PROJECT 2",
       "slug": "test-project-2",
@@ -13,11 +14,26 @@
       "technologies": [],
       "image": "",
       "imageGradient": "linear-gradient(135deg, #27FF2B 0%, #1ed923 100%)",
+=======
+      "id": "1776570035375",
+      "title": "TESTE2",
+      "slug": "teste2",
+      "category": "teste2",
+      "description": "teste2",
+      "fullDescription": "teste2",
+      "client": "teste2",
+      "year": "teste2",
+      "services": [],
+      "technologies": [],
+      "image": "",
+      "imageGradient": "teste2",
+>>>>>>> Stashed changes
       "featured": false,
       "published": true,
       "gallery": [],
       "url": "",
       "tags": [],
+<<<<<<< Updated upstream
       "number": "06"
     },
     {
@@ -52,10 +68,29 @@
       "services": [],
       "technologies": [],
       "image": "/uploads/image-1772880491635-935995075.webp",
+=======
+      "author": "Bruno Nepomuceno",
+      "author_username": "brunonepomuceno",
+      "number": "02"
+    },
+    {
+      "id": "1776570022887",
+      "title": "TESTE1",
+      "slug": "teste1",
+      "category": "teste1",
+      "description": "teste1",
+      "fullDescription": "teste1",
+      "client": "teste1",
+      "year": "teste1",
+      "services": [],
+      "technologies": [],
+      "image": "",
+>>>>>>> Stashed changes
       "imageGradient": "linear-gradient(135deg, #27FF2B 0%, #1ed923 100%)",
-      "featured": true,
+      "featured": false,
       "published": true,
       "gallery": [],
+<<<<<<< Updated upstream
       "url": "https://www.anthropic.com/research/project-vend-2",
       "tags": [],
       "number": "04"
@@ -119,6 +154,13 @@
       "gallery": [],
       "url": "",
       "tags": []
+=======
+      "url": "",
+      "tags": [],
+      "author": "Bruno Nepomuceno",
+      "author_username": "brunonepomuceno",
+      "number": "01"
+>>>>>>> Stashed changes
     }
   ]
 }
