@@ -1,3 +1,26 @@
 {
-  "projects": []
+  "projects": [
+    {
+      "id": "1776574249239",
+      "title": "PROJETO1",
+      "slug": "projeto1",
+      "category": "Projeto1",
+      "description": "Projeto1",
+      "fullDescription": "Projeto1",
+      "client": "Projeto1",
+      "year": "2026",
+      "services": [],
+      "technologies": [],
+      "image": "",
+      "imageGradient": "linear-gradient(135deg, #27FF2B 0%, #1ed923 100%)",
+      "featured": false,
+      "published": true,
+      "gallery": [],
+      "url": "",
+      "tags": [],
+      "author": "Bruno Nepomuceno",
+      "author_username": "brunonepomuceno",
+      "number": "01"
+    }
+  ]
 }
