@@ -515,6 +515,35 @@
         user-select: none;
     }
 
+    /* Botão de deletar o bloco de código */
+    .code-delete-btn {
+        position: absolute;
+        top: 4px;
+        right: 6px;
+        background: transparent;
+        border: none;
+        color: rgba(255, 255, 255, 0.25);
+        font-size: 1.1rem;
+        line-height: 1;
+        cursor: pointer;
+        padding: 2px 5px;
+        border-radius: var(--radius-sm);
+        opacity: 0;
+        transition: opacity 0.15s ease, color 0.15s ease, background 0.15s ease;
+        z-index: 10;
+        user-select: none;
+    }
+
+    pre.code-editor-block:hover .code-delete-btn {
+        opacity: 1;
+    }
+
+    .code-delete-btn:hover {
+        color: #ff5f57;
+        background: rgba(255, 95, 87, 0.12);
+    }
+
+
     /* Conteúdo do código dentro do pre */
     [contenteditable="true"] pre code,
     pre.code-editor-block code {

@@ -507,11 +507,11 @@ const AdminCMS = {
      */
     handleImageCursor(e, textarea, menu) {
         this.activeTextarea = textarea;
-        
+
         const target = e.target;
         if (target.tagName === 'IMG') {
             this.activeImageElement = target;
-            
+
             // Posicionar Menu em cima da imagem
             const rect = target.getBoundingClientRect();
             let top = rect.bottom + 10;
@@ -609,7 +609,7 @@ const AdminCMS = {
             if (selectedText.length > 0) {
                 // Há texto selecionado
                 const range = selection.getRangeAt(0);
-                
+
                 // Garantir que a seleção está dentro do editor
                 if (!textarea.contains(range.commonAncestorContainer)) {
                     menu.classList.remove('active');
@@ -778,22 +778,13 @@ const AdminCMS = {
         const btnVideo = document.getElementById(`${toolbarPrefix}-video`);
         if (btnVideo) {
             btnVideo.addEventListener('click', async () => {
-                // Salva a posição do cursor ANTES de abrir o modal (modal rouba o foco)
-                this.saveSelection();
-                toolbar.classList.remove('active');
-                toggleBtn.textContent = '+';
-
-                const rawUrl = await this.customPrompt(
-                    'Inserir Vídeo',
-                    'Cole a URL do YouTube ou Vimeo — a conversão para embed é automática:',
-                    'https://www.youtube.com/watch?v=...'
-                );
-
-                if (rawUrl && rawUrl.trim()) {
-                    const embedUrl = this.toEmbedUrl(rawUrl);
-                    const html = `<div class="video-container"><iframe src="${embedUrl}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div><p><br></p>`;
+                const url = await this.customPrompt('Inserir Vídeo', 'Cole a URL de embed do vídeo (YouTube, Vimeo, etc.):', 'https://www.youtube.com/embed/...');
+                if (url && url.trim()) {
+                    const html = `<div class="video-container"><iframe src="${url.trim()}" frameborder="0" allowfullscreen></iframe></div><p><br></p>`;
                     this.insertAtCursor(textareaId, html);
                 }
+                toolbar.classList.remove('active');
+                toggleBtn.textContent = '+';
             });
         }
 
@@ -839,23 +830,19 @@ const AdminCMS = {
         const btnEmbed = document.getElementById(`${toolbarPrefix}-embed`);
         if (btnEmbed) {
             btnEmbed.addEventListener('click', async () => {
-                // Salva posição do cursor antes do modal
-                this.saveSelection();
-                toolbar.classList.remove('active');
-                toggleBtn.textContent = '+';
-
                 const url = await this.customPrompt('Inserir Link', 'Cole a URL completa:', 'https://');
                 if (url && url.trim()) {
                     const cleanUrl = url.trim();
                     this.insertAtCursor(textareaId, `<a href="${cleanUrl}" target="_blank">${cleanUrl}</a>`);
                 }
+                toolbar.classList.remove('active');
+                toggleBtn.textContent = '+';
             });
         }
     },
 
     /**
      * Insere HTML na posição do cursor em um contenteditable
-     * Usa savedRange se a seleção foi perdida (ex: após modal)
      */
     insertAtCursor(fieldId, html) {
         const editor = document.getElementById(fieldId);
@@ -863,44 +850,8 @@ const AdminCMS = {
 
         editor.focus();
 
-        // Se temos um range salvo (seleção guardada antes do modal), restaura
-        if (this._savedRange) {
-            const sel = window.getSelection();
-            sel.removeAllRanges();
-            sel.addRange(this._savedRange);
-            this._savedRange = null;
-        }
-
+        // Se houver seleção, substitui. Se não, insere no cursor.
         document.execCommand('insertHTML', false, html);
-    },
-
-    /**
-     * Salva a posição atual do cursor (antes de abrir um modal async)
-     */
-    saveSelection() {
-        const sel = window.getSelection();
-        if (sel.rangeCount > 0) {
-            this._savedRange = sel.getRangeAt(0).cloneRange();
-        }
-    },
-
-    /**
-     * Converte URLs do YouTube/Vimeo para formato embed
-     */
-    toEmbedUrl(url) {
-        if (!url) return url;
-        url = url.trim();
-
-        // YouTube: watch?v= ou youtu.be/
-        const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/);
-        if (ytMatch) return `https://www.youtube.com/embed/${ytMatch[1]}`;
-
-        // Vimeo: vimeo.com/VIDEO_ID
-        const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
-        if (vimeoMatch) return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
-
-        // Já é um embed URL válido — retorna sem modificação
-        return url;
     },
 
     /**
@@ -933,7 +884,7 @@ const AdminCMS = {
 
             // Encontrar o elemento pai que seja um bloco direto do editor
             let block = node.nodeType === 3 ? node.parentNode : node;
-            
+
             while (block && block.parentNode !== editor && block !== editor) {
                 block = block.parentNode;
             }
@@ -942,7 +893,7 @@ const AdminCMS = {
                 // Posicionar verticalmente
                 const offsetTop = block.offsetTop;
                 toolbar.style.top = `${offsetTop}px`;
-                
+
                 // Visibilidade baseada em conteúdo (estilo Medium)
                 // Um bloco é considerado vazio se não tem texto ou se tem apenas um <br>
                 const isEmpty = block.innerText.trim() === "" && (block.childNodes.length === 0 || (block.childNodes.length === 1 && block.childNodes[0].tagName === 'BR'));
@@ -1059,7 +1010,7 @@ const AdminCMS = {
 
                 fileToUpload = await imageCompression(file, options);
                 console.log(`[CMS] Compressão concluída: ${(fileToUpload.size / 1024 / 1024).toFixed(2)}MB`);
-                
+
             } catch (error) {
                 console.error('Erro na compressão:', error);
                 // Se falhar a compressão, avisa o usuário mas tenta subir o original (o servidor deve barrar se for > 5MB)
@@ -1366,10 +1317,10 @@ const AdminCMS = {
             document.getElementById('blog-title').value = item.title;
             document.getElementById('blog-category').value = item.category;
             document.getElementById('blog-excerpt').value = item.excerpt;
-            
+
             // Markdown to HTML
             document.getElementById('blog-content').innerHTML = marked.parse(item.content || '');
-            
+
             document.getElementById('blog-tags').value = item.tags ? item.tags.join(', ') : '';
             document.getElementById('blog-featured').checked = item.featured;
             document.getElementById('blog-published').checked = item.published;
@@ -1381,10 +1332,10 @@ const AdminCMS = {
             document.getElementById('project-title').value = item.title;
             document.getElementById('project-category').value = item.category;
             document.getElementById('project-description').value = item.description;
-            
+
             // Markdown to HTML
             document.getElementById('project-full-description').innerHTML = marked.parse(item.fullDescription || '');
-            
+
             document.getElementById('project-client').value = item.client || '';
             document.getElementById('project-year').value = item.year || '';
             document.getElementById('project-gradient').value = item.imageGradient || '';
@@ -1449,8 +1400,8 @@ const AdminCMS = {
             this.selectedItems[type].add(id);
         }
         this.updateBatchUI(type);
-        
-        if(type === 'blog') {
+
+        if (type === 'blog') {
             this.renderBlogList(this.currentData.blog);
         } else if (type === 'projects') {
             this.renderProjectsList(this.currentData.projects);
@@ -1476,7 +1427,7 @@ const AdminCMS = {
 
         this.updateBatchUI(type);
 
-        if(type === 'blog') {
+        if (type === 'blog') {
             this.renderBlogList(this.currentData.blog);
         } else if (type === 'projects') {
             this.renderProjectsList(this.currentData.projects);
@@ -1491,8 +1442,8 @@ const AdminCMS = {
     clearSelection(type) {
         this.selectedItems[type].clear();
         this.updateBatchUI(type);
-        
-        if(type === 'blog' && this.currentData.blog) {
+
+        if (type === 'blog' && this.currentData.blog) {
             this.renderBlogList(this.currentData.blog);
         } else if (type === 'projects' && this.currentData.projects) {
             this.renderProjectsList(this.currentData.projects);
@@ -1508,7 +1459,7 @@ const AdminCMS = {
         const count = this.selectedItems[type].size;
         const bar = document.getElementById(`${type}-batch-actions`);
         const countSpan = document.getElementById(`${type}-selected-count`);
-        
+
         if (bar && countSpan) {
             countSpan.textContent = count;
             if (count > 0) {
@@ -1543,7 +1494,7 @@ const AdminCMS = {
                 this.customAlert('Sucesso', `${data.deletedCount} itens excluídos com sucesso!`);
                 this.selectedItems[type].clear();
                 this.updateBatchUI(type);
-                
+
                 // Recarrega dados
                 if (type === 'blog') {
                     await this.loadBlogPosts();
@@ -1682,7 +1633,7 @@ const AdminCMS = {
                 document.getElementById('admin-user-selector').style.display = 'block';
                 const usersResp = await apiRequest('/api/users');
                 const users = await usersResp.json();
-                
+
                 userSelect.innerHTML = users.map(u => `<option value="${u.username}">${u.name} (${u.username})</option>`).join('');
             }
 
@@ -1690,12 +1641,12 @@ const AdminCMS = {
                 e.preventDefault();
                 const email = document.getElementById('profile-email').value;
                 const newPassword = document.getElementById('profile-password').value;
-                
-                const body = {};
-                if(email) body.email = email;
-                if(newPassword) body.newPassword = newPassword;
 
-                if(!body.email && !body.newPassword) {
+                const body = {};
+                if (email) body.email = email;
+                if (newPassword) body.newPassword = newPassword;
+
+                if (!body.email && !body.newPassword) {
                     messageEl.textContent = 'Preencha algum campo para alterar.';
                     messageEl.style.color = 'var(--color-error)';
                     messageEl.style.display = 'block';
@@ -1724,14 +1675,14 @@ const AdminCMS = {
                         messageEl.style.color = 'var(--color-error)';
                         messageEl.style.display = 'block';
                     }
-                } catch(e) {
+                } catch (e) {
                     messageEl.textContent = '❌ Erro de conexão.';
                     messageEl.style.color = 'var(--color-error)';
                     messageEl.style.display = 'block';
                 }
             });
 
-        } catch(e) {
+        } catch (e) {
             console.error('Erro ao configurar perfil:', e);
         }
     }
@@ -1796,7 +1747,7 @@ function cancelForm() {
     document.getElementById('project-form').style.display = 'none';
     AdminCMS.editingId = null;
     AdminCMS.clearImagePreview();
-    
+
     // Clear editors
     const blogEditor = document.getElementById('blog-content');
     const projectEditor = document.getElementById('project-full-description');
