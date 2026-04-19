@@ -4,12 +4,16 @@ title: Test Code Block
 slug: test-code-block
 category: CODIGO
 excerpt: Teste de blocos de codigo
-author: Administrador
+author: Magic Oven
 tags: []
 featured: false
 published: true
 author_username: admin
 date: '2026-04-19'
+content: |
+  ```javascript
+  apt update
+  ```
 ---
 ```javascript
 apt update
