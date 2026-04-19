@@ -35,7 +35,7 @@ content: >
 
 
 
-  ![Mac Pro 2009](/uploads/image-1776597571308-983822172.png)
+  ![Mac Pro 2009](/uploads/image-1776599180789-729864221.png)
 
 
 
@@ -295,6 +295,8 @@ content: >
   Para um designer, ter essa ferramenta rodando localmente, sem depender de
   nuvem e respeitando o hardware que já possuímos, é a forma mais pura de
   liberdade técnica.
+
+
 
 
   Não precisamos da última Big Tech vendendo sonhos em subscrições mensais.
