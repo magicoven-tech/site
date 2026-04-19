@@ -4,7 +4,7 @@ title: trem
 slug: trem
 category: TREM
 excerpt: trem
-author: Bruno Nepomuceno
+author: Magic Oven
 tags: []
 featured: false
 published: true
@@ -12,8 +12,6 @@ author_username: brunonepomuceno
 date: '2026-04-19'
 ---
 ## title
-
-  
 
 ### sub
 
@@ -23,20 +21,10 @@ function {};
 
 ## Title
 
-![Imagem](http://localhost:3000/uploads/image-1776623529345-918797408.png#full)
-
-###   
+![Imagem](http://localhost:3000/uploads/image-1776623529345-918797408.png#medium)
 
 ### sub
 
-  
-
-  
-
 ddd
-
-  
-
-  
 
 dfasdfa
