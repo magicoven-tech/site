@@ -25,15 +25,19 @@ const JWT_SECRET = process.env.JWT_SECRET || 'magic-oven-jwt-secret-change-in-pr
 // Middleware de CORS
 app.use(cors({
     origin: function (origin, callback) {
-        // Permite localhost e o domínio em produção
+        // Permite localhost, IP local e domínios ngrok
         const allowedOrigins = [
             'http://localhost:3000',
+            'http://127.0.0.1:3000',
+            'http://192.168.0.4:3000',
             'https://magicoven.tech',
             'https://www.magicoven.tech'
         ];
 
-        // Permite requisições sem origin (mobile apps, curl, etc)
-        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+        const isNgrok = origin && origin.endsWith('.ngrok-free.app');
+
+        // Permite requisições sem origin ou de origens permitidas
+        if (!origin || allowedOrigins.indexOf(origin) !== -1 || isNgrok) {
             callback(null, true);
         } else {
             callback(new Error('Not allowed by CORS'));

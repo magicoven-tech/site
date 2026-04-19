@@ -5,8 +5,8 @@
 
 const API_CONFIG = {
     // URL base da API
-    baseURL: window.location.hostname === 'localhost'
-        ? 'http://localhost:3000'  // Desenvolvimento local
+    baseURL: (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('192.168.') || window.location.hostname.endsWith('.ngrok-free.app'))
+        ? ''  // Usa caminho relativo se estiver no mesmo servidor local/ngrok
         : 'https://magicoven-backend.onrender.com', // Produção - Render
 
     // Endpoints
