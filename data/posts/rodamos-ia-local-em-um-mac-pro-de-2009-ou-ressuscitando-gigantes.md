@@ -33,6 +33,10 @@ content: >
 
   No entanto, para rodar IAs modernas, ele tem "alguns" desafios:
 
+
+  ![Mac Pro 2009](/uploads/image-1776597198926-990458975.png)
+
+
   - Processadores: 2x Intel Xeon E5620 (8 núcleos/16 threads). Potente na época,
   mas sem as instruções de IA de hoje.
 
@@ -314,7 +318,9 @@ Muitos diriam para vender as peças ou usar como peso de porta. Mas o Mac Pro 20
 Para entender o desafio, imagine rodar modelos de linguagem modernos em uma máquina que nasceu antes do Instagram.
 No entanto, para rodar IAs modernas, ele tem "alguns" desafios:
 
-![Mac Pro 2009](/uploads/image-1776597198926-990458975.png)
+
+![Mac Pro 2009](/uploads/image-1776597401704-904547719.png)
+
 
 - Processadores: 2x Intel Xeon E5620 (8 núcleos/16 threads). Potente na época, mas sem as instruções de IA de hoje.
 - Memória: 4.8GB de RAM. (onde um chrome aberto já é um desafio, é menos do que um smartphone médio hoje).
