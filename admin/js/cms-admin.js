@@ -38,12 +38,18 @@ const AdminCMS = {
         this.turndownService.addRule('codeBlock', {
             filter: 'pre',
             replacement: function (content, node) {
-                // Tenta pegar a linguagem do primeiro <code>
                 const firstCode = node.querySelector('code');
                 const language = firstCode ? (firstCode.className.match(/language-(\w+)/) || [])[1] : '';
                 
-                // Pega o texto de TODO o conteúdo do <pre>, garantindo que múltiplas linhas/tags code sejam capturadas
-                const code = node.innerText || node.textContent;
+                // Converte <br> em \n e remove outras tags HTML mantendo o texto
+                let code = node.innerHTML
+                    .replace(/<br\s*\/?>/gi, '\n')
+                    .replace(/<\/p>/gi, '\n')
+                    .replace(/<\/div>/gi, '\n')
+                    .replace(/<[^>]+>/g, ''); // Remove tags HTML remanescentes
+                
+                // Decodifica entidades HTML básico
+                code = code.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
                 
                 return '\n\n```' + (language || '') + '\n' + code.trim() + '\n```\n\n';
             }
@@ -689,11 +695,20 @@ const AdminCMS = {
             if (pre) {
                 if (e.key === 'Enter') {
                     e.preventDefault();
-                    document.execCommand('insertText', false, '\n');
                     
-                    // Se o cursor estiver no final e pressionar enter, às vezes o scroll não segue
+                    // Usar insertHTML com <br> é mais estável para manter a estrutura no contenteditable
+                    document.execCommand('insertHTML', false, '<br>');
+                    
+                    // Scroll se necessário
                     setTimeout(() => {
-                        pre.scrollTop = pre.scrollHeight;
+                        const selection = window.getSelection();
+                        if (!selection.rangeCount) return;
+                        const range = selection.getRangeAt(0);
+                        const cursorRect = range.getBoundingClientRect();
+                        const preRect = pre.getBoundingClientRect();
+                        if (cursorRect.bottom > preRect.bottom) {
+                            pre.scrollTop += (cursorRect.bottom - preRect.bottom) + 20;
+                        }
                     }, 0);
                 } else if (e.key === 'Tab') {
                     e.preventDefault();
