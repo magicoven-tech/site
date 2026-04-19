@@ -118,8 +118,7 @@
               </div>
             </div>
 
-            <textarea id="blog-content"
-              style="min-height: 400px; font-family: 'Space Grotesk', sans-serif; line-height: 1.6;"></textarea>
+            <div id="blog-content" class="medium-editor" contenteditable="true" data-placeholder="Comece a escrever sua história..."></div>
             <input type="file" id="blog-image-input" accept="image/*" style="display: none;">
           </div>
 
@@ -231,8 +230,7 @@
               </div>
             </div>
 
-            <textarea id="project-full-description"
-              style="min-height: 200px; font-family: 'Space Grotesk', sans-serif; line-height: 1.6;"></textarea>
+            <div id="project-full-description" class="medium-editor" contenteditable="true" data-placeholder="Descreva os detalhes do projeto..."></div>
             <input type="file" id="project-full-description-image-input" accept="image/*" style="display: none;">
           </div>
 
@@ -420,6 +418,8 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
+  <script src="https://unpkg.com/turndown/dist/turndown.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js"></script>
   <script src="../js/config.js?v=1.2"></script>
   <script src="js/cms-admin.js?v=1.2"></script>
   <script src="../js/glitch-text.js?v=1.2"></script>

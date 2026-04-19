@@ -28,6 +28,12 @@ const AdminCMS = {
             return;
         }
 
+        // Inicializa Turndown
+        this.turndownService = new TurndownService({
+            headingStyle: 'atx',
+            codeBlockStyle: 'fenced'
+        });
+
         // Carrega dados
         await this.loadBlogPosts();
         await this.loadProjects();
@@ -415,6 +421,10 @@ const AdminCMS = {
         // Menu de Imagem (Cursor)
         this.setupImageMenu('blog-content');
         this.setupImageMenu('project-full-description');
+
+        // Paste Handling
+        this.setupPasteHandling('blog-content');
+        this.setupPasteHandling('project-full-description');
     },
 
     /**
@@ -461,99 +471,54 @@ const AdminCMS = {
      */
     handleImageCursor(e, textarea, menu) {
         this.activeTextarea = textarea;
-        // Pequeno delay
-        setTimeout(() => {
-            const cursor = textarea.selectionStart;
-            const text = textarea.value;
+        
+        const target = e.target;
+        if (target.tagName === 'IMG') {
+            this.activeImageElement = target;
+            
+            // Posicionar Menu em cima da imagem
+            const rect = target.getBoundingClientRect();
+            let top = rect.bottom + 10;
+            let left = rect.left + (rect.width / 2);
 
-            // Regex para capturar imagem Markdown: ![alt](url)
-            // Precisamos encontrar a imagem que contém o cursor
-            const regex = /!\[(.*?)\]\((.*?)\)/g;
-            let match;
-            let currentImage = null;
+            menu.style.top = `${top + window.scrollY}px`;
+            menu.style.left = `${left + window.scrollX}px`;
+            menu.style.transform = 'translate(-50%, 0)';
 
-            while ((match = regex.exec(text)) !== null) {
-                const start = match.index;
-                const end = start + match[0].length;
-
-                if (cursor >= start && cursor <= end) {
-                    currentImage = {
-                        start: start,
-                        end: end,
-                        details: match // [full, alt, url]
-                    };
-                    break;
-                }
-            }
-
-            if (currentImage) {
-                // Cursor está em uma imagem
-                this.currentImageRange = currentImage; // Salvar referência
-
-                // Posicionar Menu
-                let top, left;
-
-                if (e.type === 'mouseup' || e.type === 'click') {
-                    top = e.clientY + 20; // Abaixo do cursor
-                    left = e.clientX;
-                } else {
-                    // Fallback
-                    const rect = textarea.getBoundingClientRect();
-                    top = rect.top + (rect.height / 2);
-                    left = rect.left + (rect.width / 2);
-                }
-
-                // Ajustes
-                if (left < 0) left = 10;
-
-                menu.style.top = `${top + window.scrollY}px`;
-                menu.style.left = `${left + window.scrollX}px`;
-                menu.style.transform = 'translate(-50%, 0)';
-
-                // Esconder o menu de formatação de texto se estiver aberto
-                document.getElementById('formatting-menu').classList.remove('active');
-
-                menu.classList.add('active');
-            } else {
-                menu.classList.remove('active');
-                this.currentImageRange = null;
-            }
-        }, 10);
+            // Esconder o menu de formatação de texto se estiver aberto
+            document.getElementById('formatting-menu').classList.remove('active');
+            menu.classList.add('active');
+        } else {
+            menu.classList.remove('active');
+            this.activeImageElement = null;
+        }
     },
 
     /**
      * Aplica o redimensionamento (hash) à imagem selecionada
      */
     resizeImage(size, textarea) {
-        if (!this.currentImageRange) return;
+        if (!this.activeImageElement) return;
 
-        const { start, end, details } = this.currentImageRange;
-        const [fullMatch, alt, url] = details;
-
-        let newUrl = url;
+        const img = this.activeImageElement;
+        let url = img.src;
 
         // Remover hashes existentes
-        newUrl = newUrl.replace(/#medium$/, '').replace(/#full$/, '');
+        url = url.replace(/#medium$/, '').replace(/#full$/, '');
 
-        // Adicionar novo hash se não for standard
+        // Limpar classes existentes
+        img.classList.remove('image-medium', 'image-full');
+
+        // Adicionar novo hash e classe
         if (size === 'medium') {
-            newUrl += '#medium';
+            url += '#medium';
+            img.classList.add('image-medium');
         } else if (size === 'full') {
-            newUrl += '#full';
+            url += '#full';
+            img.classList.add('image-full');
         }
 
-        const newMarkdown = `![${alt}](${newUrl})`;
-
-        // Substituir texto
-        textarea.setRangeText(newMarkdown, start, end, 'select');
-
-        // Atualizar referência currentImageRange para o novo tamanho
-        // para que o menu continue funcionando se o usuário clicar de novo
-        this.currentImageRange = {
-            start: start,
-            end: start + newMarkdown.length,
-            details: [newMarkdown, alt, newUrl]
-        };
+        img.src = url;
     },
 
     /**
@@ -602,26 +567,14 @@ const AdminCMS = {
         this.activeTextarea = textarea;
         // Pequeno delay para garantir que a seleção foi atualizada
         setTimeout(() => {
-            const start = textarea.selectionStart;
-            const end = textarea.selectionEnd;
-
-            if (start !== end) {
+            const selection = window.getSelection();
+            if (selection.toString().length > 0) {
                 // Há texto selecionado
-                // Calcular posição
-                // Como textarea não dá coordenadas X/Y do cursor facilmente,
-                // vamos posicionar próximo ao mouse (mouseup) ou centralizado (fallback)
+                const range = selection.getRangeAt(0);
+                const rect = range.getBoundingClientRect();
 
-                let top, left;
-
-                if (e.type === 'mouseup') {
-                    top = e.clientY - 50;
-                    left = e.clientX;
-                } else {
-                    // Fallback para seleção via teclado: centralizado na textarea (aproximado)
-                    const rect = textarea.getBoundingClientRect();
-                    top = rect.top + (rect.height / 2); // Apenas um fallback visual
-                    left = rect.left + (rect.width / 2);
-                }
+                let top = rect.top - 50;
+                let left = rect.left + (rect.width / 2);
 
                 // Ajustes de limites da tela
                 if (left < 0) left = 10;
@@ -652,37 +605,27 @@ const AdminCMS = {
 
         switch (format) {
             case 'bold':
-                replacement = `**${selectedText}**`;
-                cursorOffset = 2; // Move cursor para dentro se não houver texto selecionado (futuro)
+                document.execCommand('bold', false, null);
                 break;
             case 'italic':
-                replacement = `*${selectedText}*`;
+                document.execCommand('italic', false, null);
                 break;
             case 'link':
                 const url = prompt('URL do link:', 'https://');
                 if (url) {
-                    replacement = `[${selectedText}](${url})`;
-                } else {
-                    return; // Cancelado
+                    document.execCommand('createLink', false, url);
                 }
                 break;
             case 'h2':
-                // Remove # existetes se houver
-                const cleanH2 = selectedText.replace(/^#+\s*/, '');
-                replacement = `\n## ${cleanH2}`;
+                document.execCommand('formatBlock', false, 'h2');
                 break;
             case 'h3':
-                const cleanH3 = selectedText.replace(/^#+\s*/, '');
-                replacement = `\n### ${cleanH3}`;
+                document.execCommand('formatBlock', false, 'h3');
                 break;
             case 'quote':
-                const cleanQuote = selectedText.replace(/^>\s*/, '');
-                replacement = `\n> ${cleanQuote}`;
+                document.execCommand('formatBlock', false, 'blockquote');
                 break;
         }
-
-        // Aplicar substituição
-        textarea.setRangeText(replacement, start, end, 'select');
 
         // Focar de volta e ajustar cursor se necessário
         textarea.focus();
@@ -718,28 +661,28 @@ const AdminCMS = {
                 imageInput.click();
             });
 
-            // Prevent multiple binding if the image setup is called twice, though normally an issue on singletons
-            // Given the inputs are unique per textarea this should be fine
             imageInput.addEventListener('change', (e) => {
                 const file = e.target.files[0];
                 if (file) {
                     this.handleImageUpload(file, (url) => {
-                        const markdown = `\n![Legenda da Imagem](${url})\n`;
-                        this.insertAtCursor(textareaId, markdown);
+                        const imgHtml = `<img src="${url}" alt="Imagem">`;
+                        this.insertAtCursor(textareaId, imgHtml);
                         toolbar.classList.remove('active');
                         toggleBtn.textContent = '+';
-                        // Scroll para o fim da inserção se necessário ou foco
                     });
                 }
             });
         }
 
-        // Opção de Vídeo
+        // Opção de Vídeo (Adaptado para HTML)
         const btnVideo = document.getElementById(`${toolbarPrefix}-video`);
         if (btnVideo) {
             btnVideo.addEventListener('click', () => {
-                const code = `\n<div class="video-container">\n  <iframe src="URL_DO_VIDEO_AQUI" title="Video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>\n</div>\n`;
-                this.insertAtCursor(textareaId, code);
+                const url = prompt('URL do vídeo (embed):');
+                if (url) {
+                   const html = `<div class="video-container"><iframe src="${url}" frameborder="0" allowfullscreen></iframe></div>`;
+                   this.insertAtCursor(textareaId, html);
+                }
                 toolbar.classList.remove('active');
                 toggleBtn.textContent = '+';
             });
@@ -749,8 +692,8 @@ const AdminCMS = {
         const btnCode = document.getElementById(`${toolbarPrefix}-code`);
         if (btnCode) {
             btnCode.addEventListener('click', () => {
-                const code = `\n\`\`\`javascript\n// Seu código aqui\n\`\`\`\n`;
-                this.insertAtCursor(textareaId, code);
+                const html = `<pre><code>// Seu código aqui</code></pre>`;
+                this.insertAtCursor(textareaId, html);
                 toolbar.classList.remove('active');
                 toggleBtn.textContent = '+';
             });
@@ -760,7 +703,7 @@ const AdminCMS = {
         const btnDivider = document.getElementById(`${toolbarPrefix}-divider`);
         if (btnDivider) {
             btnDivider.addEventListener('click', () => {
-                this.insertAtCursor(textareaId, '\n---\n');
+                this.insertAtCursor(textareaId, '<hr>');
                 toolbar.classList.remove('active');
                 toggleBtn.textContent = '+';
             });
@@ -770,7 +713,10 @@ const AdminCMS = {
         const btnEmbed = document.getElementById(`${toolbarPrefix}-embed`);
         if (btnEmbed) {
             btnEmbed.addEventListener('click', () => {
-                this.insertAtCursor(textareaId, '\n[Texto do Link](https://exemplo.com)\n');
+                const url = prompt('URL:');
+                if (url) {
+                   this.insertAtCursor(textareaId, `<a href="${url}">${url}</a>`);
+                }
                 toolbar.classList.remove('active');
                 toggleBtn.textContent = '+';
             });
@@ -778,22 +724,30 @@ const AdminCMS = {
     },
 
     /**
-     * Insere texto na posição do cursor em um textarea
+     * Insere HTML na posição do cursor em um contenteditable
      */
-    insertAtCursor(fieldId, text) {
-        const textarea = document.getElementById(fieldId);
-        if (!textarea) return;
+    insertAtCursor(fieldId, html) {
+        const editor = document.getElementById(fieldId);
+        if (!editor) return;
 
-        const startPos = textarea.selectionStart;
-        const endPos = textarea.selectionEnd;
-        const scrollTop = textarea.scrollTop;
+        editor.focus();
+        
+        // Se houver seleção, substitui. Se não, insere no cursor.
+        document.execCommand('insertHTML', false, html);
+    },
 
-        textarea.value = textarea.value.substring(0, startPos) + text + textarea.value.substring(endPos, textarea.value.length);
+    /**
+     * Configura limpeza de conteúdo colado
+     */
+    setupPasteHandling(fieldId) {
+        const editor = document.getElementById(fieldId);
+        if (!editor) return;
 
-        textarea.focus();
-        textarea.selectionStart = startPos + text.length;
-        textarea.selectionEnd = startPos + text.length;
-        textarea.scrollTop = scrollTop;
+        editor.addEventListener('paste', (e) => {
+            e.preventDefault();
+            const text = e.clipboardData.getData('text/plain');
+            document.execCommand('insertText', false, text);
+        });
     },
 
     /**
@@ -990,7 +944,8 @@ const AdminCMS = {
         const title = document.getElementById('blog-title').value;
         const category = document.getElementById('blog-category').value;
         const excerpt = document.getElementById('blog-excerpt').value;
-        const content = document.getElementById('blog-content').value;
+        const contentHtml = document.getElementById('blog-content').innerHTML;
+        const contentMarkdown = this.turndownService.turndown(contentHtml);
         const tags = document.getElementById('blog-tags').value.split(',').map(t => t.trim()).filter(t => t);
         const featured = document.getElementById('blog-featured').checked;
         const published = document.getElementById('blog-published').checked;
@@ -1000,7 +955,7 @@ const AdminCMS = {
             slug: this.createSlug(title),
             category: category.toUpperCase(),
             excerpt,
-            content: content || '<p>Conteúdo em breve...</p>',
+            content: contentMarkdown || 'Conteúdo em breve...',
             author: 'Magic Oven',
             tags,
             featured,
@@ -1067,7 +1022,7 @@ const AdminCMS = {
         const title = document.getElementById('project-title').value;
         const category = document.getElementById('project-category').value;
         const description = document.getElementById('project-description').value;
-        const fullDescription = document.getElementById('project-full-description').value;
+        // const fullDescription = document.getElementById('project-full-description').value; // Removido
         const client = document.getElementById('project-client').value;
         const year = document.getElementById('project-year').value;
         const gradient = document.getElementById('project-gradient').value;
@@ -1080,7 +1035,7 @@ const AdminCMS = {
             slug: this.createSlug(title),
             category,
             description,
-            fullDescription: fullDescription || '<p>Descrição completa em breve...</p>',
+            fullDescription: this.turndownService.turndown(document.getElementById('project-full-description').innerHTML) || 'Descrição completa em breve...',
             client: client || 'Cliente',
             year: year || new Date().getFullYear().toString(),
             services: [],
@@ -1196,7 +1151,10 @@ const AdminCMS = {
             document.getElementById('blog-title').value = item.title;
             document.getElementById('blog-category').value = item.category;
             document.getElementById('blog-excerpt').value = item.excerpt;
-            document.getElementById('blog-content').value = item.content || '';
+            
+            // Markdown to HTML
+            document.getElementById('blog-content').innerHTML = marked.parse(item.content || '');
+            
             document.getElementById('blog-tags').value = item.tags ? item.tags.join(', ') : '';
             document.getElementById('blog-featured').checked = item.featured;
             document.getElementById('blog-published').checked = item.published;
@@ -1208,7 +1166,10 @@ const AdminCMS = {
             document.getElementById('project-title').value = item.title;
             document.getElementById('project-category').value = item.category;
             document.getElementById('project-description').value = item.description;
-            document.getElementById('project-full-description').value = item.fullDescription || '';
+            
+            // Markdown to HTML
+            document.getElementById('project-full-description').innerHTML = marked.parse(item.fullDescription || '');
+            
             document.getElementById('project-client').value = item.client || '';
             document.getElementById('project-year').value = item.year || '';
             document.getElementById('project-gradient').value = item.imageGradient || '';
@@ -1543,10 +1504,12 @@ function showCreateForm() {
     if (AdminCMS.currentTab === 'blog') {
         document.getElementById('blog-form').style.display = 'block';
         document.getElementById('blogPostForm').reset();
+        document.getElementById('blog-content').innerHTML = ''; // Clear contenteditable
         document.getElementById('blog-form').scrollIntoView({ behavior: 'smooth' });
     } else if (AdminCMS.currentTab === 'projects') {
         document.getElementById('project-form').style.display = 'block';
         document.getElementById('projectForm').reset();
+        document.getElementById('project-full-description').innerHTML = ''; // Clear contenteditable
         document.getElementById('project-form').scrollIntoView({ behavior: 'smooth' });
     }
 }
@@ -1559,6 +1522,12 @@ function cancelForm() {
     document.getElementById('project-form').style.display = 'none';
     AdminCMS.editingId = null;
     AdminCMS.clearImagePreview();
+    
+    // Clear editors
+    const blogEditor = document.getElementById('blog-content');
+    const projectEditor = document.getElementById('project-full-description');
+    if (blogEditor) blogEditor.innerHTML = '';
+    if (projectEditor) projectEditor.innerHTML = '';
 }
 
 // Inicializa quando o DOM estiver pronto

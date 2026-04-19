@@ -253,6 +253,38 @@
       resize: vertical;
     }
 
+    /* Hide standard borders for editor inputs to feel more like a page */
+    #blog-title, #project-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        border: none;
+        background: transparent;
+        padding-left: 0;
+        padding-right: 0;
+        margin-bottom: 0.5rem;
+    }
+
+    #blog-title:focus, #project-title:focus {
+        box-shadow: none;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    #blog-category, #project-category {
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--color-accent-primary);
+        border: none;
+        background: transparent;
+        padding-left: 0;
+        padding-right: 0;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+    }
+
+    #blog-category:focus, #project-category:focus {
+        box-shadow: none;
+    }
+
     .form-checkbox {
       display: flex;
       align-items: center;
@@ -393,20 +425,34 @@
       width: 24px;
       height: 24px;
       cursor: pointer;
-      display: none;
-      align-items: center;
-      justify-content: center;
+      height: auto;
+      border-radius: var(--radius-sm);
+      margin: 1rem 0;
+      display: block;
     }
 
-    /* Editor Toolbar (Medium Style) */
-    .editor-wrapper {
+    .medium-editor img.image-medium {
+      width: 150%;
+      max-width: none;
+      margin-left: -25%;
+    }
+
+    .medium-editor img.image-full {
+      width: 200%;
+      max-width: none;
+      margin-left: -50%;
+    }
+
+    .form-group.editor-wrapper {
       position: relative;
+      padding-left: 60px;
+      margin-top: var(--spacing-xl);
     }
 
     .editor-toolbar {
       position: absolute;
-      left: -55px;
-      top: 35px;
+      left: 0;
+      top: var(--spacing-lg);
       z-index: 100;
       display: flex;
       align-items: center;
