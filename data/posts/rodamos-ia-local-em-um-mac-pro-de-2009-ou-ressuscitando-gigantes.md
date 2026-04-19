@@ -277,7 +277,122 @@ content: >
   específico.
 
 
-  {simulador}
+  import React, { useState, useEffect } from 'react';
+
+
+  export default function LlmSimulator() {
+    const [threads, setThreads] = useState(6);
+    const [chromeOpen, setChromeOpen] = useState(false);
+    const [tabs, setTabs] = useState(11); // Começa com o seu cenário real
+    const [speed, setSpeed] = useState(2.5);
+
+    useEffect(() => {
+      // 1. Velocidade base ancorada nos nossos testes reais do Mac Pro 2009
+      let baseSpeed = 1.0;
+      if (threads === 4) baseSpeed = 1.5;
+      else if (threads === 6) baseSpeed = 2.5; // O "Sweet Spot"
+      else if (threads === 8) baseSpeed = 1.8; // Overhead de processador duplo
+      else if (threads > 8) baseSpeed = 1.2;
+      else if (threads < 4) baseSpeed = 1.0;
+
+      // 2. Cálculo de Penalidade do zRAM (Chrome)
+      let penalty = 0;
+      if (chromeOpen) {
+        // Perde 0.1 t/s a cada 2 abas abertas
+        penalty = Math.floor(tabs / 2) * 0.1;
+      }
+
+      let currentSpeed = baseSpeed - penalty;
+
+      // 3. Penalidade severa: Acima de 10 abas, o Swap chora (perde 20% do total)
+      if (chromeOpen && tabs > 10) {
+        currentSpeed = currentSpeed * 0.8;
+      }
+
+      // Impede que a velocidade fique negativa
+      currentSpeed = Math.max(0.1, currentSpeed);
+      
+      setSpeed(currentSpeed.toFixed(1));
+    }, [threads, chromeOpen, tabs]);
+
+    return (
+      <div className="max-w-md mx-auto p-6 bg-zinc-900 text-zinc-100 rounded-xl border border-zinc-800 shadow-2xl font-sans">
+        <div className="mb-6 border-b border-zinc-800 pb-4">
+          <h3 className="text-xl font-semibold mb-1">Simulador de Performance LLM</h3>
+          <p className="text-sm text-zinc-400">Mac Pro 2009 • 4.8GB RAM • Llama-3.2-3B</p>
+        </div>
+
+        {/* Visor de Velocidade */}
+        <div className="bg-black/50 rounded-lg p-6 mb-8 text-center border border-zinc-800/50">
+          <div className="text-5xl font-bold font-mono tracking-tighter text-emerald-400">
+            {speed} <span className="text-xl text-zinc-500 font-sans">t/s</span>
+          </div>
+          <div className="text-xs text-zinc-500 mt-2 uppercase tracking-widest">Tokens por segundo</div>
+          
+          {/* Alerta de Gargalo */}
+          {speed < 1.0 && (
+            <div className="mt-3 text-sm text-rose-400 bg-rose-400/10 py-1.5 px-3 rounded inline-block">
+              ⚠️ Gargalo Severo de Memória
+            </div>
+          )}
+        </div>
+
+        <div className="space-y-6">
+          {/* Controle de Threads */}
+          <div>
+            <div className="flex justify-between mb-2">
+              <label className="text-sm font-medium">Threads Ativas</label>
+              <span className="text-sm text-zinc-400 font-mono">{threads}</span>
+            </div>
+            <input 
+              type="range" 
+              min="2" max="12" step="2"
+              value={threads}
+              onChange={(e) => setThreads(parseInt(e.target.value))}
+              className="w-full accent-emerald-500 bg-zinc-800 rounded-lg appearance-none h-2"
+            />
+            <div className="flex justify-between text-xs text-zinc-500 mt-1">
+              <span>Seguro</span>
+              <span>Sweet Spot (6)</span>
+              <span>Overhead</span>
+            </div>
+          </div>
+
+          {/* Toggle do Chrome */}
+          <div className="flex items-center justify-between pt-4 border-t border-zinc-800">
+            <div>
+              <label className="text-sm font-medium block">Navegador Aberto</label>
+              <span className="text-xs text-zinc-500">Impacta diretamente o zRAM</span>
+            </div>
+            <button 
+              onClick={() => setChromeOpen(!chromeOpen)}
+              className={`w-12 h-6 rounded-full transition-colors relative ${chromeOpen ? 'bg-emerald-500' : 'bg-zinc-700'}`}
+            >
+              <div className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-transform ${chromeOpen ? 'translate-x-7' : 'translate-x-1'}`} />
+            </button>
+          </div>
+
+          {/* Controle de Abas (Só aparece se o Chrome estiver aberto) */}
+          {chromeOpen && (
+            <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+              <div className="flex justify-between mb-2">
+                <label className="text-sm font-medium text-zinc-300">Abas Ativas</label>
+                <span className="text-sm text-rose-400 font-mono">{tabs} abas</span>
+              </div>
+              <input 
+                type="range" 
+                min="1" max="20" step="1"
+                value={tabs}
+                onChange={(e) => setTabs(parseInt(e.target.value))}
+                className="w-full accent-rose-500 bg-zinc-800 rounded-lg appearance-none h-2"
+              />
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
 
 
   ## Lições de um Mac Pro em 2026
@@ -468,120 +583,7 @@ No design, a teoria é linda, mas o uso real é o que importa. Testamos nossa co
 
 Abaixo, você pode explorar como o número de threads e o uso do navegador afetam a velocidade de resposta (tokens por segundo) no nosso hardware específico.
 
-import React, { useState, useEffect } from 'react';
-
-export default function LlmSimulator() {
-  const [threads, setThreads] = useState(6);
-  const [chromeOpen, setChromeOpen] = useState(false);
-  const [tabs, setTabs] = useState(11); // Começa com o seu cenário real
-  const [speed, setSpeed] = useState(2.5);
-
-  useEffect(() => {
-    // 1. Velocidade base ancorada nos nossos testes reais do Mac Pro 2009
-    let baseSpeed = 1.0;
-    if (threads === 4) baseSpeed = 1.5;
-    else if (threads === 6) baseSpeed = 2.5; // O "Sweet Spot"
-    else if (threads === 8) baseSpeed = 1.8; // Overhead de processador duplo
-    else if (threads > 8) baseSpeed = 1.2;
-    else if (threads < 4) baseSpeed = 1.0;
-
-    // 2. Cálculo de Penalidade do zRAM (Chrome)
-    let penalty = 0;
-    if (chromeOpen) {
-      // Perde 0.1 t/s a cada 2 abas abertas
-      penalty = Math.floor(tabs / 2) * 0.1;
-    }
-
-    let currentSpeed = baseSpeed - penalty;
-
-    // 3. Penalidade severa: Acima de 10 abas, o Swap chora (perde 20% do total)
-    if (chromeOpen && tabs > 10) {
-      currentSpeed = currentSpeed * 0.8;
-    }
-
-    // Impede que a velocidade fique negativa
-    currentSpeed = Math.max(0.1, currentSpeed);
-    
-    setSpeed(currentSpeed.toFixed(1));
-  }, [threads, chromeOpen, tabs]);
-
-  return (
-    <div className="max-w-md mx-auto p-6 bg-zinc-900 text-zinc-100 rounded-xl border border-zinc-800 shadow-2xl font-sans">
-      <div className="mb-6 border-b border-zinc-800 pb-4">
-        <h3 className="text-xl font-semibold mb-1">Simulador de Performance LLM</h3>
-        <p className="text-sm text-zinc-400">Mac Pro 2009 • 4.8GB RAM • Llama-3.2-3B</p>
-      </div>
-
-      {/* Visor de Velocidade */}
-      <div className="bg-black/50 rounded-lg p-6 mb-8 text-center border border-zinc-800/50">
-        <div className="text-5xl font-bold font-mono tracking-tighter text-emerald-400">
-          {speed} <span className="text-xl text-zinc-500 font-sans">t/s</span>
-        </div>
-        <div className="text-xs text-zinc-500 mt-2 uppercase tracking-widest">Tokens por segundo</div>
-        
-        {/* Alerta de Gargalo */}
-        {speed < 1.0 && (
-          <div className="mt-3 text-sm text-rose-400 bg-rose-400/10 py-1.5 px-3 rounded inline-block">
-            ⚠️ Gargalo Severo de Memória
-          </div>
-        )}
-      </div>
-
-      <div className="space-y-6">
-        {/* Controle de Threads */}
-        <div>
-          <div className="flex justify-between mb-2">
-            <label className="text-sm font-medium">Threads Ativas</label>
-            <span className="text-sm text-zinc-400 font-mono">{threads}</span>
-          </div>
-          <input 
-            type="range" 
-            min="2" max="12" step="2"
-            value={threads}
-            onChange={(e) => setThreads(parseInt(e.target.value))}
-            className="w-full accent-emerald-500 bg-zinc-800 rounded-lg appearance-none h-2"
-          />
-          <div className="flex justify-between text-xs text-zinc-500 mt-1">
-            <span>Seguro</span>
-            <span>Sweet Spot (6)</span>
-            <span>Overhead</span>
-          </div>
-        </div>
-
-        {/* Toggle do Chrome */}
-        <div className="flex items-center justify-between pt-4 border-t border-zinc-800">
-          <div>
-            <label className="text-sm font-medium block">Navegador Aberto</label>
-            <span className="text-xs text-zinc-500">Impacta diretamente o zRAM</span>
-          </div>
-          <button 
-            onClick={() => setChromeOpen(!chromeOpen)}
-            className={`w-12 h-6 rounded-full transition-colors relative ${chromeOpen ? 'bg-emerald-500' : 'bg-zinc-700'}`}
-          >
-            <div className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-transform ${chromeOpen ? 'translate-x-7' : 'translate-x-1'}`} />
-          </button>
-        </div>
-
-        {/* Controle de Abas (Só aparece se o Chrome estiver aberto) */}
-        {chromeOpen && (
-          <div className="animate-in fade-in slide-in-from-top-2 duration-300">
-            <div className="flex justify-between mb-2">
-              <label className="text-sm font-medium text-zinc-300">Abas Ativas</label>
-              <span className="text-sm text-rose-400 font-mono">{tabs} abas</span>
-            </div>
-            <input 
-              type="range" 
-              min="1" max="20" step="1"
-              value={tabs}
-              onChange={(e) => setTabs(parseInt(e.target.value))}
-              className="w-full accent-rose-500 bg-zinc-800 rounded-lg appearance-none h-2"
-            />
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
+{simulador}
 
 
 ## Lições de um Mac Pro em 2026
