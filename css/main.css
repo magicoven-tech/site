@@ -133,8 +133,6 @@ body {
     color: var(--color-text-primary);
     background-color: var(--color-background);
     min-height: 100vh;
-    width: 100%;
-    overflow-x: hidden;
     position: relative;
 }
 

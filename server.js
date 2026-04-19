@@ -901,8 +901,8 @@ Mensagem:
 ${message}
 
 ---
-Acesse o painel administrativopara gerenciar esta mensagem:
-http://localhost:${PORT}/admin/
+Acesse o painel administrativo para gerenciar esta mensagem:
+https://magicoven.tech/admin/
         `;
         
         // Dispara o e-mail (em background para não atrasar a resposta ao usuário)

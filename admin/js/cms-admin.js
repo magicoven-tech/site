@@ -139,45 +139,60 @@ const AdminCMS = {
      * Renderiza a lista de mensagens
      */
     renderMessagesList(messages) {
-        const list = document.getElementById('messages-list');
-        if (!list) return;
+        const container = document.getElementById('messages-list');
+        if (!container) return;
 
         if (!messages || messages.length === 0) {
+            document.getElementById('messages-select-all-container').style.display = 'none';
             this.renderEmptyState('messages-list', '📩', 'Nenhuma mensagem recebida');
             return;
         }
 
-        list.innerHTML = messages.map(msg => `
-            <div class="message-card ${msg.read ? '' : 'unread'}" id="msg-${msg.id}">
-                <div class="message-header">
-                    <div class="message-info">
-                        <h3>${msg.name}</h3>
+        document.getElementById('messages-select-all-container').style.display = 'flex';
+
+        // Atualiza checkbox de selecionar todos
+        const selectAllCheckbox = document.getElementById('messages-select-all');
+        if (selectAllCheckbox) {
+            selectAllCheckbox.checked = this.selectedItems.messages.size === messages.length && messages.length > 0;
+        }
+
+        container.innerHTML = messages.map(msg => {
+            const isSelected = this.selectedItems.messages.has(msg.id);
+            return `
+            <div class="message-card ${msg.read ? '' : 'unread'} ${isSelected ? 'selected' : ''}" id="msg-${msg.id}">
+                <div class="item-checkbox">
+                    <input type="checkbox" onchange="AdminCMS.toggleSelection('messages', '${msg.id}')" ${isSelected ? 'checked' : ''}>
+                </div>
+                <div class="message-info">
+                    <div class="message-header">
+                        <h3>
+                            <span class="status-indicator status-${msg.read ? 'read' : 'unread'}"></span>
+                            ${msg.name}
+                            ${!msg.read ? '<span class="badge badge-unread" style="margin-left: 10px; font-size: 9px;">NOVA</span>' : ''}
+                        </h3>
                         <div class="message-meta">
                             <span>${msg.email}</span>
                             <span>•</span>
                             <span>Projeto: ${msg.project}</span>
                         </div>
                     </div>
-                    <div class="message-date">
+                    <div class="message-body">${msg.message}</div>
+                    <div class="message-date-meta">
                         ${new Date(msg.date).toLocaleString('pt-BR')}
                     </div>
                 </div>
-                <div class="message-body">${msg.message}</div>
-                <div class="message-actions">
+                <div class="item-actions">
                     ${!msg.read ? `
-                        <button class="btn btn-outline btn-sm" onclick="AdminCMS.markMessageAsRead('${msg.id}')">
-                            Marcar como lida
+                        <button class="btn-icon btn-toggle" onclick="AdminCMS.markMessageAsRead('${msg.id}')" title="Marcar como lida">
+                            ✅
                         </button>
                     ` : ''}
-                    <button class="btn-icon btn-delete" onclick="AdminCMS.deleteMessage('${msg.id}')" title="Excluir">
-                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="3 6 5 6 21 6"></polyline>
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                        </svg>
+                    <button class="btn-icon btn-delete" onclick="AdminCMS.deleteItem('messages', '${msg.id}')" title="Excluir">
+                        🗑️
                     </button>
                 </div>
             </div>
-        `).join('');
+        `}).join('');
     },
 
     /**
@@ -1234,8 +1249,10 @@ const AdminCMS = {
                 // Recarrega dados
                 if (type === 'blog') {
                     await this.loadBlogPosts();
-                } else {
+                } else if (type === 'projects') {
                     await this.loadProjects();
+                } else if (type === 'messages') {
+                    await this.loadMessages();
                 }
             } else {
                 this.customAlert('Erro', 'Erro ao excluir item: ' + (data.error || 'Erro desconhecido'));
@@ -1259,8 +1276,10 @@ const AdminCMS = {
         
         if(type === 'blog') {
             this.renderBlogList(this.currentData.blog);
-        } else {
+        } else if (type === 'projects') {
             this.renderProjectsList(this.currentData.projects);
+        } else {
+            this.renderMessagesList(this.currentData.messages);
         }
     },
 
@@ -1283,8 +1302,10 @@ const AdminCMS = {
 
         if(type === 'blog') {
             this.renderBlogList(this.currentData.blog);
-        } else {
+        } else if (type === 'projects') {
             this.renderProjectsList(this.currentData.projects);
+        } else {
+            this.renderMessagesList(this.currentData.messages);
         }
     },
 
@@ -1299,6 +1320,8 @@ const AdminCMS = {
             this.renderBlogList(this.currentData.blog);
         } else if (type === 'projects' && this.currentData.projects) {
             this.renderProjectsList(this.currentData.projects);
+        } else if (type === 'messages' && this.currentData.messages) {
+            this.renderMessagesList(this.currentData.messages);
         }
     },
 
@@ -1348,8 +1371,10 @@ const AdminCMS = {
                 // Recarrega dados
                 if (type === 'blog') {
                     await this.loadBlogPosts();
-                } else {
+                } else if (type === 'projects') {
                     await this.loadProjects();
+                } else if (type === 'messages') {
+                    await this.loadMessages();
                 }
             } else {
                 this.customAlert('Erro', 'Erro ao excluir itens: ' + (data.error || 'Erro desconhecido'));
