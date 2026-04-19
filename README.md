@@ -139,9 +139,18 @@ Isso manterá o servidor "acordado" 24/7 sem custos adicionais.
 
 Como o Render apaga arquivos locais no plano grátis, implementamos uma rotina de sincronização automática. Toda vez que você salvar, editar ou deletar um post, projeto ou mensagem no CMS, o servidor fará um `git commit` com o título da alteração e um `git push` de volta para o seu repositório.
 
-### Como configurar para o Render salvar permanentemente:
+Para que o servidor consiga enviar e-mails e ter permissão de gravar no seu GitHub em produção, você deve criar as seguintes **Environment Variables** no painel do Render:
 
-Para que o servidor tenha permissão de gravar no seu GitHub em produção, você deve criar as seguintes **Environment Variables** no painel do Render:
+#### Autenticação e GitSync:
+- `JWT_SECRET`: Uma string aleatória para segurança dos tokens.
+- `GITHUB_TOKEN`: Seu Personal Access Token do GitHub.
+- `GITHUB_REPO`: O nome do repositório (ex: `magicoven-tech/site`).
+
+#### Notificações de E-mail (SMTP Gmail):
+- `SMTP_HOST`: `smtp.gmail.com`
+- `SMTP_PORT`: `587`
+- `SMTP_USER`: Seu e-mail (ex: `magicoven.tech@gmail.com`).
+- `SMTP_PASS`: Sua **Senha de App** do Google (16 dígitos).
 
 1. Acesse o seu [Dashboard no Render](https://dashboard.render.com/).
 2. Clique no seu serviço **Web Service** (ex: `site`).
