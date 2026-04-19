@@ -948,6 +948,36 @@ app.delete('/api/messages/:id', requireAuth, async (req, res) => {
     }
 });
 
+// Deletar mensagens em lote (protegido)
+app.post('/api/messages/batch-delete', requireAuth, async (req, res) => {
+    const { ids } = req.body;
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+        return res.status(400).json({ error: 'Nenhum ID fornecido' });
+    }
+
+    try {
+        const messages = await getAllMessages();
+        let deletedCount = 0;
+
+        for (const id of ids) {
+            const message = messages.find(m => m.id === id);
+            if (message) {
+                await fs.unlink(path.join(MESSAGES_DIR, `${message.id}.md`));
+                deletedCount++;
+            }
+        }
+
+        if (deletedCount > 0) {
+            gitSync(`cms(messages): remover ${deletedCount} mensagens em lote`);
+        }
+
+        res.json({ success: true, deletedCount });
+    } catch (error) {
+        console.error('Erro no delete em lote de mensagens:', error);
+        res.status(500).json({ error: 'Erro ao deletar mensagens' });
+    }
+});
+
 // ============================================
 // INICIALIZAÇÃO
 // ============================================
