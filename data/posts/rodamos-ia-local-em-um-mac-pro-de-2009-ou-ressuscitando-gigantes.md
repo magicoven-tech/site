@@ -134,7 +134,7 @@ content: >
   para o HD lento.
 
 
-  **Configurando o "pulmão virtual"**
+  ### Configurando o "pulmão virtual"
 
   Edite o arquivo de sistema:
 
@@ -171,7 +171,14 @@ content: >
 
 
 
-  Reinicie o serviço: sudo systemctl restart zram-config.
+  Reinicie o serviço: 
+
+  ```Bash
+
+  sudo systemctl restart zram-config.
+
+  ```
+
 
   Prioridade 100 força o Linux a usar a zRAM antes do HD swapon -p 100 /dev/zram
 
@@ -193,6 +200,7 @@ content: >
   Como UX Engineers, odiamos fricção. Não queremos digitar 10 linhas de comando
   toda vez que precisamos de um insight. Criamos um script que limpa a casa e
   inicia a IA com prioridade total do sistema.
+
 
   Criamos um executável em /usr/local/bin/llama-3b.
 
@@ -255,6 +263,7 @@ content: >
   threads e o que está aberto no seu navegador (como o chrome) é crucial para
   não travar sua produtividade.
 
+
   Abaixo, você pode explorar como o número de threads e o uso do navegador
   afetam a velocidade de resposta (tokens por segundo) no nosso hardware
   específico.
@@ -304,6 +313,9 @@ content: >
 Muitos diriam para vender as peças ou usar como peso de porta. Mas o Mac Pro 2009 é uma obra de arte da engenharia industrial. 
 Para entender o desafio, imagine rodar modelos de linguagem modernos em uma máquina que nasceu antes do Instagram.
 No entanto, para rodar IAs modernas, ele tem "alguns" desafios:
+
+![Mac Pro 2009](/uploads/image-1776597198926-990458975.png)
+
 - Processadores: 2x Intel Xeon E5620 (8 núcleos/16 threads). Potente na época, mas sem as instruções de IA de hoje.
 - Memória: 4.8GB de RAM. (onde um chrome aberto já é um desafio, é menos do que um smartphone médio hoje).
 - GPU: ATI Radeon HD 5770 com 1GB de VRAM.
