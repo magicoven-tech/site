@@ -28,6 +28,7 @@ content: >
   kalimat-kalimat dari Lorem Ipsum, dan seiring munculnya perangkat lunak
   Desktop Publishing seperti Aldus PageMaker juga memiliki versi Lorem Ipsum.
 
+    
 
   ## Mengapa kita menggunakannya?
 
@@ -67,16 +68,25 @@ content: >
   reproduksi kembali di bawah ini untuk mereka yang tertarik. Bagian 1.10.32 dan
   1.10.33 dari "de Finibus Bonorum et Malorum" karya Cicero juga di reproduksi
   persis seperti bentuk aslinya, diikuti oleh versi bahasa Inggris yang berasal
-  dar  
-    
+  dar
+
 
   ## trem
+
+    
+
+  ````
+
+  ```Bashcd /media/magicoven/storage/  # ou a pasta de sua preferênciagit clone
+  https://github.com/ggerganov/llama.cppcd llama.cppmkdir buildcd build#
+  compilando focado em CPU (desativando Vulkan para evitar conflitos)cmake ..
+  -DGGML_VULKAN=OFFcmake --build . --config Release -j$(nproc)```
+
+  ````
 ---
 ## Apakah Lorem Ipsum itu?
 
 Lorem Ipsum adalah contoh teks atau dummy dalam industri percetakan dan penataan huruf atau typesetting. Lorem Ipsum telah menjadi standar contoh teks sejak tahun 1500an, saat seorang tukang cetak yang tidak dikenal mengambil sebuah kumpulan teks dan mengacaknya untuk menjadi sebuah buku contoh huruf. Ia tidak hanya bertahan selama 5 abad, tapi juga telah beralih ke penataan huruf elektronik, tanpa ada perubahan apapun. Ia mulai dipopulerkan pada tahun 1960 dengan diluncurkannya lembaran-lembaran Letraset yang menggunakan kalimat-kalimat dari Lorem Ipsum, dan seiring munculnya perangkat lunak Desktop Publishing seperti Aldus PageMaker juga memiliki versi Lorem Ipsum.
-
-  
 
 ## Mengapa kita menggunakannya?
 
@@ -90,8 +100,6 @@ Bagian standar dari teks Lorem Ipsum yang digunakan sejak tahun 1500an kini di r
 
 ## trem
 
-  
-
-````
-```Bashcd /media/magicoven/storage/  # ou a pasta de sua preferênciagit clone https://github.com/ggerganov/llama.cppcd llama.cppmkdir buildcd build# compilando focado em CPU (desativando Vulkan para evitar conflitos)cmake .. -DGGML_VULKAN=OFFcmake --build . --config Release -j$(nproc)```
-````
+```
+Bash cd /media/magicoven/storage/  # ou a pasta de sua preferênciagit clone https://github.com/ggerganov/llama.cppcd llama.cppmkdir buildcd build# compilando focado em CPU (desativando Vulkan para evitar conflitos)cmake .. -DGGML_VULKAN=OFFcmake --build . --config Release -j$(nproc)
+```
