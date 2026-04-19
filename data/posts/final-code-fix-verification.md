@@ -7,7 +7,7 @@ excerpt: Verificacao final dos blocos de codigo.
 author: Magic Oven
 tags: []
 featured: false
-published: true
+published: false
 author_username: admin
 date: '2026-04-19'
 ---
