@@ -146,11 +146,14 @@ app.get('/api/health', (req, res) => {
 // Caminhos dos arquivos de dados
 const POSTS_DIR = path.join(__dirname, 'data', 'posts');
 const PROJECTS_DIR = path.join(__dirname, 'data', 'projects');
+const MESSAGES_DIR = path.join(__dirname, 'data', 'messages');
 const USERS_FILE = path.join(__dirname, 'data', 'users.json');
+const MESSAGES_FILE = path.join(__dirname, 'data', 'messages.json');
 
-// Ensure posts and projects directories exist
+// Ensure directories exist
 fs.mkdir(POSTS_DIR, { recursive: true }).catch(console.error);
 fs.mkdir(PROJECTS_DIR, { recursive: true }).catch(console.error);
+fs.mkdir(MESSAGES_DIR, { recursive: true }).catch(console.error);
 
 
 // ============================================
@@ -824,10 +827,153 @@ app.post('/api/projects/batch-delete', requireAuth, async (req, res) => {
 });
 
 // ============================================
+// ROTAS - Mensagens (Markdown based)
+// ============================================
+
+// Helper para ler todas as mensagens
+async function getAllMessages() {
+    try {
+        const files = await fs.readdir(MESSAGES_DIR);
+        const messages = await Promise.all(
+            files
+                .filter(file => file.endsWith('.md'))
+                .map(async file => {
+                    const content = await fs.readFile(path.join(MESSAGES_DIR, file), 'utf8');
+                    const parsed = matter(content);
+                    return {
+                        ...parsed.data,
+                        message: parsed.content,
+                        id: file.replace('.md', '')
+                    };
+                })
+        );
+        // Sort by date desc
+        return messages.sort((a, b) => new Date(b.date) - new Date(a.date));
+    } catch (error) {
+        console.error('Erro ao ler mensagens:', error);
+        return [];
+    }
+}
+
+// Listar mensagens (protegido)
+app.get('/api/messages', requireAuth, async (req, res) => {
+    const messages = await getAllMessages();
+    res.json({ messages });
+});
+
+// Receber nova mensagem (público) - Usando upload.none() para processar FormData
+app.post('/api/messages', upload.none(), async (req, res) => {
+    const { name, email, project, message } = req.body;
+    
+    if (!name || !email || !message) {
+        return res.status(400).json({ error: 'Nome, e-mail e mensagem são obrigatórios' });
+    }
+
+    const newMessage = {
+        id: String(Date.now()),
+        name,
+        email,
+        project: project || 'Não especificado',
+        date: new Date().toISOString(),
+        read: false
+    };
+
+    try {
+        const fileContent = matter.stringify(message, newMessage);
+        await fs.writeFile(path.join(MESSAGES_DIR, `${newMessage.id}.md`), fileContent);
+        
+        console.log(`📩 Nova mensagem recebida de ${name}`);
+        
+        // Enviar notificação por e-mail
+        const emailSubject = `📩 Novo Contato Site: ${name}`;
+        const emailText = `
+Novo contato recebido pelo site Magic Oven:
+
+Nome: ${name}
+E-mail: ${email}
+Projeto: ${project || 'Não especificado'}
+
+Mensagem:
+${message}
+
+---
+Acesse o painel administrativopara gerenciar esta mensagem:
+http://localhost:${PORT}/admin/
+        `;
+        
+        // Dispara o e-mail (em background para não atrasar a resposta ao usuário)
+        sendEmail('magicoven.tech@gmail.com', emailSubject, emailText).catch(err => {
+            console.error('Erro ao enviar e-mail de notificação:', err);
+        });
+
+        gitSync(`cms(messages): nova mensagem de "${name}"`);
+
+        res.json({ success: true, message: 'Mensagem enviada com sucesso!' });
+    } catch (error) {
+        console.error('❌ Erro ao salvar mensagem:', error);
+        res.status(500).json({ error: 'Erro ao processar mensagem' });
+    }
+});
+
+// Marcar como lida (protegido)
+app.put('/api/messages/:id/read', requireAuth, async (req, res) => {
+    try {
+        const filePath = path.join(MESSAGES_DIR, `${req.params.id}.md`);
+        const content = await fs.readFile(filePath, 'utf8');
+        const parsed = matter(content);
+        
+        parsed.data.read = true;
+        const newContent = matter.stringify(parsed.content, parsed.data);
+        await fs.writeFile(filePath, newContent);
+        
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Erro ao atualizar status da mensagem:', error);
+        res.status(500).json({ error: 'Erro ao atualizar mensagem' });
+    }
+});
+
+// Deletar mensagem (protegido)
+app.delete('/api/messages/:id', requireAuth, async (req, res) => {
+    try {
+        await fs.unlink(path.join(MESSAGES_DIR, `${req.params.id}.md`));
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Erro ao deletar mensagem:', error);
+        res.status(500).json({ error: 'Erro ao deletar mensagem' });
+    }
+});
+
+// ============================================
 // INICIALIZAÇÃO
 // ============================================
 
 // Criar usuário admin padrão se não existir
+async function initializeMessages() {
+    try {
+        await fs.access(MESSAGES_FILE);
+        console.log('📦 Detectado messages.json antigo. Iniciando migração...');
+        
+        const data = await fs.readFile(MESSAGES_FILE, 'utf8');
+        const parsedData = JSON.parse(data);
+        const messages = parsedData.messages || [];
+        
+        for (const msg of messages) {
+            const { message, ...meta } = msg;
+            const fileContent = matter.stringify(message || '', meta);
+            await fs.writeFile(path.join(MESSAGES_DIR, `${msg.id}.md`), fileContent);
+        }
+        
+        // Renomeia o arquivo antigo para backup
+        await fs.rename(MESSAGES_FILE, `${MESSAGES_FILE}.bak`);
+        console.log('✅ Migração de mensagens concluída com sucesso!');
+    } catch (err) {
+        if (err.code !== 'ENOENT') {
+            console.error('❌ Erro na migração de mensagens:', err);
+        }
+    }
+}
+
 async function initializeUsers() {
     try {
         await fs.access(USERS_FILE);
@@ -867,6 +1013,7 @@ app.use((err, req, res, next) => {
 // Iniciar servidor
 app.listen(PORT, async () => {
     await initializeUsers();
+    await initializeMessages();
     console.log(`
 ╔══════════════════════════════════════╗
 ║   Magic Oven CMS Backend Server      ║

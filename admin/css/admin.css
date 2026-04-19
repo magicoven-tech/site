@@ -596,3 +596,97 @@
       background: rgba(255, 255, 255, 0.2);
       margin: 0 4px;
     }
+
+    /* Messages Tab Styles */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 20px;
+      height: 20px;
+      padding: 0 6px;
+      border-radius: 10px;
+      background-color: var(--color-accent-primary);
+      color: var(--color-background);
+      font-size: 10px;
+      font-weight: bold;
+      margin-left: 8px;
+    }
+
+    .messages-container {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-md);
+    }
+
+    .message-card {
+      background: var(--color-surface-elevated);
+      border-left: 4px solid transparent;
+      border-radius: var(--radius-md);
+      padding: var(--spacing-lg);
+      transition: all var(--transition-base);
+    }
+
+    .message-card.unread {
+      border-left-color: var(--color-accent-primary);
+      background: rgba(39, 255, 43, 0.03);
+    }
+
+    .message-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .message-info h3 {
+      font-size: var(--font-size-base);
+      font-weight: var(--font-weight-bold);
+      margin-bottom: 2px;
+    }
+
+    .message-meta {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-tertiary);
+      display: flex;
+      gap: var(--spacing-sm);
+    }
+
+    .message-date {
+      color: var(--color-text-secondary);
+    }
+
+    .message-body {
+      color: var(--color-text-primary);
+      font-size: var(--font-size-sm);
+      line-height: 1.6;
+      margin: var(--spacing-md) 0;
+      white-space: pre-wrap;
+    }
+
+    .message-actions {
+      display: flex;
+      gap: var(--spacing-sm);
+      justify-content: flex-end;
+    }
+
+    .btn-icon {
+      padding: 6px;
+      border-radius: var(--radius-sm);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      transition: all var(--transition-base);
+    }
+
+    .btn-icon:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--color-text-primary);
+    }
+
+    .btn-icon.btn-delete:hover {
+      background: rgba(255, 59, 48, 0.1);
+      color: #ff3b30;
+      border-color: rgba(255, 59, 48, 0.2);
+    }

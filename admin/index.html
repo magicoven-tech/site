@@ -49,6 +49,7 @@
     <div class="admin-tabs">
       <button class="tab-button active" onclick="switchTab('blog')">Blog</button>
       <button class="tab-button" onclick="switchTab('projects')">Projetos</button>
+      <button class="tab-button" onclick="switchTab('messages')">Mensagens <span id="unread-count" class="badge" style="display: none;">0</span></button>
       <button class="tab-button" onclick="switchTab('profile')">Perfil</button>
     </div>
 
@@ -304,6 +305,13 @@
 
       <div id="projects-list" class="items-grid">
         <!-- Projetos serão carregados aqui -->
+      </div>
+    </div>
+
+    <!-- Messages Tab -->
+    <div id="messages-tab" class="tab-content">
+      <div id="messages-list" class="messages-container">
+        <!-- Mensagens serão carregadas aqui -->
       </div>
     </div>
 

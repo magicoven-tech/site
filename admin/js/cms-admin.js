@@ -8,11 +8,13 @@ const AdminCMS = {
     editingId: null,
     currentData: {
         blog: null,
-        projects: null
+        projects: null,
+        messages: null
     },
     selectedItems: {
         blog: new Set(),
-        projects: new Set()
+        projects: new Set(),
+        messages: new Set()
     },
 
     /**
@@ -29,6 +31,7 @@ const AdminCMS = {
         // Carrega dados
         await this.loadBlogPosts();
         await this.loadProjects();
+        await this.loadMessages();
         this.setupForms();
         this.setupImageUpload();
         this.setupLogout();
@@ -97,6 +100,124 @@ const AdminCMS = {
         } catch (error) {
             console.error('Erro ao carregar projetos:', error);
             this.renderEmptyState('projects-list', '🎨', 'Erro ao carregar projetos');
+        }
+    },
+
+    /**
+     * Carrega mensagens via API
+     */
+    async loadMessages() {
+        try {
+            const response = await apiRequest('/api/messages');
+            const data = await response.json();
+            this.currentData.messages = data.messages;
+            this.updateUnreadCount(data.messages);
+            this.renderMessagesList(data.messages);
+        } catch (error) {
+            console.error('Erro ao carregar mensagens:', error);
+            this.renderEmptyState('messages-list', '📩', 'Erro ao carregar mensagens');
+        }
+    },
+
+    /**
+     * Atualiza o contador de mensagens não lidas
+     */
+    updateUnreadCount(messages) {
+        const unreadCount = messages.filter(m => !m.read).length;
+        const badge = document.getElementById('unread-count');
+        if (badge) {
+            if (unreadCount > 0) {
+                badge.textContent = unreadCount;
+                badge.style.display = 'inline-flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+    },
+
+    /**
+     * Renderiza a lista de mensagens
+     */
+    renderMessagesList(messages) {
+        const list = document.getElementById('messages-list');
+        if (!list) return;
+
+        if (!messages || messages.length === 0) {
+            this.renderEmptyState('messages-list', '📩', 'Nenhuma mensagem recebida');
+            return;
+        }
+
+        list.innerHTML = messages.map(msg => `
+            <div class="message-card ${msg.read ? '' : 'unread'}" id="msg-${msg.id}">
+                <div class="message-header">
+                    <div class="message-info">
+                        <h3>${msg.name}</h3>
+                        <div class="message-meta">
+                            <span>${msg.email}</span>
+                            <span>•</span>
+                            <span>Projeto: ${msg.project}</span>
+                        </div>
+                    </div>
+                    <div class="message-date">
+                        ${new Date(msg.date).toLocaleString('pt-BR')}
+                    </div>
+                </div>
+                <div class="message-body">${msg.message}</div>
+                <div class="message-actions">
+                    ${!msg.read ? `
+                        <button class="btn btn-outline btn-sm" onclick="AdminCMS.markMessageAsRead('${msg.id}')">
+                            Marcar como lida
+                        </button>
+                    ` : ''}
+                    <button class="btn-icon btn-delete" onclick="AdminCMS.deleteMessage('${msg.id}')" title="Excluir">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    },
+
+    /**
+     * Marca uma mensagem como lida
+     */
+    async markMessageAsRead(id) {
+        try {
+            const response = await apiRequest(`/api/messages/${id}/read`, {
+                method: 'PUT'
+            });
+            if (response.ok) {
+                await this.loadMessages(); // Recarrega para atualizar tudo
+            }
+        } catch (error) {
+            console.error('Erro ao marcar mensagem como lida:', error);
+            showModal('Erro', 'Não foi possível atualizar o status da mensagem.');
+        }
+    },
+
+    /**
+     * Exclui uma mensagem
+     */
+    async deleteMessage(id) {
+        const confirmed = await showConfirmModal(
+            'Excluir Mensagem',
+            'Tem certeza que deseja excluir esta mensagem permanentemente?'
+        );
+
+        if (confirmed) {
+            try {
+                const response = await apiRequest(`/api/messages/${id}`, {
+                    method: 'DELETE'
+                });
+                if (response.ok) {
+                    await this.loadMessages();
+                }
+            } catch (error) {
+                console.error('Erro ao excluir mensagem:', error);
+                showModal('Erro', 'Não foi possível excluir a mensagem.');
+            }
         }
     },
 
@@ -1363,14 +1484,27 @@ function switchTab(tab) {
     // Atualiza botões
     document.querySelectorAll('.tab-button').forEach(btn => {
         btn.classList.remove('active');
+        // Se o clique foi no badge, o event.target pode não ser o botão
+        if (btn.contains(event.target) || btn === event.target) {
+            btn.classList.add('active');
+        }
     });
-    event.target.classList.add('active');
 
     // Atualiza conteúdo
     document.querySelectorAll('.tab-content').forEach(content => {
         content.classList.remove('active');
     });
     document.getElementById(`${tab}-tab`).classList.add('active');
+
+    // Esconde o botão de "Nova publicação" se estiver em Perfil ou Mensagens
+    const createBtn = document.querySelector('.main-nav .btn-primary');
+    if (createBtn) {
+        if (tab === 'profile' || tab === 'messages') {
+            createBtn.style.display = 'none';
+        } else {
+            createBtn.style.display = 'block';
+        }
+    }
 
     AdminCMS.currentTab = tab;
 }
@@ -1385,7 +1519,7 @@ function showCreateForm() {
         document.getElementById('blog-form').style.display = 'block';
         document.getElementById('blogPostForm').reset();
         document.getElementById('blog-form').scrollIntoView({ behavior: 'smooth' });
-    } else {
+    } else if (AdminCMS.currentTab === 'projects') {
         document.getElementById('project-form').style.display = 'block';
         document.getElementById('projectForm').reset();
         document.getElementById('project-form').scrollIntoView({ behavior: 'smooth' });
