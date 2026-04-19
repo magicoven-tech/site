@@ -305,11 +305,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
     <script>
         window.copyCodeBlock = function(btn) {
-            const pre = btn.closest('.custom-code-block').querySelector('pre code');
+            const pre = btn.closest('.custom-code-block').querySelector('pre');
             const tooltip = btn.getAttribute('title');
             const svg = btn.innerHTML;
             
-            navigator.clipboard.writeText(pre.textContent).then(() => {
+            navigator.clipboard.writeText(pre.innerText).then(() => {
                 btn.setAttribute('title', 'Copiado!');
                 btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#27ff2b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
                 setTimeout(() => {

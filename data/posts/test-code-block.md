@@ -1,20 +1,16 @@
 ---
-id: '1776607608231'
+id: '1776608322964'
 title: Test Code Block
 slug: test-code-block
 category: CODIGO
-excerpt: Teste de blocos de codigo
-author: Magic Oven
+excerpt: Testing code block multi-line and copy button.
+author: Administrador
 tags: []
 featured: false
 published: true
 author_username: admin
 date: '2026-04-19'
-content: |
-  ```javascript
-  apt update
-  ```
 ---
 ```javascript
-apt update
+function test() {  console.log("line 1");
 ```

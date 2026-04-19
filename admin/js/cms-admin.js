@@ -38,9 +38,13 @@ const AdminCMS = {
         this.turndownService.addRule('codeBlock', {
             filter: 'pre',
             replacement: function (content, node) {
-                const codeElement = node.querySelector('code');
-                const language = codeElement ? (codeElement.className.match(/language-(\w+)/) || [])[1] : '';
-                const code = codeElement ? codeElement.textContent : node.textContent;
+                // Tenta pegar a linguagem do primeiro <code>
+                const firstCode = node.querySelector('code');
+                const language = firstCode ? (firstCode.className.match(/language-(\w+)/) || [])[1] : '';
+                
+                // Pega o texto de TODO o conteúdo do <pre>, garantindo que múltiplas linhas/tags code sejam capturadas
+                const code = node.innerText || node.textContent;
+                
                 return '\n\n```' + (language || '') + '\n' + code.trim() + '\n```\n\n';
             }
         });
