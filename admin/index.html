@@ -254,6 +254,7 @@
             <label>Imagem do Projeto</label>
             <div id="project-image-dropzone" class="dropzone">
               <div class="dropzone-text">Arraste uma imagem aqui ou clique para selecionar</div>
+              <div class="dropzone-info">Limite sugerido: 5MB (Arquivos maiores serão comprimidos automaticamente)</div>
               <input type="file" id="project-image-input" accept="image/*" style="display: none;">
               <button type="button" class="dropzone-clear" id="clear-image">×</button>
               <div class="dropzone-preview" id="image-preview-container">
@@ -394,6 +395,7 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
   <script src="../js/config.js?v=1.2"></script>
   <script src="js/cms-admin.js?v=1.2"></script>
   <script src="../js/glitch-text.js?v=1.2"></script>

@@ -342,7 +342,16 @@
     }
 
     .dropzone-text {
+      color: var(--color-text-primary);
+      font-weight: var(--font-weight-semibold);
+      pointer-events: none;
+      margin-bottom: var(--spacing-xs);
+    }
+
+    .dropzone-info {
+      font-size: var(--font-size-xs);
       color: var(--color-text-secondary);
+      opacity: 0.7;
       pointer-events: none;
     }
 

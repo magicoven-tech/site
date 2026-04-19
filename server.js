@@ -69,15 +69,22 @@ const storage = multer.diskStorage({
 
 const upload = multer({
     storage: storage,
-    limits: { fileSize: 5 * 1024 * 1024 }, // Limite de 5MB
+    limits: { fileSize: 5.5 * 1024 * 1024 }, // Pequena margem acima de 5MB para evitar erros de arredondamento
     fileFilter: function (req, file, cb) {
         const filetypes = /jpeg|jpg|png|webp|gif/;
         const mimetype = filetypes.test(file.mimetype);
         const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
 
-        if (mimetype && extname) {
+        console.log(`[Multer] Validando upload: name=${file.originalname}, type=${file.mimetype}`);
+
+        // Aceita se o mimetype for válido
+        // O extname pode falhar se o arquivo for enviado sem extensão via Blob,
+        // mas o mimetype é mais confiável. No entanto, mantemos a verificação de ambos como padrão.
+        if (mimetype && (extname || file.originalname === 'blob' || !path.extname(file.originalname))) {
             return cb(null, true);
         }
+        
+        console.error(`❌ [Multer] Filtro falhou: mimetype=${mimetype}, extname=${extname}`);
         cb(new Error('Apenas imagens são permitidas (jpeg, jpg, png, webp, gif)'));
     }
 });

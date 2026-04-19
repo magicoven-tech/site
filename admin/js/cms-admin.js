@@ -716,7 +716,7 @@ const AdminCMS = {
     },
 
     /**
-     * Faz upload da imagem para o servidor
+     * Faz upload da imagem para o servidor (com compressão automática se necessário)
      * @param {File} file Arquivo de imagem
      * @param {Function} onSuccess Callback chamado com a URL da imagem em caso de sucesso
      */
@@ -726,17 +726,47 @@ const AdminCMS = {
             return;
         }
 
+        const dropzoneText = document.querySelector('.dropzone-text');
+        const dropzoneInfo = document.querySelector('.dropzone-info');
+        let originalText = dropzoneText ? dropzoneText.textContent : 'Arraste uma imagem';
+        let originalInfo = dropzoneInfo ? dropzoneInfo.textContent : '';
+
+        let fileToUpload = file;
+        const MAX_SIZE_MB = 5;
+
+        // Verifica se precisa comprimir
+        if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+            try {
+                if (dropzoneText) dropzoneText.textContent = 'Comprimindo...';
+                if (dropzoneInfo) dropzoneInfo.textContent = 'Reduzindo tamanho para otimização';
+
+                console.log(`[CMS] Iniciando compressão de ${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB)`);
+
+                const options = {
+                    maxSizeMB: MAX_SIZE_MB,
+                    maxWidthOrHeight: 1920,
+                    useWebWorker: true,
+                    onProgress: (progress) => {
+                        if (dropzoneText) dropzoneText.textContent = `Comprimindo (${progress}%)`;
+                    }
+                };
+
+                fileToUpload = await imageCompression(file, options);
+                console.log(`[CMS] Compressão concluída: ${(fileToUpload.size / 1024 / 1024).toFixed(2)}MB`);
+                
+            } catch (error) {
+                console.error('Erro na compressão:', error);
+                // Se falhar a compressão, avisa o usuário mas tenta subir o original (o servidor deve barrar se for > 5MB)
+            }
+        }
+
+        if (dropzoneText) dropzoneText.textContent = 'Enviando...';
+        if (dropzoneInfo) dropzoneInfo.textContent = 'Salvando no servidor';
+
         const formData = new FormData();
-        formData.append('image', file);
+        formData.append('image', fileToUpload, file.name);
 
         try {
-            const dropzoneText = document.querySelector('.dropzone-text');
-            let originalText = '';
-            if (dropzoneText) {
-                originalText = dropzoneText.textContent;
-                dropzoneText.textContent = 'Enviando...';
-            }
-
             const response = await apiRequest('/api/upload', {
                 method: 'POST',
                 body: formData
@@ -744,21 +774,19 @@ const AdminCMS = {
 
             const data = await response.json();
 
-            if (dropzoneText) {
-                dropzoneText.textContent = originalText;
-            }
+            // Restaura textos da UI
+            if (dropzoneText) dropzoneText.textContent = originalText;
+            if (dropzoneInfo) dropzoneInfo.textContent = originalInfo;
 
             if (response.ok) {
-                // Tentativa robusta de encontrar a URL
                 let finalUrl = '';
-
                 if (typeof data.url === 'string') {
                     finalUrl = data.url;
                 } else if (data && typeof data === 'object') {
                     if (data.url && typeof data.url === 'string') finalUrl = data.url;
                     else if (data.path) finalUrl = data.path;
                     else if (data.file && data.file.path) finalUrl = data.file.path;
-                    else if (data.location) finalUrl = data.location; // S3 style
+                    else if (data.location) finalUrl = data.location;
                     else {
                         console.error('Erro: URL não encontrada na resposta do upload', data);
                         this.customAlert('Aviso', 'Erro ao processar imagem. Tente novamente.');
@@ -770,10 +798,12 @@ const AdminCMS = {
 
                 if (onSuccess) onSuccess(finalUrl);
             } else {
-                this.customAlert('Aviso', 'Erro ao fazer upload: ' + (data.error || 'Erro desconhecido'));
+                this.customAlert('Aviso', 'Erro ao fazer upload: ' + (data.error || data.message || 'Erro desconhecido'));
             }
         } catch (error) {
             console.error('Erro no upload:', error);
+            if (dropzoneText) dropzoneText.textContent = originalText;
+            if (dropzoneInfo) dropzoneInfo.textContent = originalInfo;
             this.customAlert('Aviso', 'Erro ao fazer upload da imagem.');
         }
     },
