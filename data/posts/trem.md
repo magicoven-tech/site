@@ -28,3 +28,11 @@ function {};
 ddd
 
 dfasdfa
+
+```javascript
+function {};
+```
+
+```java
+object {};
+```
