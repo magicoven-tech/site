@@ -654,6 +654,13 @@ const AdminCMS = {
             toggleBtn.textContent = toolbar.classList.contains('active') ? '×' : '+';
         });
 
+        // Sync repositioning
+        const updatePos = () => this.syncToolbarPosition(textareaId, toolbar);
+        textarea.addEventListener('click', updatePos);
+        textarea.addEventListener('keyup', updatePos);
+        textarea.addEventListener('focus', updatePos);
+        textarea.addEventListener('input', updatePos);
+
         // Opção de Imagem
         const btnImage = document.getElementById(`${toolbarPrefix}-image`);
         if (btnImage && imageInput) {
@@ -748,6 +755,52 @@ const AdminCMS = {
             const text = e.clipboardData.getData('text/plain');
             document.execCommand('insertText', false, text);
         });
+    },
+
+    /**
+     * Sincroniza a posição do toolbar com o parágrafo atual
+     */
+    syncToolbarPosition(editorId, toolbar) {
+        const editor = document.getElementById(editorId);
+        if (!editor || !toolbar) return;
+
+        setTimeout(() => {
+            const selection = window.getSelection();
+            if (!selection.rangeCount) return;
+
+            let node = selection.anchorNode;
+            if (!node) return;
+
+            // Encontrar o elemento pai que seja um bloco direto do editor
+            let block = node.nodeType === 3 ? node.parentNode : node;
+            
+            while (block && block.parentNode !== editor && block !== editor) {
+                block = block.parentNode;
+            }
+
+            if (block && block.parentNode === editor) {
+                // Posicionar verticalmente
+                const offsetTop = block.offsetTop;
+                toolbar.style.top = `${offsetTop}px`;
+                
+                // Visibilidade baseada em conteúdo (estilo Medium)
+                const text = block.innerText.trim();
+                if (text === "" || text === "\n") {
+                    toolbar.classList.add('visible');
+                } else {
+                    toolbar.classList.remove('visible');
+                    toolbar.classList.remove('active');
+                    const toggleBtn = document.getElementById(`${editorId === 'blog-content' ? 'toolbar' : 'project-toolbar'}-toggle`);
+                    if (toggleBtn) toggleBtn.textContent = '+';
+                }
+            } else if (block === editor) {
+                // Caso o editor esteja vazio
+                toolbar.style.top = `0px`;
+                toolbar.classList.add('visible');
+            } else {
+                toolbar.classList.remove('visible');
+            }
+        }, 0);
     },
 
     /**
