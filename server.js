@@ -132,13 +132,13 @@ app.get('/api/health', (req, res) => {
 });
 
 // Caminhos dos arquivos de dados
-// Caminhos dos arquivos de dados
 const POSTS_DIR = path.join(__dirname, 'data', 'posts');
-const PROJECTS_FILE = path.join(__dirname, 'data', 'projects.json');
+const PROJECTS_DIR = path.join(__dirname, 'data', 'projects');
 const USERS_FILE = path.join(__dirname, 'data', 'users.json');
 
-// Ensure posts directory exists
+// Ensure posts and projects directories exist
 fs.mkdir(POSTS_DIR, { recursive: true }).catch(console.error);
+fs.mkdir(PROJECTS_DIR, { recursive: true }).catch(console.error);
 
 
 // ============================================
@@ -646,26 +646,45 @@ app.post('/api/blog/batch-delete', requireAuth, async (req, res) => {
 });
 
 // ============================================
-// ROTAS - Projetos
+// ROTAS - Projetos (Markdown based)
 // ============================================
+
+// Helper para ler todos os projetos
+async function getAllProjects() {
+    try {
+        const files = await fs.readdir(PROJECTS_DIR);
+        const projects = await Promise.all(
+            files
+                .filter(file => file.endsWith('.md'))
+                .map(async file => {
+                    const content = await fs.readFile(path.join(PROJECTS_DIR, file), 'utf8');
+                    const parsed = matter(content);
+                    return {
+                        ...parsed.data,
+                        fullDescription: parsed.content,
+                        slug: file.replace('.md', '')
+                    };
+                })
+        );
+        // Sort by date desc (if it exists, otherwise ignore)
+        return projects.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+    } catch (error) {
+        console.error('Erro ao ler projetos:', error);
+        return [];
+    }
+}
 
 // Listar todos os projetos
 app.get('/api/projects', async (req, res) => {
-    const data = await readJSON(PROJECTS_FILE);
-    if (!data) {
-        return res.status(500).json({ error: 'Erro ao carregar projetos' });
-    }
-    res.json(data);
+    const projects = await getAllProjects();
+    res.json({ projects });
 });
 
 // Obter projeto por ID
 app.get('/api/projects/:id', async (req, res) => {
-    const data = await readJSON(PROJECTS_FILE);
-    if (!data) {
-        return res.status(500).json({ error: 'Erro ao carregar projetos' });
-    }
+    const projects = await getAllProjects();
+    const project = projects.find(p => p.id === req.params.id || p.slug === req.params.id);
 
-    const project = data.projects.find(p => p.id === req.params.id);
     if (!project) {
         return res.status(404).json({ error: 'Projeto não encontrado' });
     }
@@ -675,85 +694,91 @@ app.get('/api/projects/:id', async (req, res) => {
 
 // Criar novo projeto (protegido)
 app.post('/api/projects', requireAuth, async (req, res) => {
-    const data = await readJSON(PROJECTS_FILE);
-    if (!data) {
-        return res.status(500).json({ error: 'Erro ao carregar projetos' });
-    }
+    const { title, slug, fullDescription, ...otherData } = req.body;
+
+    const finalSlug = slug || title.toLowerCase()
+        .replace(/[^\w\s-]/g, '')
+        .replace(/[\s_-]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+
+    const projects = await getAllProjects();
 
     const newProject = {
         id: String(Date.now()),
-        ...req.body,
+        title,
+        slug: finalSlug,
+        ...otherData,
         author: req.user ? req.user.name : 'Admin',
         author_username: req.user ? req.user.username : 'admin',
-        number: '0' + (data.projects.length + 1)
+        number: '0' + (projects.length + 1)
     };
 
-    data.projects.unshift(newProject);
-    const success = await writeJSON(PROJECTS_FILE, data);
+    try {
+        await fs.mkdir(PROJECTS_DIR, { recursive: true });
+        const fileContent = matter.stringify(fullDescription || '', newProject);
+        await fs.writeFile(path.join(PROJECTS_DIR, `${finalSlug}.md`), fileContent);
+        
+        console.log(`✅ Projeto criado: ${finalSlug}`);
+        gitSync(`cms(projects): adicionar projeto "${title}"`);
 
-    if (!success) {
-        return res.status(500).json({ error: 'Erro ao salvar projeto' });
+        res.json({ success: true, project: { ...newProject, fullDescription } });
+    } catch (error) {
+        console.error('❌ Erro ao salvar projeto:', error);
+        res.status(500).json({ error: 'Erro ao salvar projeto', details: error.message });
     }
-
-    // Sincroniza com GitHub
-    gitSync(`cms(projects): adicionar projeto "${newProject.title}"`);
-
-    res.json({ success: true, project: newProject });
 });
 
 // Atualizar projeto (protegido)
 app.put('/api/projects/:id', requireAuth, async (req, res) => {
-    const data = await readJSON(PROJECTS_FILE);
-    if (!data) {
-        return res.status(500).json({ error: 'Erro ao carregar projetos' });
-    }
+    const projects = await getAllProjects();
+    const existingProject = projects.find(p => p.id === req.params.id || p.slug === req.params.id);
 
-    const index = data.projects.findIndex(p => p.id === req.params.id);
-    if (index === -1) {
+    if (!existingProject) {
         return res.status(404).json({ error: 'Projeto não encontrado' });
     }
 
-    data.projects[index] = {
-        ...data.projects[index],
-        ...req.body,
-        id: req.params.id
+    const fullDescription = req.body.fullDescription;
+    const { fullDescription: _, ...updateData } = req.body;
+
+    const updatedProject = {
+        ...existingProject,
+        ...updateData
     };
 
-    const success = await writeJSON(PROJECTS_FILE, data);
-    if (!success) {
-        return res.status(500).json({ error: 'Erro ao atualizar projeto' });
+    try {
+        await fs.mkdir(PROJECTS_DIR, { recursive: true });
+        const fileContent = matter.stringify(fullDescription || '', updatedProject);
+        await fs.writeFile(path.join(PROJECTS_DIR, `${existingProject.slug}.md`), fileContent);
+
+        console.log(`✅ Projeto atualizado: ${existingProject.slug}`);
+        gitSync(`cms(projects): atualizar projeto "${updatedProject.title}"`);
+
+        res.json({ success: true, project: { ...updatedProject, fullDescription } });
+    } catch (error) {
+        console.error('❌ Erro ao atualizar projeto:', error);
+        res.status(500).json({ error: 'Erro ao atualizar projeto', details: error.message });
     }
-
-    // Sincroniza com GitHub
-    gitSync(`cms(projects): atualizar projeto "${data.projects[index].title}"`);
-
-    res.json({ success: true, project: data.projects[index] });
 });
 
 // Deletar projeto (protegido)
 app.delete('/api/projects/:id', requireAuth, async (req, res) => {
-    const data = await readJSON(PROJECTS_FILE);
-    if (!data) {
-        return res.status(500).json({ error: 'Erro ao carregar projetos' });
-    }
+    const projects = await getAllProjects();
+    const project = projects.find(p => p.id === req.params.id || p.slug === req.params.id);
 
-    const index = data.projects.findIndex(p => p.id === req.params.id);
-    if (index === -1) {
+    if (!project) {
         return res.status(404).json({ error: 'Projeto não encontrado' });
     }
 
-    const project = data.projects[index];
-    data.projects.splice(index, 1);
-    const success = await writeJSON(PROJECTS_FILE, data);
-    if (!success) {
-        return res.status(500).json({ error: 'Erro ao deletar projeto' });
+    try {
+        await fs.unlink(path.join(PROJECTS_DIR, `${project.slug}.md`));
+        const projectName = project ? project.title : req.params.id;
+        gitSync(`cms(projects): remover projeto "${projectName}"`);
+
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Erro ao deletar projeto:', error);
+        res.status(500).json({ error: 'Erro ao deletar projeto' });
     }
-
-    // Sincroniza com GitHub
-    const projectName = project ? project.title : req.params.id;
-    gitSync(`cms(projects): remover projeto "${projectName}"`);
-
-    res.json({ success: true });
 });
 
 // Deletar projetos em lote (protegido)
@@ -764,16 +789,18 @@ app.post('/api/projects/batch-delete', requireAuth, async (req, res) => {
     }
 
     try {
-        const data = await readJSON(PROJECTS_FILE);
-        if (!data) return res.status(500).json({ error: 'Erro ao carregar projetos' });
+        const projects = await getAllProjects();
+        let deletedCount = 0;
 
-        const initialLength = data.projects.length;
-        data.projects = data.projects.filter(p => !ids.includes(p.id));
-        const deletedCount = initialLength - data.projects.length;
+        for (const id of ids) {
+            const project = projects.find(p => p.id === id || p.slug === id);
+            if (project) {
+                await fs.unlink(path.join(PROJECTS_DIR, `${project.slug}.md`));
+                deletedCount++;
+            }
+        }
 
         if (deletedCount > 0) {
-            const success = await writeJSON(PROJECTS_FILE, data);
-            if (!success) return res.status(500).json({ error: 'Erro ao deletar projetos' });
             gitSync(`cms(projects): remover ${deletedCount} projetos em lote`);
         }
 
