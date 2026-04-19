@@ -317,7 +317,8 @@ document.addEventListener('DOMContentLoaded', () => {
         status.style.opacity = "0.7";
 
         try {
-            const response = await fetch(event.target.action, {
+            // Usamos a função apiRequest para garantir que a baseURL correta seja usada em produção
+            const response = await window.apiRequest(event.target.getAttribute('action'), {
                 method: form.method,
                 body: data,
                 headers: {
