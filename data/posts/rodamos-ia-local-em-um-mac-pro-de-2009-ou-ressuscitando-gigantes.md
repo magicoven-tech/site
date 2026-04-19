@@ -45,7 +45,6 @@ content: >
   mão da estética.
 
 
-
   ## O vale das sombras (o que NÃO funcionou)
 
   Antes de chegarmos à vitória, falhamos e falhar é parte do processo de design.
@@ -64,7 +63,6 @@ content: >
   era útil.
 
 
-
   ## Llama-3.2-3B e o artesanato digital
 
   A virada de chave foi entender que não precisávamos de força bruta, mas de
@@ -72,9 +70,7 @@ content: >
   entender português e leve o suficiente para morar na nossa RAM limitada.
 
 
-
   ### Passo 1: Preparando o terreno (dependências)
-
 
   O Linux precisa de ferramentas para compilar o llama.cpp. Abra o terminal e
   instale o essencial:
@@ -131,7 +127,6 @@ content: >
   3. Salve o arquivo .gguf na sua pasta de storage.
 
 
-
   ## Engenharia de memória
 
   Com apenas 4.8GB de RAM, o Mac Pro engasgaria. A solução técnica foi
@@ -148,6 +143,7 @@ content: >
   sudo nano /usr/bin/init-zram-swapping
 
   ```
+
 
 
   Cole este script (que otimizamos para prioridade máxima):
@@ -174,6 +170,7 @@ content: >
   ```
 
 
+
   Reinicie o serviço: sudo systemctl restart zram-config.
 
   Prioridade 100 força o Linux a usar a zRAM antes do HD swapon -p 100 /dev/zram
@@ -189,7 +186,6 @@ content: >
 
 
   O resultado deve mostrar o /dev/zram0 com prioridade 100.
-
 
 
   ## O Comando llama-3b (automação)
@@ -209,6 +205,7 @@ content: >
   sudo nano /usr/local/bin/llama-3b
 
   ```
+
 
 
   Adicione o código abaixo:
@@ -241,6 +238,7 @@ content: >
   ```
 
 
+
   Dê permissão de execução: 
 
   ```Bash 
@@ -248,7 +246,6 @@ content: >
   sudo chmod +x /usr/local/bin/llama-3b.
 
   ```
-
 
 
   ## A Realidade pés no chão
@@ -264,7 +261,6 @@ content: >
 
 
   {simulador}
-
 
 
   ## Lições de um Mac Pro em 2026
@@ -421,7 +417,7 @@ sudo nice -n -10 /media/magicoven/storage/llama.cpp/build/bin/llama-cli \
 
 Dê permissão de execução: 
 ```Bash 
-sudo chmod +x /usr/local/bin/llama-3b.
+sudo chmod +x /usr/local/bin/llama-3b
 ```
 
 ## A Realidade pés no chão
