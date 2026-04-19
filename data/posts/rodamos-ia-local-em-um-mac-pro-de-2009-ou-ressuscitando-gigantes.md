@@ -320,6 +320,7 @@ content: >
 ## Um tanque de guerra cansado
 Muitos diriam para vender as peças ou usar como peso de porta. Mas o Mac Pro 2009 é uma obra de arte da engenharia industrial. 
 Para entender o desafio, imagine rodar modelos de linguagem modernos em uma máquina que nasceu antes do Instagram.
+<br>
 No entanto, para rodar IAs modernas, ele tem "alguns" desafios:
 
 
