@@ -409,19 +409,6 @@
       pointer-events: none;
     }
 
-    .post-body code.language-auto:empty::before,
-    [contenteditable="true"] code.language-auto:empty::before {
-        content: "Digite a linguagem (ex: javascript, bash)...";
-        color: var(--color-text-secondary);
-        opacity: 0.5;
-        font-style: italic;
-    }
-
-    .post-body pre,
-    [contenteditable="true"] pre {
-        position: relative;
-    }
-
     .dropzone-preview {
       margin-top: var(--spacing-md);
       display: none;
@@ -464,18 +451,68 @@
     }
 
     /* Code Blocks in Editor */
-    [contenteditable="true"] pre {
+    [contenteditable="true"] pre,
+    pre.code-editor-block {
         background: #111;
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: var(--radius-sm);
-        padding: var(--spacing-md);
+        padding: 0;
         margin: var(--spacing-md) 0;
         font-family: var(--font-mono);
         color: #f0f0f0;
         overflow-x: auto;
-        white-space: pre-wrap; /* Crucial for line breaks in editor */
+        white-space: pre-wrap;
         tab-size: 4;
         position: relative;
+    }
+
+    /* Cabeçalho com a linguagem */
+    .code-lang-line {
+        display: block;
+        width: 100%;
+        padding: 6px var(--spacing-md);
+        background: #1e1e1e;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+        font-family: var(--font-mono);
+        font-size: 0.78rem;
+        color: #a9b7c6;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        outline: none;
+        cursor: text;
+        white-space: nowrap;
+        overflow: hidden;
+        min-height: 1.5em;
+        box-sizing: border-box;
+    }
+
+    /* Placeholder para quando a linha de linguagem está vazia */
+    .code-lang-line:empty::before {
+        content: attr(data-placeholder);
+        color: rgba(169, 183, 198, 0.4);
+        pointer-events: none;
+    }
+
+    /* Linguagem confirmada (após Enter) */
+    .code-lang-line.lang-confirmed {
+        color: var(--color-accent-primary);
+        opacity: 0.8;
+        pointer-events: none;
+        user-select: none;
+    }
+
+    /* Conteúdo do código dentro do pre */
+    [contenteditable="true"] pre code,
+    pre.code-editor-block code {
+        display: block;
+        padding: var(--spacing-md);
+        background: transparent;
+        color: #f0f0f0;
+        white-space: pre-wrap;
+        word-break: break-all;
+        outline: none;
+        min-height: 3em;
     }
 
     [contenteditable="true"] code {
@@ -486,12 +523,6 @@
         border-radius: 4px;
     }
 
-    [contenteditable="true"] pre code {
-        background: transparent;
-        padding: 0;
-        color: inherit;
-        display: block;
-    }
 
 
     .form-group.editor-wrapper {

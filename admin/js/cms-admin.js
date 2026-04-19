@@ -38,22 +38,37 @@ const AdminCMS = {
         this.turndownService.addRule('codeBlock', {
             filter: 'pre',
             replacement: function (content, node) {
-                const firstCode = node.querySelector('code');
-                const language = firstCode ? (firstCode.className.match(/language-(\w+)/) || [])[1] : '';
-                
-                // Converte <br> em \n e remove outras tags HTML mantendo o texto
-                let code = node.innerHTML
+                // 1. Tenta pegar linguagem da linha de cabeçalho (.code-lang-line)
+                const langLine = node.querySelector('.code-lang-line');
+                let language = '';
+                if (langLine) {
+                    language = langLine.getAttribute('data-lang') || langLine.innerText.trim() || '';
+                }
+
+                // 2. Fallback: tenta pegar pelo class do <code>
+                if (!language) {
+                    const firstCode = node.querySelector('code');
+                    language = firstCode ? (firstCode.className.match(/language-(\w+)/) || [])[1] : '';
+                }
+
+                // Normaliza: remove linguagens genéricas
+                if (language === 'text') language = '';
+
+                // Pega o conteúdo do <code>, convertendo <br> em \n
+                const codeEl = node.querySelector('code');
+                let code = (codeEl ? codeEl.innerHTML : node.innerHTML)
                     .replace(/<br\s*\/?>/gi, '\n')
                     .replace(/<\/p>/gi, '\n')
                     .replace(/<\/div>/gi, '\n')
-                    .replace(/<[^>]+>/g, ''); // Remove tags HTML remanescentes
-                
-                // Decodifica entidades HTML básico
-                code = code.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
-                
+                    .replace(/<[^>]+>/g, '');
+
+                // Decodifica entidades HTML
+                code = code.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&').replace(/&quot;/g, '"');
+
                 return '\n\n```' + (language || '') + '\n' + code.trim() + '\n```\n\n';
             }
         });
+
 
         // Carrega dados
         await this.loadBlogPosts();
@@ -624,7 +639,7 @@ const AdminCMS = {
     /**
      * Aplica a formatação selecionada ao texto
      */
-    applyFormat(format, textarea) {
+    async applyFormat(format, textarea) {
         // No contenteditable, document.execCommand usa a seleção atual automaticamente
         switch (format) {
             case 'bold':
@@ -633,12 +648,13 @@ const AdminCMS = {
             case 'italic':
                 document.execCommand('italic', false, null);
                 break;
-            case 'link':
-                const url = prompt('URL do link:', 'https://');
-                if (url) {
-                    document.execCommand('createLink', false, url);
+            case 'link': {
+                const url = await this.customPrompt('Inserir Link', 'Cole a URL completa do link:', 'https://', 'https://');
+                if (url && url.trim()) {
+                    document.execCommand('createLink', false, url.trim());
                 }
                 break;
+            }
             case 'h2':
                 document.execCommand('formatBlock', false, 'h2');
                 break;
@@ -693,31 +709,39 @@ const AdminCMS = {
             const pre = range.startContainer.parentElement.closest('pre');
 
             if (pre) {
-                const codeNode = pre.querySelector('code');
-                const isLanguageDraft = codeNode && codeNode.classList.contains('language-auto');
-
                 if (e.key === 'Enter') {
                     e.preventDefault();
-                    
-                    if (isLanguageDraft) {
-                        const lang = codeNode.innerText.trim();
-                        codeNode.className = `language-${lang || 'text'}`;
-                        codeNode.innerText = ''; // Limpa o nome da linguagem
-                        // Força um pequeno atraso para que a limpeza do texto seja processada
-                        setTimeout(() => {
-                            document.execCommand('insertHTML', false, '<br>');
-                        }, 0);
-                    } else {
-                        // Usar insertHTML com <br> é mais estável para manter a estrutura no contenteditable
-                        document.execCommand('insertHTML', false, '<br>');
+
+                    const langLine = pre.querySelector('.code-lang-line');
+                    const codeEl = pre.querySelector('code');
+
+                    // Se o cursor está na linha de linguagem, confirmar a linguagem e mover para o code
+                    if (langLine && langLine.contains(range.startContainer)) {
+                        const lang = langLine.innerText.trim() || 'text';
+                        // Aplica a linguagem e esconde o placeholder
+                        langLine.setAttribute('data-lang', lang);
+                        langLine.textContent = lang; // Remove placeholder styling
+                        langLine.classList.add('lang-confirmed');
+                        if (codeEl) {
+                            codeEl.className = `language-${lang}`;
+                            // Move o cursor para dentro do <code>
+                            const newRange = document.createRange();
+                            newRange.setStart(codeEl, 0);
+                            newRange.collapse(true);
+                            selection.removeAllRanges();
+                            selection.addRange(newRange);
+                        }
+                        return;
                     }
-                    
-                    // Scroll se necessário
+
+                    // Comportamento padrão de code: insert <br>
+                    document.execCommand('insertHTML', false, '<br>');
+
                     setTimeout(() => {
-                        const selection = window.getSelection();
-                        if (!selection.rangeCount) return;
-                        const range = selection.getRangeAt(0);
-                        const cursorRect = range.getBoundingClientRect();
+                        const sel2 = window.getSelection();
+                        if (!sel2.rangeCount) return;
+                        const r2 = sel2.getRangeAt(0);
+                        const cursorRect = r2.getBoundingClientRect();
                         const preRect = pre.getBoundingClientRect();
                         if (cursorRect.bottom > preRect.bottom) {
                             pre.scrollTop += (cursorRect.bottom - preRect.bottom) + 20;
@@ -754,25 +778,41 @@ const AdminCMS = {
         const btnVideo = document.getElementById(`${toolbarPrefix}-video`);
         if (btnVideo) {
             btnVideo.addEventListener('click', async () => {
-                const url = await this.customPrompt('Inserir Vídeo', 'Digite a URL do vídeo (embed):');
-                if (url) {
-                   const html = `<div class="video-container"><iframe src="${url}" frameborder="0" allowfullscreen></iframe></div>`;
-                   this.insertAtCursor(textareaId, html);
+                const url = await this.customPrompt('Inserir Vídeo', 'Cole a URL de embed do vídeo (YouTube, Vimeo, etc.):', 'https://www.youtube.com/embed/...');
+                if (url && url.trim()) {
+                    const html = `<div class="video-container"><iframe src="${url.trim()}" frameborder="0" allowfullscreen></iframe></div><p><br></p>`;
+                    this.insertAtCursor(textareaId, html);
                 }
                 toolbar.classList.remove('active');
                 toggleBtn.textContent = '+';
             });
         }
 
-        // Opção de Código
+        // Opção de Código — novo UX inline: 1ª linha = linguagem, Enter = inicio do código
         const btnCode = document.getElementById(`${toolbarPrefix}-code`);
         if (btnCode) {
             btnCode.addEventListener('click', () => {
-                // Ao invés de prompt, inserimos um bloco com classe especial
-                const html = `<pre><code class="language-auto"></code></pre><p><br></p>`;
+                // Bloco com linha de linguagem editável + <code> para o conteúdo
+                const html = `<pre class="code-editor-block"><span class="code-lang-line" contenteditable="true" data-placeholder="linguagem (ex: javascript)"></span><code class="language-text"><br></code></pre><p><br></p>`;
                 this.insertAtCursor(textareaId, html);
                 toolbar.classList.remove('active');
                 toggleBtn.textContent = '+';
+
+                // Mover cursor para a linha de linguagem
+                setTimeout(() => {
+                    const editor = document.getElementById(textareaId);
+                    const langLines = editor.querySelectorAll('.code-lang-line:not([data-lang])');
+                    const lastLangLine = langLines[langLines.length - 1];
+                    if (lastLangLine) {
+                        lastLangLine.focus();
+                        const r = document.createRange();
+                        r.setStart(lastLangLine, 0);
+                        r.collapse(true);
+                        const sel = window.getSelection();
+                        sel.removeAllRanges();
+                        sel.addRange(r);
+                    }
+                }, 50);
             });
         }
 
@@ -780,7 +820,7 @@ const AdminCMS = {
         const btnDivider = document.getElementById(`${toolbarPrefix}-divider`);
         if (btnDivider) {
             btnDivider.addEventListener('click', () => {
-                this.insertAtCursor(textareaId, '<hr>');
+                this.insertAtCursor(textareaId, '<hr><p><br></p>');
                 toolbar.classList.remove('active');
                 toggleBtn.textContent = '+';
             });
@@ -789,10 +829,11 @@ const AdminCMS = {
         // Opção de Embed/Link
         const btnEmbed = document.getElementById(`${toolbarPrefix}-embed`);
         if (btnEmbed) {
-            btnEmbed.addEventListener('click', () => {
-                const url = prompt('URL:');
-                if (url) {
-                   this.insertAtCursor(textareaId, `<a href="${url}">${url}</a>`);
+            btnEmbed.addEventListener('click', async () => {
+                const url = await this.customPrompt('Inserir Link', 'Cole a URL completa:', 'https://');
+                if (url && url.trim()) {
+                    const cleanUrl = url.trim();
+                    this.insertAtCursor(textareaId, `<a href="${cleanUrl}" target="_blank">${cleanUrl}</a>`);
                 }
                 toolbar.classList.remove('active');
                 toggleBtn.textContent = '+';
@@ -1472,11 +1513,13 @@ const AdminCMS = {
     },
 
     setupModals() {
-                this.customAlert = (title, msg) => {
+        // ── customAlert ──────────────────────────────────────────────────────────
+        this.customAlert = (title, msg) => {
             return new Promise(resolve => {
                 const titleEl = document.getElementById('alert-modal-title');
-                if(!titleEl) {
-                    alert((title ? title + " - " : "") + msg);
+                if (!titleEl) {
+                    // Fallback silencioso — nunca deve acontecer
+                    console.error('[CMS Alert]', title, msg);
                     resolve();
                     return;
                 }
@@ -1497,62 +1540,79 @@ const AdminCMS = {
             });
         };
 
+        // ── customConfirm ─────────────────────────────────────────────────────────
         this.customConfirm = (title, msg) => {
             return new Promise(resolve => {
                 document.getElementById('confirm-modal-title').textContent = title;
                 document.getElementById('confirm-modal-msg').textContent = msg;
                 const modal = document.getElementById('confirm-modal');
                 modal.style.display = 'flex';
-                
+
                 const okBtn = document.getElementById('confirm-modal-ok');
                 const cancelBtn = document.getElementById('confirm-modal-cancel');
-                
+
                 const cleanup = () => {
                     okBtn.onclick = null;
                     cancelBtn.onclick = null;
                     modal.style.display = 'none';
-                }
-                okBtn.onclick = () => { cleanup(); resolve(true); }
-                cancelBtn.onclick = () => { cleanup(); resolve(false); }
+                };
+                okBtn.onclick = () => { cleanup(); resolve(true); };
+                cancelBtn.onclick = () => { cleanup(); resolve(false); };
             });
         };
 
-        this.customPrompt = (title, msg, defaultValue = '') => {
+        // ── customPrompt ──────────────────────────────────────────────────────────
+        // Substitui window.prompt() em todo o CMS
+        this.customPrompt = (title, msg, placeholder = '', defaultVal = '') => {
             return new Promise(resolve => {
-                const modal = document.getElementById('prompt-modal');
-                const titleEl = document.getElementById('prompt-modal-title');
-                const msgEl = document.getElementById('prompt-modal-msg');
-                const inputEl = document.getElementById('prompt-modal-input');
-                const okBtn = document.getElementById('prompt-modal-ok');
-                const cancelBtn = document.getElementById('prompt-modal-cancel');
+                const modal = document.getElementById('input-modal');
+                const titleEl = document.getElementById('input-modal-title');
+                const msgEl = document.getElementById('input-modal-msg');
+                const inputEl = document.getElementById('input-modal-input');
+                const okBtn = document.getElementById('input-modal-ok');
+                const cancelBtn = document.getElementById('input-modal-cancel');
 
                 if (!modal) {
-                    const result = prompt(msg, defaultValue);
-                    resolve(result);
+                    // Fallback para ambientes sem o modal
+                    const val = window.prompt((msg || title), defaultVal);
+                    resolve(val);
                     return;
                 }
 
                 titleEl.textContent = title;
-                msgEl.textContent = msg;
-                inputEl.value = defaultValue;
+                msgEl.textContent = msg || '';
+                inputEl.placeholder = placeholder;
+                inputEl.value = defaultVal;
                 modal.style.display = 'flex';
-                inputEl.focus();
+
+                // Foca no input
+                setTimeout(() => inputEl.focus(), 50);
 
                 const cleanup = () => {
+                    modal.style.display = 'none';
                     okBtn.onclick = null;
                     cancelBtn.onclick = null;
-                    modal.style.display = 'none';
-                }
-
-                okBtn.onclick = () => {
-                    const val = inputEl.value;
-                    cleanup();
-                    resolve(val);
+                    inputEl.onkeydown = null;
                 };
 
-                cancelBtn.onclick = () => {
+                const confirm = () => {
+                    const val = inputEl.value.trim();
+                    cleanup();
+                    resolve(val || null);
+                };
+
+                const cancel = () => {
                     cleanup();
                     resolve(null);
+                };
+
+                okBtn.onclick = confirm;
+                cancelBtn.onclick = cancel;
+
+                // Enter confirma, Escape cancela
+                inputEl.onkeydown = (e) => {
+                    if (e.key === 'Enter') { e.preventDefault(); confirm(); }
+                    if (e.key === 'Escape') { e.preventDefault(); cancel(); }
                 };
             });
         };
