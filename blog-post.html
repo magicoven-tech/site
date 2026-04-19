@@ -116,9 +116,29 @@
 
     <!-- Scripts -->
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        zinc: {
+                            950: '#09090b',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
     <script src="js/config.js"></script>
     <script src="js/cms.js"></script>
-    <script>
+    <script type="text/babel" src="js/components/LlmSimulator.js"></script>
+
+    <script type="text/babel">
         // Inicializa AOS
         AOS.init({
             duration: 800,
@@ -226,6 +246,13 @@
                 marked.use({ renderer });
 
                 // Renderiza o post
+                let contentHTML = marked.parse(post.content);
+                
+                // Placeholder Injection: Substitui {simulador} por um ponto de montagem do React
+                if (contentHTML.includes('{simulador}')) {
+                    contentHTML = contentHTML.replace('{simulador}', '<div id="llm-simulator-mount"></div>');
+                }
+
                 container.innerHTML = `
                     <div class="blog-post-wrapper" style="max-width: 720px; margin: 0 auto; padding: var(--spacing-4xl) var(--spacing-lg);">
                         
@@ -250,7 +277,7 @@
                         </header>
 
                             <div class="markdown-content post-body">
-                                ${marked.parse(post.content)}
+                                ${contentHTML}
                             </div>
 
                         <div style="margin-top: var(--spacing-4xl); padding-top: var(--spacing-xl); border-top: 1px solid rgba(255, 255, 255, 0.1);">
@@ -279,6 +306,13 @@
                     Prism.highlightAllUnder(container);
                 }
 
+                // Monta o componente React se o placeholder existir
+                const simulatorMount = document.getElementById('llm-simulator-mount');
+                if (simulatorMount && window.LlmSimulator) {
+                    const root = ReactDOM.createRoot(simulatorMount);
+                    root.render(<window.LlmSimulator />);
+                }
+
             } catch (error) {
                 console.error('Erro ao carregar post:', error);
 
@@ -299,11 +333,7 @@
         } else {
             loadPost();
         }
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
-    <script>
+
         window.copyCodeBlock = function(btn) {
             const pre = btn.closest('.custom-code-block').querySelector('pre');
             const tooltip = btn.getAttribute('title');
@@ -319,6 +349,9 @@
             });
         };
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
     <script src="js/main.js"></script>
     <script src="js/glitch-text.js"></script>
 </body>
