@@ -21,7 +21,7 @@ function {};
 
 ## Title
 
-![Imagem](http://localhost:3000/uploads/image-1776623529345-918797408.png#medium)
+![Imagem](http://localhost:3000/uploads/image-1776623529345-918797408.png)
 
 ### sub
 
