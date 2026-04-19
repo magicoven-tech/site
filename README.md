@@ -69,16 +69,9 @@ Senha inicial: admin123
 ```
 *No primeiro login, o sistema exigirá uma troca forçada de senha para maior segurança.*
 
-### 🚀 Funcionalidades do CMS
-- **Sistema Multi-Usuário e Autoria**: O backend intercepta o token JWT e injeta dinamicamente o *Nome e Username* de quem produziu a publicação, identificando a autoria no site (Blog/Projetos).
-- **Segurança Avançada**: 
-  - Fluxo de **"Esqueci Minha Senha"** com envio de códigos por e-mail (`nodemailer`).
-  - **Password Visibility Toggle**: Ícone de "olho" em todos os campos de senha para facilidade de uso.
-- **Experiência Visual Premium (UX)**:
-  - **Zero Browser Alerts**: Todos os feedbacks do sistema (sucessos, erros e avisos) agora utilizam **Modais Customizados** que seguem o Design System do site.
-  - **Glassmorphism Editor Menus**: Menus de formatação e redimensionamento de imagem totalmente redesenhados com efeitos de desfoque e transparência.
-- **Gestão de Perfil Centralizada**: Aba dedicada para troca de e-mails/senhas, com visão administrativa especial para a conta `admin`.
-- **Otimização GitSync**: Sincronização automática com GitHub para persistência de dados no Render.
+- **Armazenamento em Markdown Estático**: Posts e projetos não são mais salvos em JSONs monolíticos. Agora cada publicação é um arquivo `.md` individual com Frontmatter (`gray-matter`), facilitando a edição externa e o SEO.
+- **Compressão Inteligente de Imagens**: Sistema integrado que detecta uploads acima de 5MB e realiza compressão automática em **4K (Ref. 4096px)** no lado do cliente, garantindo alta fidelidade visual e tempo de carregamento otimizado.
+- **Otimização GitSync**: Sincronização automática com GitHub para persistência de dados no Render, salvando os arquivos Markdown e imagens diretamente no repositório.
 
 ---
 
@@ -105,8 +98,8 @@ O painel de administração foi totalmente refatorado sob os princípios de sepa
 ```
 site/
 ├── server.js              # Servidor Node.js (API & GitSync)
-├── data/                  # Armazenamento JSON (Blog, Projetos e Usuários)
-├── admin/                 # Interface do CMS Professional
+├── data/                  # Armazenamento em Markdown (Posts, Projetos e Usuários JSON)
+├── uploads/               # Diretório local para uploads temporários de imagens
 │   ├── css/               # Estilos desacoplados (admin.css, login.css)
 │   ├── js/                # Lógica modular (cms-admin.js, login.js)
 │   ├── index.html         # Dashboard (Gerenciador)
