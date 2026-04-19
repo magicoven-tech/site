@@ -31,6 +31,8 @@ content: >
   Para entender o desafio, imagine rodar modelos de linguagem modernos em uma
   máquina que nasceu antes do Instagram.
 
+  <br>
+
   No entanto, para rodar IAs modernas, ele tem "alguns" desafios:
 
 
@@ -460,6 +462,9 @@ Fazer algo funcionar onde outros desistiram é a essência do que fazemos na Mag
 
 O Llama-3.2-3B rodando em um Mac Pro 2009 nos ensinou que o "impossível" é apenas um problema de design mal resolvido. Hoje, temos uma IA que gera 1.8 t/s mesmo com 11 abas do Chrome abertas, e que chega a 2.5 t/s em modo foco. Não é a velocidade da luz, mas é a velocidade de uma conversa humana. É uma IA que roda no silêncio do nosso estúdio, sem enviar dados para servidores de terceiros.
 Para um designer, ter essa ferramenta rodando localmente, sem depender de nuvem e respeitando o hardware que já possuímos, é a forma mais pura de liberdade técnica.
+
+
+<div style="padding:123.57% 0 0 0;position:relative;"><iframe src="https://player.vimeo.com/video/1184546571?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479&amp;autoplay=1&amp;muted=1&amp;loop=1" frameborder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" referrerpolicy="strict-origin-when-cross-origin" style="position:absolute;top:0;left:0;width:100%;height:100%;" title="Rodamos IA local em um Mac Pro de 2009 OU ressuscitando gigantes"></iframe></div><script src="https://player.vimeo.com/api/player.js"></script>
 
 
 
