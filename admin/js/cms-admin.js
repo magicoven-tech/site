@@ -663,6 +663,30 @@ const AdminCMS = {
         textarea.addEventListener('focus', updatePos);
         textarea.addEventListener('input', updatePos);
 
+        // Handler para teclas especiais dentro de blocos de código
+        textarea.addEventListener('keydown', (e) => {
+            const selection = window.getSelection();
+            if (!selection.rangeCount) return;
+
+            const range = selection.getRangeAt(0);
+            const pre = range.startContainer.parentElement.closest('pre');
+
+            if (pre) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    document.execCommand('insertText', false, '\n');
+                    
+                    // Se o cursor estiver no final e pressionar enter, às vezes o scroll não segue
+                    setTimeout(() => {
+                        pre.scrollTop = pre.scrollHeight;
+                    }, 0);
+                } else if (e.key === 'Tab') {
+                    e.preventDefault();
+                    document.execCommand('insertText', false, '    ');
+                }
+            }
+        });
+
         // Opção de Imagem
         const btnImage = document.getElementById(`${toolbarPrefix}-image`);
         if (btnImage && imageInput) {
@@ -701,7 +725,8 @@ const AdminCMS = {
         const btnCode = document.getElementById(`${toolbarPrefix}-code`);
         if (btnCode) {
             btnCode.addEventListener('click', () => {
-                const html = `<pre><code>// Seu código aqui</code></pre>`;
+                const lang = prompt('Linguagem do código (ex: javascript, html, css):', 'javascript') || 'javascript';
+                const html = `<pre><code class="language-${lang}">// Seu código ${lang} aqui\n</code></pre><p><br></p>`;
                 this.insertAtCursor(textareaId, html);
                 toolbar.classList.remove('active');
                 toggleBtn.textContent = '+';

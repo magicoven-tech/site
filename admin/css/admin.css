@@ -450,6 +450,37 @@
       margin-left: -50%;
     }
 
+    /* Code Blocks in Editor */
+    [contenteditable="true"] pre {
+        background: #111;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: var(--radius-sm);
+        padding: var(--spacing-md);
+        margin: var(--spacing-md) 0;
+        font-family: var(--font-mono);
+        color: #f0f0f0;
+        overflow-x: auto;
+        white-space: pre-wrap; /* Crucial for line breaks in editor */
+        tab-size: 4;
+        position: relative;
+    }
+
+    [contenteditable="true"] code {
+        font-family: var(--font-mono);
+        color: var(--color-accent-primary);
+        background: rgba(39, 255, 43, 0.1);
+        padding: 2px 4px;
+        border-radius: 4px;
+    }
+
+    [contenteditable="true"] pre code {
+        background: transparent;
+        padding: 0;
+        color: inherit;
+        display: block;
+    }
+
+
     .form-group.editor-wrapper {
       position: relative;
       margin-top: var(--spacing-xl);
