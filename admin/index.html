@@ -310,6 +310,22 @@
 
     <!-- Messages Tab -->
     <div id="messages-tab" class="tab-content">
+      <div id="messages-batch-actions" class="batch-actions-bar hidden">
+        <div class="batch-info"><span id="messages-selected-count">0</span> item(s) selecionado(s)</div>
+        <div class="batch-actions-buttons">
+          <button class="btn btn-outline" onclick="AdminCMS.clearSelection('messages')">Cancelar</button>
+          <button class="btn btn-primary" style="background-color: #ff3b30; color: white; border-color: #ff3b30;"
+            onclick="AdminCMS.batchDelete('messages')">Excluir selecionados</button>
+        </div>
+      </div>
+
+      <div class="select-all-container" id="messages-select-all-container" style="display: none;">
+        <div class="item-checkbox">
+          <input type="checkbox" id="messages-select-all" onchange="AdminCMS.toggleSelectAll('messages', this.checked)">
+        </div>
+        <label for="messages-select-all">Selecionar todas as mensagens</label>
+      </div>
+
       <div id="messages-list" class="messages-container">
         <!-- Mensagens serão carregadas aqui -->
       </div>
