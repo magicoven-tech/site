@@ -568,41 +568,43 @@ const AdminCMS = {
         // Pequeno delay para garantir que a seleção foi atualizada
         setTimeout(() => {
             const selection = window.getSelection();
-            if (selection.toString().length > 0) {
+            const selectedText = selection.toString().trim();
+
+            if (selectedText.length > 0) {
                 // Há texto selecionado
                 const range = selection.getRangeAt(0);
+                
+                // Garantir que a seleção está dentro do editor
+                if (!textarea.contains(range.commonAncestorContainer)) {
+                    menu.classList.remove('active');
+                    return;
+                }
+
                 const rect = range.getBoundingClientRect();
 
-                let top = rect.top - 50;
+                let top = rect.top - 60;
                 let left = rect.left + (rect.width / 2);
 
                 // Ajustes de limites da tela
-                if (left < 0) left = 10;
-                if (top < 0) top = 10;
+                if (left < 10) left = 10;
+                if (top < 10) top = 10;
 
                 menu.style.top = `${top + window.scrollY}px`;
                 menu.style.left = `${left + window.scrollX}px`;
-
-                // Centralizar o menu no ponto X
                 menu.style.transform = 'translate(-50%, 0)';
 
                 menu.classList.add('active');
             } else {
                 menu.classList.remove('active');
             }
-        }, 10);
+        }, 50); // Aumentar levemente o delay para estabilidade
     },
 
     /**
      * Aplica a formatação selecionada ao texto
      */
     applyFormat(format, textarea) {
-        const start = textarea.selectionStart;
-        const end = textarea.selectionEnd;
-        const selectedText = textarea.value.substring(start, end);
-        let replacement = '';
-        let cursorOffset = 0;
-
+        // No contenteditable, document.execCommand usa a seleção atual automaticamente
         switch (format) {
             case 'bold':
                 document.execCommand('bold', false, null);
@@ -627,8 +629,8 @@ const AdminCMS = {
                 break;
         }
 
-        // Focar de volta e ajustar cursor se necessário
-        textarea.focus();
+        // Garantir que o editor mantém o foco
+        if (textarea) textarea.focus();
     },
 
     /**
@@ -784,8 +786,10 @@ const AdminCMS = {
                 toolbar.style.top = `${offsetTop}px`;
                 
                 // Visibilidade baseada em conteúdo (estilo Medium)
-                const text = block.innerText.trim();
-                if (text === "" || text === "\n") {
+                // Um bloco é considerado vazio se não tem texto ou se tem apenas um <br>
+                const isEmpty = block.innerText.trim() === "" && (block.childNodes.length === 0 || (block.childNodes.length === 1 && block.childNodes[0].tagName === 'BR'));
+
+                if (isEmpty) {
                     toolbar.classList.add('visible');
                 } else {
                     toolbar.classList.remove('visible');
