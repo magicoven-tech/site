@@ -706,25 +706,45 @@ const AdminCMS = {
             if (!selection.rangeCount) return;
 
             const range = selection.getRangeAt(0);
-            const pre = range.startContainer.parentElement.closest('pre');
+
+            // ──────────────────────────────────────────────────────────
+            // Backspace FORA do pre: deletar o <pre> anterior ao cursor
+            // ──────────────────────────────────────────────────────────
+            if (e.key === 'Backspace') {
+                const anchorNode = range.startContainer;
+                const offset = range.startOffset;
+                let block = anchorNode.nodeType === 3 ? anchorNode.parentNode : anchorNode;
+                while (block && block.parentNode !== textarea && block !== textarea) {
+                    block = block.parentNode;
+                }
+                if (block && offset === 0 && range.collapsed) {
+                    const prev = block.previousElementSibling;
+                    if (prev && prev.tagName === 'PRE') {
+                        e.preventDefault();
+                        prev.remove();
+                        return;
+                    }
+                }
+            }
+
+            const pre = range.startContainer.nodeType === 3
+                ? range.startContainer.parentNode.closest('pre')
+                : (range.startContainer.closest ? range.startContainer.closest('pre') : null);
 
             if (pre) {
                 if (e.key === 'Enter') {
-                    e.preventDefault();
-
                     const langLine = pre.querySelector('.code-lang-line');
                     const codeEl = pre.querySelector('code');
 
-                    // Se o cursor está na linha de linguagem, confirmar a linguagem e mover para o code
+                    // Se o cursor está na linha de linguagem, confirmar e mover para o code
                     if (langLine && langLine.contains(range.startContainer)) {
+                        e.preventDefault();
                         const lang = langLine.innerText.trim() || 'text';
-                        // Aplica a linguagem e esconde o placeholder
                         langLine.setAttribute('data-lang', lang);
-                        langLine.textContent = lang; // Remove placeholder styling
+                        langLine.textContent = lang;
                         langLine.classList.add('lang-confirmed');
                         if (codeEl) {
                             codeEl.className = `language-${lang}`;
-                            // Move o cursor para dentro do <code>
                             const newRange = document.createRange();
                             newRange.setStart(codeEl, 0);
                             newRange.collapse(true);
@@ -734,9 +754,37 @@ const AdminCMS = {
                         return;
                     }
 
+                    // BREAKOUT: Se apertar Enter em uma linha vazia no final do bloco <code>
+                    // (ou se apertar Enter duas vezes no final)
+                    const textBefore = range.startContainer.textContent.substring(0, range.startOffset);
+                    const textAfter = range.startContainer.textContent.substring(range.startOffset);
+                    
+                    // Se a linha atual está vazia (ou contém apenas o \n de um <br>)
+                    const isAtEnd = !textAfter.trim();
+                    const isLineEmpty = !textBefore.trim() && isAtEnd;
+
+                    if (isLineEmpty && isAtEnd) {
+                        e.preventDefault();
+                        // Remove a linha vazia atual se necessário e pula fora
+                        // (Simplificado: apenas insere um parágrafo novo após o pre)
+                        const nextP = document.createElement('p');
+                        nextP.innerHTML = '<br>';
+                        pre.after(nextP);
+                        
+                        const newRange = document.createRange();
+                        newRange.setStart(nextP, 0);
+                        newRange.collapse(true);
+                        selection.removeAllRanges();
+                        selection.addRange(newRange);
+                        nextP.focus();
+                        return;
+                    }
+
                     // Comportamento padrão de code: insert <br>
+                    e.preventDefault();
                     document.execCommand('insertHTML', false, '<br>');
 
+                    // Scroll fix
                     setTimeout(() => {
                         const sel2 = window.getSelection();
                         if (!sel2.rangeCount) return;
@@ -747,9 +795,25 @@ const AdminCMS = {
                             pre.scrollTop += (cursorRect.bottom - preRect.bottom) + 20;
                         }
                     }, 0);
+
                 } else if (e.key === 'Tab') {
                     e.preventDefault();
                     document.execCommand('insertText', false, '    ');
+                } else if (e.key === 'Escape') {
+                    // ESCAPE: Pula para o parágrafo seguinte ou cria um
+                    e.preventDefault();
+                    let nextP = pre.nextElementSibling;
+                    if (!nextP || nextP.tagName !== 'P') {
+                        nextP = document.createElement('p');
+                        nextP.innerHTML = '<br>';
+                        pre.after(nextP);
+                    }
+                    const newRange = document.createRange();
+                    newRange.setStart(nextP, 0);
+                    newRange.collapse(true);
+                    selection.removeAllRanges();
+                    selection.addRange(newRange);
+                    nextP.focus();
                 }
             }
         });
@@ -778,13 +842,25 @@ const AdminCMS = {
         const btnVideo = document.getElementById(`${toolbarPrefix}-video`);
         if (btnVideo) {
             btnVideo.addEventListener('click', async () => {
-                const url = await this.customPrompt('Inserir Vídeo', 'Cole a URL de embed do vídeo (YouTube, Vimeo, etc.):', 'https://www.youtube.com/embed/...');
-                if (url && url.trim()) {
-                    const html = `<div class="video-container"><iframe src="${url.trim()}" frameborder="0" allowfullscreen></iframe></div><p><br></p>`;
-                    this.insertAtCursor(textareaId, html);
-                }
+                // Salva a posição do cursor ANTES de abrir o modal (modal rouba o foco)
+                this.saveSelection();
                 toolbar.classList.remove('active');
                 toggleBtn.textContent = '+';
+
+                const rawUrl = await this.customPrompt(
+                    'Inserir Vídeo',
+                    'Cole a URL do YouTube ou Vimeo (a conversão para embed é automática):',
+                    'https://www.youtube.com/watch?v=...'
+                );
+
+                if (rawUrl && rawUrl.trim()) {
+                    const embedUrl = this.toEmbedUrl(rawUrl);
+                    const html = `<div class="video-container"><iframe src="${embedUrl}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div><p><br></p>`;
+                    this.insertAtCursor(textareaId, html);
+                } else {
+                    // Se cancelou, limpa a seleção salva para não interferir em inserções futuras
+                    this._savedRange = null;
+                }
             });
         }
 
@@ -830,10 +906,13 @@ const AdminCMS = {
         const btnEmbed = document.getElementById(`${toolbarPrefix}-embed`);
         if (btnEmbed) {
             btnEmbed.addEventListener('click', async () => {
+                this.saveSelection();
                 const url = await this.customPrompt('Inserir Link', 'Cole a URL completa:', 'https://');
                 if (url && url.trim()) {
                     const cleanUrl = url.trim();
                     this.insertAtCursor(textareaId, `<a href="${cleanUrl}" target="_blank">${cleanUrl}</a>`);
+                } else {
+                    this._savedRange = null;
                 }
                 toolbar.classList.remove('active');
                 toggleBtn.textContent = '+';
@@ -850,8 +929,46 @@ const AdminCMS = {
 
         editor.focus();
 
+        // Restaura a seleção se houver uma salva (útil após modais)
+        this.restoreSelection();
+
         // Se houver seleção, substitui. Se não, insere no cursor.
         document.execCommand('insertHTML', false, html);
+        
+        // Limpa após usar
+        this._savedRange = null;
+    },
+
+    saveSelection() {
+        const sel = window.getSelection();
+        if (sel.getRangeAt && sel.rangeCount) {
+            this._savedRange = sel.getRangeAt(0).cloneRange();
+        }
+    },
+
+    restoreSelection() {
+        if (this._savedRange) {
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(this._savedRange);
+        }
+    },
+
+    /**
+     * Converte URLs do YouTube/Vimeo para formato de embed
+     */
+    toEmbedUrl(url) {
+        if (!url) return '';
+        
+        // YouTube: watch?v= ou youtu.be/
+        const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/);
+        if (ytMatch) return `https://www.youtube.com/embed/${ytMatch[1]}`;
+
+        // Vimeo: vimeo.com/VIDEO_ID
+        const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
+        if (vimeoMatch) return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+
+        return url; // Retorna original se não for match
     },
 
     /**
@@ -875,7 +992,8 @@ const AdminCMS = {
         const editor = document.getElementById(editorId);
         if (!editor || !toolbar) return;
 
-        setTimeout(() => {
+        // Usamos requestAnimationFrame ou um pequeno delay para garantir que o DOM atualizou após o clique/keyup
+        requestAnimationFrame(() => {
             const selection = window.getSelection();
             if (!selection.rangeCount) return;
 
@@ -891,12 +1009,22 @@ const AdminCMS = {
 
             if (block && block.parentNode === editor) {
                 // Posicionar verticalmente
-                const offsetTop = block.offsetTop;
-                toolbar.style.top = `${offsetTop}px`;
+                // Usamos getBoundingClientRect relativo ao editor para maior precisão
+                const editorRect = editor.getBoundingClientRect();
+                const blockRect = block.getBoundingClientRect();
+                const relativeTop = blockRect.top - editorRect.top;
+                
+                toolbar.style.top = `${relativeTop}px`;
 
                 // Visibilidade baseada em conteúdo (estilo Medium)
                 // Um bloco é considerado vazio se não tem texto ou se tem apenas um <br>
-                const isEmpty = block.innerText.trim() === "" && (block.childNodes.length === 0 || (block.childNodes.length === 1 && block.childNodes[0].tagName === 'BR'));
+                const text = block.innerText.replace(/\n/g, '').trim();
+                const hasImages = block.querySelector('img') !== null;
+                const hasIframe = block.querySelector('iframe') !== null;
+                
+                const isEmpty = text === "" && !hasImages && !hasIframe && 
+                               (block.childNodes.length === 0 || 
+                                (block.childNodes.length === 1 && (block.childNodes[0].tagName === 'BR' || block.childNodes[0].nodeType === 3)));
 
                 if (isEmpty) {
                     toolbar.classList.add('visible');
@@ -906,14 +1034,14 @@ const AdminCMS = {
                     const toggleBtn = document.getElementById(`${editorId === 'blog-content' ? 'toolbar' : 'project-toolbar'}-toggle`);
                     if (toggleBtn) toggleBtn.textContent = '+';
                 }
-            } else if (block === editor) {
-                // Caso o editor esteja vazio
+            } else if (block === editor && editor.innerText.trim() === "") {
+                // Caso o editor esteja totalmente vazio
                 toolbar.style.top = `0px`;
                 toolbar.classList.add('visible');
             } else {
                 toolbar.classList.remove('visible');
             }
-        }, 0);
+        });
     },
 
     /**

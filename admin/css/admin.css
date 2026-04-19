@@ -574,7 +574,7 @@
 
     .editor-toolbar {
       position: absolute;
-      left: -50px;
+      left: -42px;
       top: var(--spacing-lg);
       z-index: 100;
       display: flex;
@@ -588,6 +588,15 @@
       pointer-events: none;
       transform: scale(0.8);
     }
+
+    @media (max-width: 1200px) {
+        .editor-toolbar {
+            left: 10px; /* Inside on smaller screens */
+            background: rgba(20, 20, 20, 0.4);
+            backdrop-filter: blur(4px);
+        }
+    }
+
 
     .editor-toolbar.visible {
         opacity: 1;
