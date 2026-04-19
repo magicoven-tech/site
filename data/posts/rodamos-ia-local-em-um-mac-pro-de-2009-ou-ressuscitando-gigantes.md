@@ -35,9 +35,7 @@ content: >
 
 
 
-
-  ![Mac Pro 2009](/uploads/image-1776597505237-586525982.png)
-
+  ![Mac Pro 2009](/uploads/image-1776597571308-983822172.png)
 
 
 
@@ -323,7 +321,7 @@ Para entender o desafio, imagine rodar modelos de linguagem modernos em uma máq
 No entanto, para rodar IAs modernas, ele tem "alguns" desafios:
 
 
-![Mac Pro 2009](/uploads/image-1776597571308-983822172.png)
+![Mac Pro 2009](/uploads/image-1776599180789-729864221.png)
 
 
 - Processadores: 2x Intel Xeon E5620 (8 núcleos/16 threads). Potente na época, mas sem as instruções de IA de hoje.
@@ -459,6 +457,8 @@ Fazer algo funcionar onde outros desistiram é a essência do que fazemos na Mag
 
 O Llama-3.2-3B rodando em um Mac Pro 2009 nos ensinou que o "impossível" é apenas um problema de design mal resolvido. Hoje, temos uma IA que gera 1.8 t/s mesmo com 11 abas do Chrome abertas, e que chega a 2.5 t/s em modo foco. Não é a velocidade da luz, mas é a velocidade de uma conversa humana. É uma IA que roda no silêncio do nosso estúdio, sem enviar dados para servidores de terceiros.
 Para um designer, ter essa ferramenta rodando localmente, sem depender de nuvem e respeitando o hardware que já possuímos, é a forma mais pura de liberdade técnica.
+
+
 
 Não precisamos da última Big Tech vendendo sonhos em subscrições mensais. Precisamos de artesanato digital. O hardware de 2009 ainda tem alma, só precisava de um pouco de zRAM e respeito.
 
