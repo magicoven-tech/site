@@ -243,7 +243,7 @@ content: >
 
   ```Bash 
 
-  sudo chmod +x /usr/local/bin/llama-3b.
+  sudo chmod +x /usr/local/bin/llama-3b
 
   ```
 
@@ -351,7 +351,7 @@ Escolhemos o Llama-3.2-3B-Instruct da Meta. Ele é o equilíbrio perfeito entre 
 ## Engenharia de memória
 Com apenas 4.8GB de RAM, o Mac Pro engasgaria. A solução técnica foi implementar o zRAM, um sistema que compacta dados na RAM antes de jogá-los para o HD lento.
 
-**Configurando o "pulmão virtual"**
+### Configurando o "pulmão virtual"
 Edite o arquivo de sistema:
 ```Bash
 sudo nano /usr/bin/init-zram-swapping
@@ -372,7 +372,11 @@ swapon -p 100 /dev/zram0
 ```
 
 
-Reinicie o serviço: sudo systemctl restart zram-config.
+Reinicie o serviço: 
+```Bash
+sudo systemctl restart zram-config.
+```
+
 Prioridade 100 força o Linux a usar a zRAM antes do HD swapon -p 100 /dev/zram
 
 ```Bash
@@ -384,6 +388,7 @@ O resultado deve mostrar o /dev/zram0 com prioridade 100.
 
 ## O Comando llama-3b (automação)
 Como UX Engineers, odiamos fricção. Não queremos digitar 10 linhas de comando toda vez que precisamos de um insight. Criamos um script que limpa a casa e inicia a IA com prioridade total do sistema.
+
 Criamos um executável em /usr/local/bin/llama-3b.
 
 Crie o arquivo:
@@ -422,6 +427,7 @@ sudo chmod +x /usr/local/bin/llama-3b
 
 ## A Realidade pés no chão
 No design, a teoria é linda, mas o uso real é o que importa. Testamos nossa configuração em diferentes cenários de estresse. Entender a relação entre threads e o que está aberto no seu navegador (como o chrome) é crucial para não travar sua produtividade.
+
 Abaixo, você pode explorar como o número de threads e o uso do navegador afetam a velocidade de resposta (tokens por segundo) no nosso hardware específico.
 
 {simulador}
