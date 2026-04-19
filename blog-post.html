@@ -25,6 +25,9 @@
 
     <!-- Main CSS -->
     <link rel="stylesheet" href="css/main.css">
+    
+    <!-- Prism Syntax Highlighting Theme -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
 </head>
 
 <body>
@@ -200,6 +203,26 @@
                     return `<p>${text}</p>`;
                 };
 
+                // Respect line breaks and custom code block renderer
+                marked.setOptions({ breaks: true });
+                
+                renderer.code = function (code, language) {
+                    const lang = (language || 'text').toLowerCase();
+                    const escapedCode = code.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+                    
+                    return `
+                        <div class="custom-code-block" style="position: relative; margin: 2rem 0; background: #1d1f21; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); overflow: hidden;">
+                            <div class="code-header" style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 1rem; background: #2d2f31; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                <span style="color: #a9b7c6; font-size: 0.85rem; font-family: var(--font-mono); text-transform: uppercase;">${lang}</span>
+                                <button class="copy-code-btn" title="Copiar código" onclick="copyCodeBlock(this)" style="background: none; border: none; color: #a9b7c6; cursor: pointer; padding: 0.25rem; display: flex; align-items: center; justify-content: center; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#a9b7c6'">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                </button>
+                            </div>
+                            <pre style="margin: 0; padding: 1rem; overflow-x: auto; background: transparent;"><code class="language-${lang}">${escapedCode}</code></pre>
+                        </div>
+                    `;
+                };
+
                 marked.use({ renderer });
 
                 // Renderiza o post
@@ -252,6 +275,10 @@
                     </div>
                 `;
 
+                if (window.Prism) {
+                    Prism.highlightAllUnder(container);
+                }
+
             } catch (error) {
                 console.error('Erro ao carregar post:', error);
 
@@ -274,6 +301,24 @@
         }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script>
+        window.copyCodeBlock = function(btn) {
+            const pre = btn.closest('.custom-code-block').querySelector('pre code');
+            const tooltip = btn.getAttribute('title');
+            const svg = btn.innerHTML;
+            
+            navigator.clipboard.writeText(pre.textContent).then(() => {
+                btn.setAttribute('title', 'Copiado!');
+                btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#27ff2b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+                setTimeout(() => {
+                    btn.setAttribute('title', tooltip);
+                    btn.innerHTML = svg;
+                }, 2000);
+            });
+        };
+    </script>
     <script src="js/main.js"></script>
     <script src="js/glitch-text.js"></script>
 </body>
