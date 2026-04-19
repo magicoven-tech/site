@@ -438,17 +438,30 @@
       display: block;
     }
 
-    .medium-editor img.image-medium {
-      width: 150%;
-      max-width: none;
-      margin-left: -25%;
+    /* Imagens no editor — tamanhos representativos, sem overflow */
+    .medium-editor img {
+        max-width: 100%;
+        height: auto;
+        border-radius: var(--radius-sm);
+        margin: var(--spacing-md) 0;
+        display: block;
     }
 
-    .medium-editor img.image-full {
-      width: 200%;
-      max-width: none;
-      margin-left: -50%;
+    /* "Médio" — alargada visualmente mas dentro do container */
+    .medium-editor img.image-medium {
+        width: 80%;
+        max-width: 100%;
+        margin-left: auto;
+        margin-right: auto;
     }
+
+    /* "Full" — ocupa toda a largura do editor */
+    .medium-editor img.image-full {
+        width: 100%;
+        max-width: 100%;
+        margin-left: 0;
+    }
+
 
     /* Code Blocks in Editor */
     [contenteditable="true"] pre,
